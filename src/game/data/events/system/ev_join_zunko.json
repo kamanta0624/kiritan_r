@@ -1,0 +1,22 @@
+{
+  "id": "ev_join_zunko",
+  "name": "東北ずんこ加入",
+  "trigger": "player_turn",
+  "probability": 1, "priority": 40, "maxOccurrences": 1,
+  "conditions": [
+    { "type": "turn", "op": "eq", "value": 2 },
+    { "type": "flag", "flag": "flag_join_zunko" }
+  ],
+  "script": [
+    { "type": "conversation", "lines": [
+      { "characterId": "char_014", "position": "center", "text": "まかせてよ、きりたん！" }
+    ]},
+    { "type": "end" }
+  ],
+  "effects": {
+    "default": [
+      { "type": "charJoin", "charId": "char_014" },
+      { "type": "clearFlag", "flag": "flag_join_zunko" }
+    ]
+  }
+}

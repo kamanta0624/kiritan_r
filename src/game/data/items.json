@@ -1,0 +1,118 @@
+{
+  "items": [
+    {
+      "id": "item_w002",
+      "name": "騎士の槍",
+      "type": "weapon",
+      "slotType": "weapon",
+      "description": "突撃に特化した長槍。攻撃力が大きく上昇する。",
+      "effect": {
+        "type": "charAttack",
+        "value": 25
+      },
+      "cost": 500,
+      "sellPrice": 250
+    },
+    {
+      "id": "item_w003",
+      "name": "魔導の弓",
+      "type": "weapon",
+      "slotType": "weapon",
+      "description": "魔力を宿した弓。攻撃力が上昇する。",
+      "effect": {
+        "type": "charAttack",
+        "value": 20
+      },
+      "cost": 450,
+      "sellPrice": 225
+    },
+    {
+      "id": "item_a001",
+      "name": "鉄の鎧",
+      "type": "armor",
+      "slotType": "armor",
+      "description": "基本的な防具。キャラのHPが増加する。",
+      "effect": {
+        "type": "charMaxHp",
+        "value": 30
+      },
+      "cost": 280,
+      "sellPrice": 140
+    },
+    {
+      "id": "item_a002",
+      "name": "竜鱗の盾",
+      "type": "armor",
+      "slotType": "armor",
+      "description": "竜の鱗で作られた盾。HPが大きく増加する。",
+      "effect": {
+        "type": "charMaxHp",
+        "value": 60
+      },
+      "cost": 600,
+      "sellPrice": 300
+    },
+    {
+      "id": "item_s001",
+      "name": "速足の靴",
+      "type": "accessory",
+      "slotType": "accessory",
+      "description": "兵士の機動力を高める。兵士の攻撃力が上昇する。",
+      "effect": {
+        "type": "soldierAtk",
+        "value": 3
+      },
+      "cost": 350,
+      "sellPrice": 175
+    },
+    {
+      "id": "item_s002",
+      "name": "守護の首飾り",
+      "type": "accessory",
+      "slotType": "accessory",
+      "description": "守護の力を宿した首飾り。兵士の防御力が上昇する。",
+      "effect": {
+        "type": "soldierDef",
+        "value": 3
+      },
+      "cost": 350,
+      "sellPrice": 175
+    },
+    {
+      "id": "item_s003",
+      "name": "兵糧袋",
+      "type": "accessory",
+      "slotType": "accessory",
+      "description": "十分な兵糧を確保する。最大兵士数が増加する。",
+      "effect": {
+        "type": "maxSoldiers",
+        "value": 200
+      },
+      "cost": 400,
+      "sellPrice": 200
+    },
+    {
+      "id": "item_0004",
+      "name": "新規アイテム",
+      "type": "weapon",
+      "slotType": "weapon",
+      "description": "",
+      "effect": {
+        "type": "charAttack",
+        "value": 10
+      },
+      "cost": 300,
+      "sellPrice": 150
+    }
+  ],
+  "shopStock": [
+    "item_w001",
+    "item_w002",
+    "item_w003",
+    "item_a001",
+    "item_a002",
+    "item_s001",
+    "item_s002",
+    "item_s003"
+  ]
+}

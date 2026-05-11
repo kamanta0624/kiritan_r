@@ -1,0 +1,1417 @@
+{
+  "bases": [
+    {
+      "id": "base_001",
+      "name": "仙台",
+      "x": 3256,
+      "y": 1019,
+      "factionId": "東北家",
+      "income": 100,
+      "isCapital": true,
+      "adjacentBases": [
+        "base_003",
+        "base_049",
+        "base_010"
+      ],
+      "battleCapacity": 800,
+      "dungeonId": null
+    },
+    {
+      "id": "base_002",
+      "name": "新潟",
+      "x": 2325,
+      "y": 1175,
+      "factionId": "東北家",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_013",
+        "base_051",
+        "base_069"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_003",
+      "name": "福島",
+      "x": 3269,
+      "y": 1313,
+      "factionId": "faction_red",
+      "income": 70,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_001",
+        "base_014",
+        "base_021"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_004",
+      "name": "函館",
+      "x": 2356,
+      "y": 388,
+      "factionId": "faction_new02",
+      "income": 60,
+      "isCapital": true,
+      "adjacentBases": [
+        "base_006",
+        "base_011",
+        "base_052",
+        "base_054"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_005",
+      "name": "前橋",
+      "x": 3069,
+      "y": 1556,
+      "factionId": "faction_green",
+      "income": 55,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_007",
+        "base_014",
+        "base_024"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_006",
+      "name": "小樽",
+      "x": 2081,
+      "y": 356,
+      "factionId": "faction_yellow",
+      "income": 120,
+      "isCapital": true,
+      "adjacentBases": [
+        "base_004",
+        "base_015",
+        "base_054"
+      ],
+      "battleCapacity": 800,
+      "dungeonId": null
+    },
+    {
+      "id": "base_007",
+      "name": "熊谷",
+      "x": 3031,
+      "y": 1963,
+      "factionId": "faction_green",
+      "income": 110,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_005",
+        "base_022",
+        "base_073"
+      ],
+      "battleCapacity": 800,
+      "dungeonId": null
+    },
+    {
+      "id": "base_008",
+      "name": "鳥取",
+      "x": 788,
+      "y": 2088,
+      "factionId": "faction_new04",
+      "income": 90,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_075",
+        "base_080"
+      ],
+      "battleCapacity": 500,
+      "dungeonId": null
+    },
+    {
+      "id": "base_009",
+      "name": "大阪",
+      "x": 1156,
+      "y": 2350,
+      "factionId": "faction_new04",
+      "income": 115,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_074",
+        "base_075",
+        "base_076",
+        "base_077"
+      ],
+      "battleCapacity": 800,
+      "dungeonId": null
+    },
+    {
+      "id": "base_010",
+      "name": "山形",
+      "x": 2763,
+      "y": 1019,
+      "factionId": "東北家",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_001",
+        "base_013",
+        "base_014"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_011",
+      "name": "青森",
+      "x": 2606,
+      "y": 563,
+      "factionId": "東北家",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_004",
+        "base_013",
+        "base_050"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_012",
+      "name": "盛岡",
+      "x": 3138,
+      "y": 488,
+      "factionId": "東北家",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_048",
+        "base_049",
+        "base_050",
+        "base_013"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": "dungeon_001"
+    },
+    {
+      "id": "base_013",
+      "name": "秋田",
+      "x": 2556,
+      "y": 838,
+      "factionId": "東北家",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_010",
+        "base_011",
+        "base_012",
+        "base_052",
+        "base_002"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_014",
+      "name": "会津",
+      "x": 2850,
+      "y": 1381,
+      "factionId": "faction_red",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_003",
+        "base_010",
+        "base_005"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_015",
+      "name": "札幌",
+      "x": 1800,
+      "y": 300,
+      "factionId": "faction_yellow",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_006",
+        "base_055",
+        "base_056"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_016",
+      "name": "オホーツク",
+      "x": 988,
+      "y": 631,
+      "factionId": "faction_new02",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_018",
+        "base_058",
+        "base_059",
+        "base_061",
+        "base_017"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_017",
+      "name": "釧路",
+      "x": 1256,
+      "y": 850,
+      "factionId": "faction_new02",
+      "income": 50,
+      "isCapital": true,
+      "adjacentBases": [
+        "base_016",
+        "base_063",
+        "base_066"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_018",
+      "name": "女満別",
+      "x": 1188,
+      "y": 544,
+      "factionId": "faction_new02",
+      "income": 50,
+      "isCapital": true,
+      "adjacentBases": [
+        "base_016",
+        "base_067"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_019",
+      "name": "登別",
+      "x": 1975,
+      "y": 769,
+      "factionId": "faction_new02",
+      "income": 50,
+      "isCapital": true,
+      "adjacentBases": [
+        "base_052",
+        "base_055"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_020",
+      "name": "宇都宮",
+      "x": 3550,
+      "y": 1588,
+      "factionId": "faction_green",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_024",
+        "base_045"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_021",
+      "name": "郡山",
+      "x": 3613,
+      "y": 1281,
+      "factionId": "faction_red",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_003",
+        "base_045",
+        "base_046"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_022",
+      "name": "大宮",
+      "x": 3325,
+      "y": 2119,
+      "factionId": "faction_green",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_007",
+        "base_024",
+        "base_026",
+        "base_028"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_023",
+      "name": "秩父",
+      "x": 2219,
+      "y": 1813,
+      "factionId": "faction_green",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_072"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_024",
+      "name": "動物公園",
+      "x": 3394,
+      "y": 1800,
+      "factionId": "faction_green",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_020",
+        "base_022",
+        "base_028",
+        "base_005"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_025",
+      "name": "武蔵村山",
+      "x": 2825,
+      "y": 2419,
+      "factionId": "faction_green",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_027",
+        "base_098"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_026",
+      "name": "浦和",
+      "x": 3206,
+      "y": 2400,
+      "factionId": "faction_green",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_022"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_027",
+      "name": "川越",
+      "x": 2869,
+      "y": 2200,
+      "factionId": "faction_green",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_025",
+        "base_073"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_028",
+      "name": "春日部",
+      "x": 3644,
+      "y": 2275,
+      "factionId": "faction_green",
+      "income": 50,
+      "isCapital": true,
+      "adjacentBases": [
+        "base_022",
+        "base_024",
+        "base_029",
+        "base_031"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_029",
+      "name": "越谷",
+      "x": 3425,
+      "y": 2506,
+      "factionId": "faction_green",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_028"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_030",
+      "name": "千葉",
+      "x": 3788,
+      "y": 2813,
+      "factionId": "faction_new01",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_031",
+        "base_032"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_031",
+      "name": "横浜",
+      "x": 3613,
+      "y": 2675,
+      "factionId": "faction_new01",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_028",
+        "base_030"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_032",
+      "name": "秋葉原",
+      "x": 3869,
+      "y": 2594,
+      "factionId": "faction_new01",
+      "income": 50,
+      "isCapital": true,
+      "adjacentBases": [
+        "base_030"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_035",
+      "name": "岐阜",
+      "x": 1994,
+      "y": 2088,
+      "factionId": "faction_new04",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_037",
+        "base_039"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_037",
+      "name": "金沢",
+      "x": 1700,
+      "y": 1781,
+      "factionId": "faction_new04",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_035",
+        "base_070",
+        "base_041"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_039",
+      "name": "静岡",
+      "x": 2050,
+      "y": 2381,
+      "factionId": "faction_new04",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_035",
+        "base_078",
+        "base_098"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_041",
+      "name": "福井",
+      "x": 1456,
+      "y": 1981,
+      "factionId": "faction_new04",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_037",
+        "base_074"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_042",
+      "name": "和歌山",
+      "x": 1125,
+      "y": 2788,
+      "factionId": "faction_new04",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_076",
+        "base_079",
+        "base_081",
+        "base_082"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_043",
+      "name": "滋賀",
+      "x": 1513,
+      "y": 2281,
+      "factionId": "faction_new04",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_078"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_045",
+      "name": "水戸",
+      "x": 3838,
+      "y": 1463,
+      "factionId": "faction_red",
+      "income": 50,
+      "isCapital": true,
+      "adjacentBases": [
+        "base_020",
+        "base_021"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_046",
+      "name": "いわき",
+      "x": 3763,
+      "y": 1000,
+      "factionId": "faction_red",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_021",
+        "base_047"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_047",
+      "name": "三陸",
+      "x": 3706,
+      "y": 725,
+      "factionId": "faction_red",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_046",
+        "base_049"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_048",
+      "name": "浄土ヶ浜",
+      "x": 3263,
+      "y": 225,
+      "factionId": "東北家",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_012"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_049",
+      "name": "平泉",
+      "x": 3438,
+      "y": 638,
+      "factionId": "東北家",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_001",
+        "base_047",
+        "base_012"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_050",
+      "name": "八戸",
+      "x": 2825,
+      "y": 419,
+      "factionId": "東北家",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_011",
+        "base_012"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_051",
+      "name": "湯沢",
+      "x": 2531,
+      "y": 1406,
+      "factionId": "東北家",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_002",
+        "base_071"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_052",
+      "name": "苫小牧",
+      "x": 2294,
+      "y": 819,
+      "factionId": "faction_new02",
+      "income": 50,
+      "isCapital": true,
+      "adjacentBases": [
+        "base_004",
+        "base_013",
+        "base_019",
+        "base_053"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_053",
+      "name": "襟裳",
+      "x": 2000,
+      "y": 1088,
+      "factionId": "faction_new02",
+      "income": 50,
+      "isCapital": true,
+      "adjacentBases": [
+        "base_052"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_054",
+      "name": "ニセコ",
+      "x": 2319,
+      "y": 175,
+      "factionId": "faction_new02",
+      "income": 50,
+      "isCapital": true,
+      "adjacentBases": [
+        "base_004",
+        "base_006"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_055",
+      "name": "新千歳",
+      "x": 1725,
+      "y": 594,
+      "factionId": "faction_new02",
+      "income": 50,
+      "isCapital": true,
+      "adjacentBases": [
+        "base_015",
+        "base_019",
+        "base_057"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_056",
+      "name": "すすきの",
+      "x": 1925,
+      "y": 544,
+      "factionId": "faction_new02",
+      "income": 50,
+      "isCapital": true,
+      "adjacentBases": [
+        "base_015"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_057",
+      "name": "上川",
+      "x": 1513,
+      "y": 444,
+      "factionId": "faction_new02",
+      "income": 50,
+      "isCapital": true,
+      "adjacentBases": [
+        "base_055",
+        "base_060",
+        "base_067"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_058",
+      "name": "石垣",
+      "x": 881,
+      "y": 313,
+      "factionId": "faction_new02",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_016",
+        "base_062"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_059",
+      "name": "宮古",
+      "x": 738,
+      "y": 531,
+      "factionId": "faction_new02",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_016"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_060",
+      "name": "稚内",
+      "x": 1413,
+      "y": 219,
+      "factionId": "faction_new02",
+      "income": 50,
+      "isCapital": true,
+      "adjacentBases": [
+        "base_057"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_061",
+      "name": "那覇",
+      "x": 550,
+      "y": 806,
+      "factionId": "faction_new02",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_016",
+        "base_086"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_062",
+      "name": "竹富",
+      "x": 619,
+      "y": 213,
+      "factionId": "faction_new02",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_058",
+        "base_084"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_063",
+      "name": "厚岸",
+      "x": 1031,
+      "y": 888,
+      "factionId": "faction_new02",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_017",
+        "base_064"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_064",
+      "name": "知床",
+      "x": 888,
+      "y": 950,
+      "factionId": "faction_new02",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_063",
+        "base_065"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_065",
+      "name": "奄美",
+      "x": 650,
+      "y": 1050,
+      "factionId": "faction_new02",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_064"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_066",
+      "name": "帯広",
+      "x": 1688,
+      "y": 856,
+      "factionId": "faction_new02",
+      "income": 50,
+      "isCapital": true,
+      "adjacentBases": [
+        "base_017",
+        "base_067",
+        "base_068"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_067",
+      "name": "北見",
+      "x": 1413,
+      "y": 575,
+      "factionId": "faction_new02",
+      "income": 50,
+      "isCapital": true,
+      "adjacentBases": [
+        "base_018",
+        "base_057",
+        "base_066"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_068",
+      "name": "日高",
+      "x": 1838,
+      "y": 988,
+      "factionId": "faction_new02",
+      "income": 50,
+      "isCapital": true,
+      "adjacentBases": [
+        "base_066"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_069",
+      "name": "親不知",
+      "x": 2119,
+      "y": 1431,
+      "factionId": "東北家",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_002",
+        "base_070"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_070",
+      "name": "子不知",
+      "x": 1850,
+      "y": 1563,
+      "factionId": "faction_new04",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_069",
+        "base_037"
+      ],
+      "battleCapacity": 5,
+      "dungeonId": null
+    },
+    {
+      "id": "base_071",
+      "name": "高崎",
+      "x": 2700,
+      "y": 1631,
+      "factionId": "faction_green",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_051",
+        "base_072"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_072",
+      "name": "所沢",
+      "x": 2450,
+      "y": 1863,
+      "factionId": "faction_green",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_023",
+        "base_071",
+        "base_073"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_073",
+      "name": "深谷",
+      "x": 2763,
+      "y": 1869,
+      "factionId": "faction_green",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_007",
+        "base_027",
+        "base_072"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_074",
+      "name": "京都",
+      "x": 1263,
+      "y": 2169,
+      "factionId": "faction_new04",
+      "income": 50,
+      "isCapital": true,
+      "adjacentBases": [
+        "base_009",
+        "base_041"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_075",
+      "name": "神戸",
+      "x": 1006,
+      "y": 2156,
+      "factionId": "faction_new04",
+      "income": 50,
+      "isCapital": true,
+      "adjacentBases": [
+        "base_008",
+        "base_009"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_076",
+      "name": "奈良",
+      "x": 1031,
+      "y": 2563,
+      "factionId": "faction_new04",
+      "income": 50,
+      "isCapital": true,
+      "adjacentBases": [
+        "base_009",
+        "base_042"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_077",
+      "name": "名古屋",
+      "x": 1394,
+      "y": 2519,
+      "factionId": "faction_new04",
+      "income": 50,
+      "isCapital": true,
+      "adjacentBases": [
+        "base_009",
+        "base_078"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_078",
+      "name": "浜松",
+      "x": 1688,
+      "y": 2406,
+      "factionId": "faction_new04",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_039",
+        "base_043",
+        "base_077",
+        "base_079"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_079",
+      "name": "三重",
+      "x": 1425,
+      "y": 2856,
+      "factionId": "faction_new04",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_042",
+        "base_078"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_080",
+      "name": "岡山",
+      "x": 644,
+      "y": 1944,
+      "factionId": "faction_new04",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_008",
+        "base_095"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_081",
+      "name": "島根",
+      "x": 688,
+      "y": 2550,
+      "factionId": "faction_new04",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_042"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_082",
+      "name": "広島",
+      "x": 775,
+      "y": 2888,
+      "factionId": "faction_new04",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_042",
+        "base_094"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_083",
+      "name": "佐渡",
+      "x": 1588,
+      "y": 1281,
+      "factionId": "faction_new02",
+      "income": 50,
+      "isCapital": true,
+      "adjacentBases": [],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_084",
+      "name": "桜島",
+      "x": 263,
+      "y": 463,
+      "factionId": "faction_new03",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_062",
+        "base_085"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_085",
+      "name": "鹿児島",
+      "x": 125,
+      "y": 975,
+      "factionId": "faction_new03",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_084",
+        "base_086",
+        "base_087"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_086",
+      "name": "宮崎",
+      "x": 369,
+      "y": 906,
+      "factionId": "faction_new03",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_061",
+        "base_085"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_087",
+      "name": "熊本",
+      "x": 313,
+      "y": 1231,
+      "factionId": "faction_new03",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_085",
+        "base_088"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_088",
+      "name": "佐賀",
+      "x": 163,
+      "y": 1469,
+      "factionId": "faction_new03",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_087",
+        "base_089",
+        "base_090"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_089",
+      "name": "博多",
+      "x": 163,
+      "y": 1738,
+      "factionId": "faction_new03",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_088",
+        "base_092"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_090",
+      "name": "長崎",
+      "x": 444,
+      "y": 1738,
+      "factionId": "faction_new03",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_088",
+        "base_091"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_091",
+      "name": "下関",
+      "x": 450,
+      "y": 2081,
+      "factionId": "faction_new03",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_090",
+        "base_095",
+        "base_097"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_092",
+      "name": "北九州",
+      "x": 144,
+      "y": 2344,
+      "factionId": "faction_new03",
+      "income": 50,
+      "isCapital": true,
+      "adjacentBases": [
+        "base_089",
+        "base_096",
+        "base_097"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_093",
+      "name": "香川",
+      "x": 269,
+      "y": 2800,
+      "factionId": "faction_new03",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_094",
+        "base_096"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_094",
+      "name": "高知",
+      "x": 513,
+      "y": 2819,
+      "factionId": "faction_new03",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_082",
+        "base_093"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_095",
+      "name": "愛媛",
+      "x": 594,
+      "y": 2275,
+      "factionId": "faction_new03",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_080",
+        "base_091"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_096",
+      "name": "徳島",
+      "x": 106,
+      "y": 2631,
+      "factionId": "faction_new03",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_092",
+        "base_093"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_097",
+      "name": "壇ノ浦",
+      "x": 344,
+      "y": 2263,
+      "factionId": "faction_new03",
+      "income": 50,
+      "isCapital": false,
+      "adjacentBases": [
+        "base_091",
+        "base_092"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    },
+    {
+      "id": "base_098",
+      "name": "富士山",
+      "x": 2431,
+      "y": 2725,
+      "factionId": "faction_new02",
+      "income": 50,
+      "isCapital": true,
+      "adjacentBases": [
+        "base_025",
+        "base_039"
+      ],
+      "battleCapacity": 400,
+      "dungeonId": null
+    }
+  ]
+}

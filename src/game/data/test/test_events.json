@@ -1,0 +1,224 @@
+{
+  "events": [
+    {
+      "id": "ev_test_game_start",
+      "name": "【C3-01】game_startトリガー確認",
+      "trigger": "game_start",
+      "conditions": [],
+      "probability": 1,
+      "priority": 999,
+      "maxOccurrences": 1,
+      "script": [
+        { "type": "conversation", "lines": [
+          { "characterId": "tc_001", "position": "center", "text": "【C3-01確認】game_startトリガー正常発火。このダイアログが表示されれば合格。" }
+        ]},
+        { "type": "end" }
+      ],
+      "effects": {
+        "default": [
+          { "type": "setFlag", "flag": "test_game_start_fired" }
+        ]
+      }
+    },
+    {
+      "id": "ev_test_turn_start",
+      "name": "【C3-02】turn_startトリガー確認",
+      "trigger": "turn_start",
+      "conditions": [
+        { "type": "turn", "op": "eq", "value": 2 }
+      ],
+      "probability": 1,
+      "priority": 100,
+      "maxOccurrences": 1,
+      "script": [
+        { "type": "conversation", "lines": [
+          { "characterId": "tc_001", "position": "center", "text": "【C3-02確認】2ターン目のturn_startトリガー正常発火。このダイアログが表示されれば合格。" }
+        ]},
+        { "type": "end" }
+      ],
+      "effects": {
+        "default": [
+          { "type": "setFlag", "flag": "test_turn_start_fired" }
+        ]
+      }
+    },
+    {
+      "id": "ev_test_player_turn_flag",
+      "name": "【C3-03】player_turn + flagCondition確認",
+      "trigger": "player_turn",
+      "conditions": [
+        { "type": "flag", "flag": "test_game_start_fired" },
+        { "type": "noFlag", "flag": "test_player_turn_flag_done" }
+      ],
+      "probability": 1,
+      "priority": 100,
+      "maxOccurrences": 1,
+      "script": [
+        { "type": "conversation", "lines": [
+          { "characterId": "tc_001", "position": "center", "text": "【C3-03確認】flag/noFlag条件付きplayer_turnイベント正常発火。このダイアログが表示されれば合格。" }
+        ]},
+        { "type": "end" }
+      ],
+      "effects": {
+        "default": [
+          { "type": "setFlag", "flag": "test_player_turn_flag_done" }
+        ]
+      }
+    },
+    {
+      "id": "ev_test_base_conquered",
+      "name": "【C3-04】base_conqueredトリガー確認",
+      "trigger": "base_conquered",
+      "conditions": [
+        { "type": "baseConquered", "baseId": "test_base_003" }
+      ],
+      "probability": 1,
+      "priority": 100,
+      "maxOccurrences": 1,
+      "script": [
+        { "type": "conversation", "lines": [
+          { "characterId": "tc_001", "position": "center", "text": "【C3-04確認】敵首都制圧後のbase_conqueredトリガー正常発火。このダイアログが表示されれば合格。" }
+        ]},
+        { "type": "end" }
+      ],
+      "effects": {
+        "default": [
+          { "type": "setFlag", "flag": "test_base_conquered_fired" }
+        ]
+      }
+    },
+    {
+      "id": "ev_test_turn_after_flag",
+      "name": "【C3-05】turnAfterFlag条件確認",
+      "trigger": "player_turn",
+      "conditions": [
+        { "type": "flag", "flag": "test_game_start_fired" },
+        { "type": "turnAfterFlag", "flag": "test_game_start_fired", "value": 3 },
+        { "type": "noFlag", "flag": "test_turn_after_flag_done" }
+      ],
+      "probability": 1,
+      "priority": 90,
+      "maxOccurrences": 1,
+      "script": [
+        { "type": "conversation", "lines": [
+          { "characterId": "tc_001", "position": "center", "text": "【C3-05確認】ゲーム開始から3ターン後のturnAfterFlag条件正常発火。このダイアログが表示されれば合格。" }
+        ]},
+        { "type": "end" }
+      ],
+      "effects": {
+        "default": [
+          { "type": "setFlag", "flag": "test_turn_after_flag_done" }
+        ]
+      }
+    },
+    {
+      "id": "ev_test_treasury_effect",
+      "name": "【C3-06】treasury エフェクト確認",
+      "trigger": "player_turn",
+      "conditions": [
+        { "type": "turn", "op": "eq", "value": 3 },
+        { "type": "noFlag", "flag": "test_treasury_effect_done" }
+      ],
+      "probability": 1,
+      "priority": 80,
+      "maxOccurrences": 1,
+      "script": [
+        { "type": "conversation", "lines": [
+          { "characterId": "tc_001", "position": "center", "text": "【C3-06確認】ミーム+500エフェクトを適用します。適用後UIのミーム数が増えれば合格。" }
+        ]},
+        { "type": "end" }
+      ],
+      "effects": {
+        "default": [
+          { "type": "treasury", "factionId": "player", "delta": 500 },
+          { "type": "setFlag", "flag": "test_treasury_effect_done" }
+        ]
+      }
+    },
+    {
+      "id": "ev_test_before_faction_turn",
+      "name": "【C3-07】before_faction_turnトリガー確認",
+      "trigger": "before_faction_turn",
+      "conditions": [
+        { "type": "noFlag", "flag": "test_before_faction_done" }
+      ],
+      "probability": 1,
+      "priority": 100,
+      "maxOccurrences": 1,
+      "script": [
+        { "type": "conversation", "lines": [
+          { "characterId": "tc_001", "position": "center", "text": "【C3-07確認】before_faction_turnトリガー正常発火。このダイアログが表示されれば合格。" }
+        ]},
+        { "type": "end" }
+      ],
+      "effects": {
+        "default": [
+          { "type": "setFlag", "flag": "test_before_faction_done" }
+        ]
+      }
+    },
+    {
+      "id": "ev_test_base_conquered_easy",
+      "name": "[追加]【C3-04】game_start時に抜点B前取済み局面を設定",
+      "trigger": "game_start",
+      "conditions": [],
+      "probability": 1,
+      "priority": 998,
+      "maxOccurrences": 1,
+      "script": [
+        { "type": "conversation", "lines": [
+          { "characterId": "tc_001", "position": "center", "text": "[追加]抜点Bは初期からプレイヤー備に設定しました。抜点C（敵首都）を直接攻撃してC3-04を確認してください。" }
+        ]},
+        { "type": "end" }
+      ],
+      "effects": {
+        "default": [
+          { "type": "baseTransfer", "fromFactionId": "faction_enemy", "toFactionId": "player" },
+          { "type": "setFlag", "flag": "test_base_b_pretransferred" }
+        ]
+      }
+    },
+    {
+      "id": "ev_test_choice_branch",
+      "name": "【C3-09】choice分岐確認",
+      "trigger": "player_turn",
+      "conditions": [
+        { "type": "flag", "flag": "test_game_start_fired" },
+        { "type": "noFlag", "flag": "test_choice_done" }
+      ],
+      "probability": 1,
+      "priority": 70,
+      "maxOccurrences": 1,
+      "script": [
+        {
+          "type": "choice",
+          "characterId": "tc_001",
+          "position": "center",
+          "text": "【C3-09確認】選択肢分岐テスト。選んだ方によってミーム増減値が変わります。",
+          "choices": [
+            {
+              "label": "選択肢A（ミーム+1000）",
+              "next": 1,
+              "effects": [
+                { "type": "treasury", "factionId": "player", "delta": 1000 }
+              ]
+            },
+            {
+              "label": "選択肢B（ミーム-500）",
+              "next": 1,
+              "effects": [
+                { "type": "treasury", "factionId": "player", "delta": -500 }
+              ]
+            }
+          ]
+        },
+        { "type": "end" }
+      ],
+      "effects": {
+        "default": [
+          { "type": "setFlag", "flag": "test_choice_done" }
+        ]
+      }
+    }
+  ]
+}

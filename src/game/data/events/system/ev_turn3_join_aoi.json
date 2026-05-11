@@ -1,0 +1,22 @@
+{
+  "id": "ev_turn3_join_aoi",
+  "name": "3ターン目：琺葉葵加入",
+  "trigger": "player_turn",
+  "conditions": [
+    { "type": "turn", "op": "eq", "value": 3 },
+    { "type": "flag", "flag": "flag_r1_aoi" }
+  ],
+  "probability": 1, "priority": 800, "maxOccurrences": 1,
+  "script": [
+    { "type": "conversation", "lines": [
+      { "characterId": "char_009", "position": "center", "text": "呼んでくれたの？葵、小っちゃい子のことはちゃんと守るから。一緒に戦おうね。" }
+    ]},
+    { "type": "end" }
+  ],
+  "effects": {
+    "default": [
+      { "type": "charJoin", "charId": "char_009", "factionId": "東北家" },
+      { "type": "clearFlag", "flag": "flag_r1_aoi" }
+    ]
+  }
+}

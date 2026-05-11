@@ -1,0 +1,22 @@
+{
+  "id": "ev_join_itako",
+  "name": "東北イタコ加入",
+  "trigger": "player_turn",
+  "probability": 1, "priority": 40, "maxOccurrences": 1,
+  "conditions": [
+    { "type": "turn", "op": "eq", "value": 2 },
+    { "type": "flag", "flag": "flag_join_itako" }
+  ],
+  "script": [
+    { "type": "conversation", "lines": [
+      { "characterId": "char_015", "position": "center", "text": "呼ばれたよ。力を貸すね。" }
+    ]},
+    { "type": "end" }
+  ],
+  "effects": {
+    "default": [
+      { "type": "charJoin", "charId": "char_015" },
+      { "type": "clearFlag", "flag": "flag_join_itako" }
+    ]
+  }
+}

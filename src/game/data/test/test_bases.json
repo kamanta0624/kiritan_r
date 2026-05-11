@@ -1,0 +1,37 @@
+{
+  "bases": [
+    {
+      "id": "test_base_001",
+      "name": "テスト拠点A（プレイヤー首都）",
+      "x": 640, "y": 360,
+      "factionId": "player",
+      "income": 100,
+      "isCapital": true,
+      "battleCapacity": 400,
+      "adjacentBases": ["test_base_002"],
+      "dungeonId": null
+    },
+    {
+      "id": "test_base_002",
+      "name": "テスト拠点B（係争地）",
+      "x": 900, "y": 360,
+      "factionId": "player",
+      "income": 50,
+      "isCapital": false,
+      "battleCapacity": 300,
+      "adjacentBases": ["test_base_001", "test_base_003"],
+      "dungeonId": null
+    },
+    {
+      "id": "test_base_003",
+      "name": "テスト拠点C（敵拠点・isCapital:false）",
+      "x": 1160, "y": 360,
+      "factionId": "faction_enemy",
+      "income": 100,
+      "isCapital": false,
+      "battleCapacity": 400,
+      "adjacentBases": ["test_base_002"],
+      "dungeonId": null
+    }
+  ]
+}

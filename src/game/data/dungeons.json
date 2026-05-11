@@ -1,0 +1,82 @@
+{
+  "dungeons": [
+    {
+      "id": "dungeon_001",
+      "name": "龍泉洞",
+      "baseId": "base_012",
+      "totalFloors": 5,
+      "prerequisites": {
+        "eventFlags": [],
+        "requiredItemIds": [],
+        "requiredCharIds": []
+      },
+      "floors": [
+        {
+          "floor": 1,
+          "enemy": {
+            "name": "龍泉洞の番人 1",
+            "charHp": 30,
+            "charAttack": 10,
+            "soldiers": 200,
+            "soldierAtk": 8,
+            "soldierDef": 6
+          },
+          "rewardItemId": null,
+          "eventId": null
+        },
+        {
+          "floor": 2,
+          "enemy": {
+            "name": "龍泉洞の番人 2",
+            "charHp": 40,
+            "charAttack": 14,
+            "soldiers": 300,
+            "soldierAtk": 10,
+            "soldierDef": 8
+          },
+          "rewardItemId": null,
+          "eventId": null
+        },
+        {
+          "floor": 3,
+          "enemy": {
+            "name": "龍泉洞の番人 3",
+            "charHp": 50,
+            "charAttack": 18,
+            "soldiers": 400,
+            "soldierAtk": 12,
+            "soldierDef": 10
+          },
+          "rewardItemId": null,
+          "eventId": null
+        },
+        {
+          "floor": 4,
+          "enemy": {
+            "name": "龍泉洞の番人 4",
+            "charHp": 60,
+            "charAttack": 22,
+            "soldiers": 500,
+            "soldierAtk": 14,
+            "soldierDef": 12
+          },
+          "rewardItemId": null,
+          "eventId": null
+        },
+        {
+          "floor": 5,
+          "enemy": {
+            "name": "龍泉洞の番人 5",
+            "charHp": 70,
+            "charAttack": 26,
+            "soldiers": 600,
+            "soldierAtk": 16,
+            "soldierDef": 14
+          },
+          "rewardItemId": null,
+          "eventId": null
+        }
+      ]
+    }
+  ]
+}

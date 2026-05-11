@@ -1,0 +1,25 @@
+[
+  { "type": "narration", "text": "王都アルファの謁見の間。アルスは家臣たちを前に立っていた。" },
+  { "type": "text", "speaker": "アルス", "characterId": "char_001", "position": "left", "text": "諸君、我々の王国は今、四方から脅威にさらされている。" },
+  { "type": "text", "speaker": "ガルド", "characterId": "char_003", "position": "right", "text": "アルス様、我々は戦う準備が整っています。ご命令を！" },
+  { "type": "text", "speaker": "エリナ", "characterId": "char_002", "position": "center", "text": "ただ……敵の数は多い。慎重に動くべきではないでしょうか。" },
+  {
+    "type": "choice",
+    "speaker": "アルス",
+    "characterId": "char_001",
+    "position": "left",
+    "text": "どう動くべきか……",
+    "choices": [
+      { "label": "積極的に攻め込む", "next": 5 },
+      { "label": "守りを固める", "next": 8 }
+    ]
+  },
+  { "type": "text", "speaker": "アルス", "characterId": "char_001", "position": "left", "text": "よし、攻勢に出る！敵に考える暇を与えるな！" },
+  { "type": "text", "speaker": "ガルド", "characterId": "char_003", "position": "right", "text": "御意！全軍、進撃の準備を！" },
+  { "type": "narration", "text": "こうして王国軍は攻勢に転じることを決意した。" },
+  { "type": "end" },
+  { "type": "text", "speaker": "アルス", "characterId": "char_001", "position": "left", "text": "まずは防衛線を整え、国力を蓄えよう。" },
+  { "type": "text", "speaker": "エリナ", "characterId": "char_002", "position": "right", "text": "賢明な判断だと思います、アルス様。" },
+  { "type": "narration", "text": "王国軍は守りの体制を整えることにした。" },
+  { "type": "end" }
+]

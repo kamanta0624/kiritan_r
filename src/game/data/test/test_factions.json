@@ -1,0 +1,20 @@
+{
+  "factions": [
+    {
+      "id": "player",
+      "name": "テストプレイヤー",
+      "color": "#c4427a",
+      "isPlayer": true,
+      "treasury": 2000,
+      "atWarWith": ["faction_enemy"]
+    },
+    {
+      "id": "faction_enemy",
+      "name": "テスト敵勢力",
+      "color": "#4a7ac4",
+      "isPlayer": false,
+      "treasury": 1000,
+      "atWarWith": ["player"]
+    }
+  ]
+}

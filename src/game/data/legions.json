@@ -1,0 +1,234 @@
+{
+  "legions": [
+    {
+      "id": "legion_red_01",
+      "name": "納豆ファクトリー第一軍団",
+      "factionId": "faction_red",
+      "charIds": [
+        "char_024",
+        "char_023"
+      ],
+      "mobSlots": [
+        {
+          "slotId": "slot_1",
+          "templateId": "mob_001",
+          "charId": null,
+          "respawnIn": null
+        },
+        {
+          "slotId": "slot_2",
+          "templateId": "mob_001",
+          "charId": null,
+          "respawnIn": null
+        }
+      ],
+      "maxMobSlots": 2,
+      "attackPriority": [
+        "base_001",
+        "base_003",
+        "base_014",
+        "base_071"
+      ],
+      "defendBases": [
+        "base_003",
+        "base_014",
+        "base_071"
+      ],
+      "attackFrequency": {
+        "type": "every_turn"
+      },
+      "retreatRule": {
+        "onAttack": "hp_any",
+        "onDefend": "char_dead",
+        "onDefendBase": {
+          "base_071": "never"
+        }
+      }
+    },
+    {
+      "id": "legion_new02_base_016",
+      "name": "オホーツク守備隊",
+      "factionId": "faction_new02",
+      "charIds": [],
+      "mobSlots": [
+        {
+          "slotId": "slot_1",
+          "templateId": "mob_001",
+          "charId": null,
+          "respawnIn": null
+        },
+        {
+          "slotId": "slot_2",
+          "templateId": "mob_003",
+          "charId": null,
+          "respawnIn": null
+        }
+      ],
+      "maxMobSlots": 2,
+      "attackPriority": [],
+      "defendBases": [
+        "base_016"
+      ],
+      "attackFrequency": null,
+      "retreatRule": {
+        "onAttack": "never",
+        "onDefend": "char_dead",
+        "onDefendBase": {}
+      }
+    },
+    {
+      "id": "legion_new02_base_017",
+      "name": "釧路守備隊",
+      "factionId": "faction_new02",
+      "charIds": [],
+      "mobSlots": [
+        {
+          "slotId": "slot_1",
+          "templateId": "mob_001",
+          "charId": null,
+          "respawnIn": null
+        }
+      ],
+      "maxMobSlots": 1,
+      "attackPriority": [],
+      "defendBases": [
+        "base_017"
+      ],
+      "attackFrequency": null,
+      "retreatRule": {
+        "onAttack": "never",
+        "onDefend": "char_dead",
+        "onDefendBase": {}
+      }
+    },
+    {
+      "id": "legion_new02_base_018",
+      "name": "女満別守備隊",
+      "factionId": "faction_new02",
+      "charIds": [],
+      "mobSlots": [
+        {
+          "slotId": "slot_1",
+          "templateId": "mob_001",
+          "charId": null,
+          "respawnIn": null
+        }
+      ],
+      "maxMobSlots": 1,
+      "attackPriority": [],
+      "defendBases": [
+        "base_018"
+      ],
+      "attackFrequency": null,
+      "retreatRule": {
+        "onAttack": "never",
+        "onDefend": "char_dead",
+        "onDefendBase": {}
+      }
+    },
+    {
+      "id": "legion_new02_base_019",
+      "name": "登別守備隊",
+      "factionId": "faction_new02",
+      "charIds": [],
+      "mobSlots": [
+        {
+          "slotId": "slot_1",
+          "templateId": "mob_001",
+          "charId": null,
+          "respawnIn": null
+        }
+      ],
+      "maxMobSlots": 1,
+      "attackPriority": [],
+      "defendBases": [
+        "base_019"
+      ],
+      "attackFrequency": null,
+      "retreatRule": {
+        "onAttack": "never",
+        "onDefend": "char_dead",
+        "onDefendBase": {}
+      }
+    },
+    {
+      "id": "legion_green_01",
+      "name": "さいたま第一軍団",
+      "factionId": "faction_green",
+      "charIds": [
+        "char_044",
+        "char_048",
+        "char_049"
+      ],
+      "mobSlots": [
+        {
+          "slotId": "slot_1",
+          "templateId": "mob_001",
+          "charId": null,
+          "respawnIn": null
+        }
+      ],
+      "maxMobSlots": 1,
+      "attackPriority": [],
+      "defendBases": [
+        "base_007",
+        "base_022",
+        "base_028"
+      ],
+      "attackFrequency": null,
+      "retreatRule": {
+        "onAttack": "loss_25",
+        "onDefend": "char_dead",
+        "onDefendBase": {}
+      }
+    },
+    {
+      "id": "legion_yellow_01",
+      "name": "小樽潮風高校軍",
+      "factionId": "faction_yellow",
+      "charIds": [
+        "char_025",
+        "char_026",
+        "char_027"
+      ],
+      "mobSlots": [],
+      "maxMobSlots": 0,
+      "attackPriority": [],
+      "defendBases": [
+        "base_006",
+        "base_015"
+      ],
+      "attackFrequency": null,
+      "retreatRule": {
+        "onAttack": "loss_25",
+        "onDefend": "char_dead",
+        "onDefendBase": {}
+      }
+    },
+    {
+      "id": "legion_faction_red_02",
+      "name": "新規軍団",
+      "factionId": "faction_red",
+      "charIds": [
+        "char_021",
+        "char_022"
+      ],
+      "mobSlots": [],
+      "maxMobSlots": 0,
+      "attackPriority": [
+        "base_001",
+        "base_047"
+      ],
+      "defendBases": [
+        "base_047",
+        "base_046"
+      ],
+      "attackFrequency": null,
+      "retreatRule": {
+        "onAttack": "hp_any",
+        "onDefend": "char_dead",
+        "onDefendBase": {}
+      }
+    }
+  ]
+}

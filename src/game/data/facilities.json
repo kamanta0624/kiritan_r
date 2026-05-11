@@ -1,0 +1,39 @@
+{
+  "research": [
+    {
+      "id": "info_gathering",
+      "name": "情報収集術",
+      "cost": 200,
+      "description": "収入 +30ミーム/ターン（勢力全体）",
+      "effect": { "type": "income", "value": 30 }
+    },
+    {
+      "id": "trade_network",
+      "name": "交易ネットワーク",
+      "cost": 500,
+      "description": "収入 +60ミーム/ターン（勢力全体）",
+      "effect": { "type": "income", "value": 60 }
+    },
+    {
+      "id": "calling_allies",
+      "name": "仲間への呼びかけ",
+      "cost": 600,
+      "description": "キャラクターを仲間にできるようになる",
+      "effect": { "type": "recruitment" }
+    },
+    {
+      "id": "meme_resonance",
+      "name": "ミーム共鳴理論",
+      "cost": 400,
+      "description": "全キャラのミーム上限 +200",
+      "effect": { "type": "maxSoldiersBonus", "value": 200 }
+    },
+    {
+      "id": "vocal_analysis",
+      "name": "歌唱解析",
+      "cost": 450,
+      "description": "全キャラの歌パラメータ +5",
+      "effect": { "type": "charSongBonus", "value": 5 }
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "legions": [
+    {
+      "id": "test_legion_001",
+      "name": "テスト軍団（毎ターン攻撃）",
+      "factionId": "faction_enemy",
+      "charIds": ["tc_enemy_001"],
+      "mobSlots": [
+        { "slotId": "slot_1", "templateId": "tc_mob_template", "charId": null, "respawnIn": null }
+      ],
+      "maxMobSlots": 1,
+      "attackPriority": ["test_base_002", "test_base_001"],
+      "defendBases": ["test_base_003"],
+      "attackFrequency": { "type": "every_turn" },
+      "retreatRule": { "onAttack": "char_dead", "onDefend": "char_dead" }
+    }
+  ]
+}

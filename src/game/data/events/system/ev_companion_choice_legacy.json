@@ -1,0 +1,21 @@
+{
+  "id": "ev_companion_choice",
+  "name": "助っ人選択（旧・無効化済み）",
+  "trigger": "player_turn",
+  "probability": 1, "priority": 50, "maxOccurrences": 1,
+  "conditions": [ { "type": "turn", "op": "eq", "value": 99 } ],
+  "script": [
+    { "type": "conversation", "lines": [
+      { "characterId": "char_016", "position": "left",  "text": "助けを呼んでくるのだ。誰を呼ぶのだ？" },
+      { "characterId": "char_004", "position": "right", "text": "うーん…" }
+    ]},
+    { "type": "choice", "characterId": "char_004", "position": "right", "text": "誰を呼ぼうか…",
+      "choices": [
+        { "label": "イタコ姉を呼ぶ", "next": 2, "effects": [ { "type": "setFlag", "flag": "flag_join_itako" } ] },
+        { "label": "ずんこ姉を呼ぶ", "next": 2, "effects": [ { "type": "setFlag", "flag": "flag_join_zunko" } ] }
+      ]
+    },
+    { "type": "end" }
+  ],
+  "effects": { "default": [] }
+}

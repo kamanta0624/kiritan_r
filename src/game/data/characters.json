@@ -1,0 +1,4306 @@
+{
+  "characters": [
+    {
+      "id": "mob_001",
+      "isTemplate": true,
+      "displayName": "歩兵部隊",
+      "nameVariants": [
+        "カルス",
+        "ベルン",
+        "ドラン",
+        "フォーグ",
+        "ライエン"
+      ],
+      "statVariance": 0.15,
+      "factionId": null,
+      "status": "standby",
+      "joinCondition": null,
+      "hireCost": 0,
+      "attack": 60,
+      "defense": 60,
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 60,
+      "charSong": 15,
+      "soldierName": "一般兵",
+      "soldierAtk": 9,
+      "soldierDef": 9,
+      "description": "各地で見られる標準的な歩兵部隊。",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 1,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 1,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        }
+      },
+      "skillId": null
+    },
+    {
+      "id": "mob_002",
+      "isTemplate": true,
+      "displayName": "弓兵部隊",
+      "nameVariants": [
+        "アイン",
+        "セラ",
+        "フィン",
+        "ルナ",
+        "ミルド"
+      ],
+      "statVariance": 0.15,
+      "factionId": null,
+      "status": "standby",
+      "joinCondition": null,
+      "hireCost": 0,
+      "attack": 65,
+      "defense": 50,
+      "soldiers": 400,
+      "maxSoldiers": 800,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "ranged",
+      "charHp": 130,
+      "charMaxHp": 130,
+      "charAttack": 65,
+      "charSong": 18,
+      "soldierName": "弓兵",
+      "soldierAtk": 12,
+      "soldierDef": 6,
+      "description": "遠距離から敵を射抜く弓兵部隊。",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 2,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "defense": {
+          "soldierAtk": -1,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        }
+      },
+      "skillId": null
+    },
+    {
+      "id": "mob_003",
+      "isTemplate": true,
+      "displayName": "重装部隊",
+      "nameVariants": [
+        "ゴルド",
+        "バルガ",
+        "ドルム",
+        "クレイン",
+        "ハーグ"
+      ],
+      "statVariance": 0.15,
+      "factionId": null,
+      "status": "standby",
+      "joinCondition": null,
+      "hireCost": 0,
+      "attack": 55,
+      "defense": 80,
+      "soldiers": 600,
+      "maxSoldiers": 1200,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "guardian",
+      "attackType": "melee",
+      "charHp": 200,
+      "charMaxHp": 200,
+      "charAttack": 55,
+      "charSong": 10,
+      "soldierName": "重装兵",
+      "soldierAtk": 7,
+      "soldierDef": 15,
+      "description": "堅牢な防具で身を固めた重装部隊。",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": -1,
+          "soldierDef": -2,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 3,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        }
+      },
+      "skillId": null
+    },
+    {
+      "id": "char_004",
+      "name": "東北きりたん",
+      "factionId": "東北家",
+      "status": "active",
+      "joinCondition": null,
+      "isTemplate": false,
+      "attack": 22,
+      "defense": 70,
+      "soldiers": 5,
+      "maxSoldiers": 5,
+      "isLeader": true,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 15,
+      "charMaxHp": 15,
+      "charAttack": 22,
+      "charSong": 0,
+      "soldierName": "きりたんミーム",
+      "soldierAtk": 6,
+      "soldierDef": 4,
+      "description": "東北家の三女。",
+      "hireCost": 0,
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 1,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "dungeon": {
+          "soldierAtk": 1,
+          "soldierDef": 1,
+          "charAttack": 0,
+          "charSong": 0
+        }
+      },
+      "charDefense": 8,
+      "skillId": null
+    },
+    {
+      "id": "char_005",
+      "name": "音街ウナ",
+      "factionId": "東北家",
+      "status": "active",
+      "joinCondition": null,
+      "isTemplate": false,
+      "attack": 3,
+      "defense": 70,
+      "soldiers": 100,
+      "maxSoldiers": 1000,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "ranged",
+      "charHp": 3,
+      "charMaxHp": 3,
+      "charAttack": 3,
+      "charSong": 55,
+      "soldierName": "うなミーム",
+      "soldierAtk": 3,
+      "soldierDef": 3,
+      "description": "アイドル。",
+      "hireCost": 0,
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        }
+      },
+      "charDefense": 4,
+      "skillId": null
+    },
+    {
+      "id": "char_006",
+      "name": "彩澄しゅお",
+      "factionId": "東北家",
+      "status": "active",
+      "joinCondition": null,
+      "isTemplate": false,
+      "attack": 4,
+      "defense": 70,
+      "soldiers": 10,
+      "maxSoldiers": 10,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "ranged",
+      "charHp": 4,
+      "charMaxHp": 4,
+      "charAttack": 4,
+      "charSong": 30,
+      "soldierName": "しゅおミーム",
+      "soldierAtk": 4,
+      "soldierDef": 3,
+      "description": "きりたん、ウナのクラスメイト。彩澄しゅおの妹。",
+      "hireCost": 0,
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        }
+      },
+      "charDefense": 4,
+      "skillId": null
+    },
+    {
+      "id": "char_008",
+      "name": "琴葉茜",
+      "factionId": "faction_new04",
+      "status": "standby",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 12,
+      "charMaxHp": 12,
+      "charAttack": 22,
+      "attack": 22,
+      "defense": 70,
+      "soldierName": "あかねミーム",
+      "soldiers": 200,
+      "maxSoldiers": 750,
+      "soldierAtk": 14,
+      "soldierDef": 6,
+      "charSong": 25,
+      "description": "琴葉姉妹の姉。攻撃戦で真価を発揮",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        }
+      },
+      "skillId": null
+    },
+    {
+      "id": "char_009",
+      "name": "琴葉葵",
+      "factionId": "faction_new04",
+      "status": "standby",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 16,
+      "charMaxHp": 16,
+      "charAttack": 12,
+      "attack": 12,
+      "defense": 70,
+      "soldierName": "あおいミーム",
+      "soldiers": 200,
+      "maxSoldiers": 750,
+      "soldierAtk": 10,
+      "soldierDef": 10,
+      "charSong": 28,
+      "description": "琴葉姉妹の妹。防衛戦で真価を発揮",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        }
+      },
+      "skillId": null
+    },
+    {
+      "id": "char_010",
+      "name": "紲星あかり",
+      "factionId": "faction_new04",
+      "status": "standby",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 10,
+      "charMaxHp": 10,
+      "charAttack": 8,
+      "attack": 8,
+      "defense": 70,
+      "soldierName": "あかりミーム",
+      "soldiers": 300,
+      "maxSoldiers": 600,
+      "soldierAtk": 12,
+      "soldierDef": 8,
+      "charSong": 35,
+      "description": "あかりちゃん。",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        }
+      },
+      "skillId": null
+    },
+    {
+      "id": "char_011",
+      "name": "結月ゆかり",
+      "factionId": "faction_new04",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": true,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 12,
+      "charMaxHp": 12,
+      "charAttack": 24,
+      "attack": 24,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 100,
+      "maxSoldiers": 100,
+      "soldierAtk": 13,
+      "soldierDef": 11,
+      "charSong": 45,
+      "description": "ニコニコ地方の覇権。",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        }
+      },
+      "charDefense": 0,
+      "skillId": null
+    },
+    {
+      "id": "char_012",
+      "name": "弦巻マキ",
+      "factionId": "faction_new04",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 17,
+      "charMaxHp": 17,
+      "charAttack": 22,
+      "attack": 22,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 100,
+      "maxSoldiers": 100,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "charSong": 30,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        }
+      },
+      "charDefense": 0,
+      "skillId": null
+    },
+    {
+      "id": "char_013",
+      "name": "彩澄りりせ",
+      "factionId": null,
+      "status": "standby",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 7,
+      "charMaxHp": 7,
+      "charAttack": 10,
+      "attack": 10,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 100,
+      "maxSoldiers": 100,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "彩澄しゅおの姉。",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_014",
+      "name": "東北ずんこ",
+      "factionId": null,
+      "status": "standby",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "ranged",
+      "charHp": 5,
+      "charMaxHp": 5,
+      "charAttack": 11,
+      "attack": 11,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 100,
+      "maxSoldiers": 100,
+      "soldierAtk": 8,
+      "soldierDef": 6,
+      "description": "東北家次女。",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_015",
+      "name": "東北イタコ",
+      "factionId": null,
+      "status": "standby",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "ranged",
+      "charHp": 4,
+      "charMaxHp": 4,
+      "charAttack": 11,
+      "attack": 11,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 100,
+      "maxSoldiers": 100,
+      "soldierAtk": 7,
+      "soldierDef": 7,
+      "description": "東北家長女。",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_016",
+      "name": "ずんだもん",
+      "factionId": "東北家",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 20,
+      "charMaxHp": 20,
+      "charAttack": 6,
+      "attack": 6,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 400,
+      "maxSoldiers": 400,
+      "soldierAtk": 4,
+      "soldierDef": 9,
+      "description": "ずんだの精霊。",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_017",
+      "name": "四国めたん",
+      "factionId": "東北家",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 4,
+      "charMaxHp": 4,
+      "charAttack": 10,
+      "attack": 10,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 100,
+      "maxSoldiers": 100,
+      "soldierAtk": 9,
+      "soldierDef": 8,
+      "description": "ずんこのクラスメイト",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_018",
+      "name": "九州そら",
+      "factionId": "東北家",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "ranged",
+      "charHp": 20,
+      "charMaxHp": 20,
+      "charAttack": 5,
+      "attack": 5,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 100,
+      "maxSoldiers": 100,
+      "soldierAtk": 6,
+      "soldierDef": 12,
+      "description": "宇宙開拓用アンドロイド",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_019",
+      "name": "中国うさぎ",
+      "factionId": "東北家",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 3,
+      "charMaxHp": 3,
+      "charAttack": 13,
+      "attack": 13,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 100,
+      "maxSoldiers": 100,
+      "soldierAtk": 13,
+      "soldierDef": 3,
+      "description": "14歳だが飛び級でずんこのクラスに通う",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_020",
+      "name": "大江戸ちゃんこ",
+      "factionId": "faction_red",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 7,
+      "charMaxHp": 7,
+      "charAttack": 10,
+      "attack": 10,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 710,
+      "maxSoldiers": 710,
+      "soldierAtk": 7,
+      "soldierDef": 10,
+      "description": "秘密結社大都会の総帥",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_021",
+      "name": "中部つるぎ",
+      "factionId": "faction_red",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 9,
+      "charMaxHp": 9,
+      "charAttack": 21,
+      "attack": 21,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 100,
+      "maxSoldiers": 100,
+      "soldierAtk": 12,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_022",
+      "name": "関西しのび",
+      "factionId": "faction_red",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_023",
+      "name": "沖縄あわも",
+      "factionId": "faction_red",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_024",
+      "name": "北海道めろん",
+      "factionId": "faction_red",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_025",
+      "name": "小春六花",
+      "factionId": "faction_yellow",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 5,
+      "charMaxHp": 5,
+      "charAttack": 10,
+      "attack": 10,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 100,
+      "maxSoldiers": 100,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "小樽潮風高校に通う2年生。身長 160cm。誕生日 5月16日。  軽音部所属・ギター＆ボーカル担当。",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_026",
+      "name": "夏色花梨",
+      "factionId": "faction_yellow",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 6,
+      "charMaxHp": 6,
+      "charAttack": 10,
+      "attack": 10,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 100,
+      "maxSoldiers": 100,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "小樽潮風高校に通う3年生。身長 164cm。誕生日 9月9日。  軽音部部長・ベース担当。",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_027",
+      "name": "花隈千冬",
+      "factionId": "faction_yellow",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 4,
+      "charMaxHp": 4,
+      "charAttack": 9,
+      "attack": 9,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 100,
+      "maxSoldiers": 100,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "小樽潮風高校に通う1年生。身長 151cm。誕生日 3月2日。  軽音部所属・ドラム担当。",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_028",
+      "name": "さとうささら",
+      "factionId": "faction_new01",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 10,
+      "charMaxHp": 10,
+      "charAttack": 7,
+      "attack": 7,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 100,
+      "maxSoldiers": 100,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "アニメやゲームが大好きな、ごくごく普通の女の子。",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_029",
+      "name": "すずきつづみ",
+      "factionId": "faction_new01",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 9,
+      "charMaxHp": 9,
+      "charAttack": 7,
+      "attack": 7,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 100,
+      "maxSoldiers": 100,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "ショートカットが似合う、ちょっとすました女の子。 ささらとは仲がいいが、趣味の方向性が少し違うため 会話が噛み合わないこともたまにある。",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_030",
+      "name": "タカハシ",
+      "factionId": "faction_new01",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 20,
+      "charMaxHp": 20,
+      "charAttack": 3,
+      "attack": 3,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 50,
+      "maxSoldiers": 50,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "長らく下の名前が不明だった",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_031",
+      "name": "ONE",
+      "factionId": "faction_new01",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 4,
+      "charMaxHp": 4,
+      "charAttack": 10,
+      "attack": 10,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 10,
+      "maxSoldiers": 10,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "ONE -ARIA ON THE PLANETES-",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_032",
+      "name": "IA",
+      "factionId": "faction_new01",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 4,
+      "charMaxHp": 4,
+      "charAttack": 10,
+      "attack": 10,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 50,
+      "maxSoldiers": 50,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "IA -ARIA ON THE PLANETES",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_033",
+      "name": "双葉湊音",
+      "factionId": null,
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 4,
+      "charMaxHp": 4,
+      "charAttack": 10,
+      "attack": 10,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 50,
+      "maxSoldiers": 50,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_034",
+      "name": "桜乃そら",
+      "factionId": null,
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 4,
+      "charMaxHp": 4,
+      "charAttack": 8,
+      "attack": 8,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 50,
+      "maxSoldiers": 50,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_035",
+      "name": "フリモメン",
+      "factionId": null,
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 4,
+      "charMaxHp": 4,
+      "charAttack": 8,
+      "attack": 8,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 50,
+      "maxSoldiers": 100,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_036",
+      "name": "宮舞モカ",
+      "factionId": "faction_new04",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 4,
+      "charMaxHp": 4,
+      "charAttack": 8,
+      "attack": 8,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 50,
+      "maxSoldiers": 100,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_037",
+      "name": "ついなちゃん",
+      "factionId": "faction_new04",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 4,
+      "charMaxHp": 4,
+      "charAttack": 8,
+      "attack": 8,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 50,
+      "maxSoldiers": 100,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_038",
+      "name": "京町セイカ",
+      "factionId": "faction_new04",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 4,
+      "charMaxHp": 4,
+      "charAttack": 8,
+      "attack": 8,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 50,
+      "maxSoldiers": 100,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_039",
+      "name": "重音テト",
+      "factionId": "東北家",
+      "status": "standby",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 4,
+      "charMaxHp": 4,
+      "charAttack": 8,
+      "attack": 8,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 50,
+      "maxSoldiers": 100,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null,
+      "charDefense": 0
+    },
+    {
+      "id": "char_040",
+      "name": "月読アイ",
+      "factionId": "faction_new04",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 2,
+      "charMaxHp": 2,
+      "charAttack": 10,
+      "attack": 10,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 120,
+      "maxSoldiers": 120,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_041",
+      "name": "タンゲコトエ",
+      "factionId": "faction_new04",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_042",
+      "name": "紡乃世詞音",
+      "factionId": "faction_new04",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_043",
+      "name": "夜語トバリ",
+      "factionId": "faction_new04",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_044",
+      "name": "栗田まろん",
+      "factionId": "faction_green",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_045",
+      "name": "足立レイ",
+      "factionId": null,
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_046",
+      "name": "カキョウヨサリ",
+      "factionId": "faction_new04",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_047",
+      "name": "つくよみちゃん",
+      "factionId": null,
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_048",
+      "name": "No.7",
+      "factionId": "faction_green",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_049",
+      "name": "雨晴はう",
+      "factionId": "faction_green",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_050",
+      "name": "冥鳴ひまり",
+      "factionId": "faction_green",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_051",
+      "name": "もち子",
+      "factionId": "faction_green",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "模型娘のもち子さん。フルネームはモチノキョウコ",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_052",
+      "name": "小夜/SAYO",
+      "factionId": "faction_green",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_053",
+      "name": "ナースロボ＿タイプＴ",
+      "factionId": "faction_green",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_054",
+      "name": "アリアル",
+      "factionId": null,
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_055",
+      "name": "ミリアル",
+      "factionId": null,
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_056",
+      "name": "アベルーニ",
+      "factionId": null,
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_057",
+      "name": "リリンちゃん",
+      "factionId": "faction_green",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "黒朱乃宮・ティンティナーブルム・リリン",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_058",
+      "name": "クロワちゃん",
+      "factionId": "faction_green",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "黒朱乃宮・セプテントリオーネス・ラ・クロワ",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_059",
+      "name": "WhiteCUL",
+      "factionId": "faction_green",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_060",
+      "name": "アンジーさん",
+      "factionId": "faction_green",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "アンドロマリウス・プルガトリア",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_061",
+      "name": "ディアちゃん",
+      "factionId": "faction_green",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_062",
+      "name": "アルマちゃん",
+      "factionId": "faction_green",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_063",
+      "name": "アメノちゃん",
+      "factionId": "faction_green",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "海神之宮・リンドブルム・天乃",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_064",
+      "name": "MEIKO",
+      "factionId": "faction_new03",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_065",
+      "name": "KAITO",
+      "factionId": "faction_new03",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_066",
+      "name": "初音ミク",
+      "factionId": null,
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_067",
+      "name": "鏡音リン",
+      "factionId": "faction_new03",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_068",
+      "name": "鏡音レン",
+      "factionId": "faction_new03",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_069",
+      "name": "巡音ルカ",
+      "factionId": "faction_new03",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_070",
+      "name": "猫村いろは",
+      "factionId": "faction_new03",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_071",
+      "name": "歌愛ユキ",
+      "factionId": "faction_new03",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_072",
+      "name": "ギャラ子",
+      "factionId": null,
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_073",
+      "name": "鳴花ヒメ",
+      "factionId": "faction_red",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_074",
+      "name": "鳴花ミコト",
+      "factionId": "faction_red",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_075",
+      "name": "春日部つむぎ",
+      "factionId": "faction_green",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_076",
+      "name": "可不",
+      "factionId": "faction_new03",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_077",
+      "name": "星界",
+      "factionId": "faction_new03",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_078",
+      "name": "裏命",
+      "factionId": "faction_new03",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_079",
+      "name": "狐子",
+      "factionId": "faction_new03",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_080",
+      "name": "羽累",
+      "factionId": "faction_new03",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_081",
+      "name": "フィーちゃん",
+      "factionId": null,
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_082",
+      "name": "知声",
+      "factionId": null,
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_083",
+      "name": "GUMI",
+      "factionId": "faction_new03",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_084",
+      "name": "猫使アル",
+      "factionId": null,
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_085",
+      "name": "猫使ビィ",
+      "factionId": null,
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_086",
+      "name": "Voidoll",
+      "factionId": "faction_green",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_087",
+      "name": "ユーレイちゃん",
+      "factionId": "faction_green",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_088",
+      "name": "欲音ルコ",
+      "factionId": "faction_new03",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_089",
+      "name": "波音リツ",
+      "factionId": "faction_new03",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_090",
+      "name": "邪神ちゃん",
+      "factionId": null,
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_091",
+      "name": "flower",
+      "factionId": null,
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_092",
+      "name": "スーパーフリモたん",
+      "factionId": "faction_new01",
+      "status": "active",
+      "isTemplate": false,
+      "joinCondition": null,
+      "hireCost": 0,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "attack": 70,
+      "defense": 70,
+      "soldierName": "一般兵",
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0
+        }
+      },
+      "charSong": 20,
+      "skillId": null
+    },
+    {
+      "id": "char_093",
+      "name": "唯世かのん",
+      "factionId": null,
+      "status": "standby",
+      "joinCondition": null,
+      "isTemplate": false,
+      "attack": 12,
+      "defense": 70,
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 4,
+      "charMaxHp": 4,
+      "charAttack": 12,
+      "charDefense": 10,
+      "charSong": 2,
+      "skillId": null,
+      "soldierName": "一般兵",
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "hireCost": 0,
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        }
+      }
+    }
+  ]
+}

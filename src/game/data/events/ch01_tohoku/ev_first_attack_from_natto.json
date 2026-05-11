@@ -1,0 +1,24 @@
+{
+  "id": "ev_first_attack_from_natto",
+  "name": "納豆ファクトリー初撃（大江戸・中部会話）",
+  "trigger": "base_defense",
+  "conditions": [
+    { "type": "attackerFaction", "factionId": "faction_red" },
+    { "type": "defenderFaction", "factionId": "東北家" },
+    { "type": "noFlag", "flag": "flag_natto_first_attack_done" }
+  ],
+  "probability": 1, "priority": 950, "maxOccurrences": 1,
+  "script": [
+    { "type": "conversation", "lines": [
+      { "characterId": "char_020", "position": "left",  "text": "はっは、東北家とやらいりゃする日が来たな。毀してやるぜ。" },
+      { "characterId": "char_021", "position": "right", "text": "手富い相手ですね、大江戸さん。内情はもうつかんでいます。こちらが有利なはず。" },
+      { "characterId": "char_020", "position": "left",  "text": "そういうことだ。じゃあ遺漏なく潰してやれ。" }
+    ]},
+    { "type": "end" }
+  ],
+  "effects": {
+    "default": [
+      { "type": "setFlag", "flag": "flag_natto_first_attack_done" }
+    ]
+  }
+}

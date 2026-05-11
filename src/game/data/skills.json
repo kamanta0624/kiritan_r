@@ -1,0 +1,28 @@
+{
+  "skills": [
+    {
+      "id": "rally",
+      "name": "鼓舞",
+      "description": "味方全体の攻撃力を1ターン +20%",
+      "assignTo": "leader"
+    },
+    {
+      "id": "pierce",
+      "name": "看破",
+      "description": "相手の防御を無視して攻撃",
+      "assignTo": "attacker"
+    },
+    {
+      "id": "fortress",
+      "name": "鉄壁",
+      "description": "このターンの被ダメージを0にする",
+      "assignTo": "guardian"
+    },
+    {
+      "id": "volley",
+      "name": "乱撃",
+      "description": "相手全体に通常の50%のダメージ",
+      "assignTo": "commander"
+    }
+  ]
+}

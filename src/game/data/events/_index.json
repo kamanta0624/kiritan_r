@@ -1,0 +1,33 @@
+{
+  "_comment": "イベントインデックス。新規イベント追加時はここにエントリを追加すること。",
+  "_schema": {
+    "id": "イベントID（ファイル内のidと一致させること）",
+    "path": "src/data/events/ からの相対パス",
+    "chapter": "管理用タグ（system / ch01 / ch02 / ... / defeated / placeholder）"
+  },
+  "events": [
+    { "id": "ev_000_opening",           "path": "system/ev_000_opening.json",           "chapter": "system" },
+    { "id": "ev_turn1_status",          "path": "system/ev_turn1_status.json",          "chapter": "system" },
+    { "id": "ev_turn2_recruit_1",       "path": "system/ev_turn2_recruit_1.json",       "chapter": "system" },
+    { "id": "ev_turn2_recruit_2",       "path": "system/ev_turn2_recruit_2.json",       "chapter": "system" },
+    { "id": "ev_turn3_join_akane",      "path": "system/ev_turn3_join_akane.json",      "chapter": "system" },
+    { "id": "ev_turn3_join_aoi",        "path": "system/ev_turn3_join_aoi.json",        "chapter": "system" },
+    { "id": "ev_turn3_join_akari",      "path": "system/ev_turn3_join_akari.json",      "chapter": "system" },
+    { "id": "ev_turn3_join_maki",       "path": "system/ev_turn3_join_maki.json",       "chapter": "system" },
+    { "id": "ev_turn3_join_yukari",     "path": "system/ev_turn3_join_yukari.json",     "chapter": "system" },
+    { "id": "ev_turn3_join_sora",       "path": "system/ev_turn3_join_sora.json",       "chapter": "system" },
+    { "id": "ev_companion_choice",      "path": "system/ev_companion_choice_legacy.json", "chapter": "system" },
+    { "id": "ev_join_itako",            "path": "system/ev_join_itako.json",            "chapter": "system" },
+    { "id": "ev_join_zunko",            "path": "system/ev_join_zunko.json",            "chapter": "system" },
+    { "id": "ev_first_attack_from_natto", "path": "ch01_tohoku/ev_first_attack_from_natto.json", "chapter": "ch01" },
+    { "id": "ev_mito_conquest",         "path": "ch01_tohoku/ev_mito_conquest.json",    "chapter": "ch01" },
+    { "id": "ev_saitama_chain_1",       "path": "ch02_saitama/ev_saitama_chain_1.json", "chapter": "ch02" },
+    { "id": "ev_saitama_chain_2",       "path": "ch02_saitama/ev_saitama_chain_2.json", "chapter": "ch02" },
+    { "id": "ev_saitama_chain_3",       "path": "ch02_saitama/ev_saitama_chain_3.json", "chapter": "ch02" },
+    { "id": "ev_saitama_chain_4",       "path": "ch02_saitama/ev_saitama_chain_4.json", "chapter": "ch02" },
+    { "id": "ev_defeated_naruhanahi_me",     "path": "defeated/ev_defeated_naruhanahi_me.json",     "chapter": "defeated" },
+    { "id": "ev_defeated_naruhanahi_mikoto", "path": "defeated/ev_defeated_naruhanahi_mikoto.json", "chapter": "defeated" },
+    { "id": "ev_defeated_placeholder_03",    "path": "placeholder/ev_defeated_placeholder_03.json", "chapter": "placeholder" },
+    { "id": "ev_defeated_placeholder_04",    "path": "placeholder/ev_defeated_placeholder_04.json", "chapter": "placeholder" }
+  ]
+}

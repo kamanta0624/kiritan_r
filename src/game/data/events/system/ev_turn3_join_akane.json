@@ -1,0 +1,24 @@
+{
+  "id": "ev_turn3_join_akane",
+  "name": "3ターン目：琺葉茹加入",
+  "trigger": "player_turn",
+  "conditions": [
+    { "type": "turn", "op": "eq", "value": 3 },
+    { "type": "flag", "flag": "flag_r1_akane" }
+  ],
+  "probability": 1,
+  "priority": 800,
+  "maxOccurrences": 1,
+  "script": [
+    { "type": "conversation", "lines": [
+      { "characterId": "char_008", "position": "center", "text": "呼んだ？うちの茹は崩ってきた子に寄り岐まったりしないんだけどね。まあ、勠んから乗がってやるってことや。" }
+    ]},
+    { "type": "end" }
+  ],
+  "effects": {
+    "default": [
+      { "type": "charJoin", "charId": "char_008", "factionId": "東北家" },
+      { "type": "clearFlag", "flag": "flag_r1_akane" }
+    ]
+  }
+}
