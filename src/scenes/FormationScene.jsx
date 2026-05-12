@@ -80,7 +80,19 @@ export default function AttackFormationScene({ targetNode, onLaunch, onCancel, a
   const [hoverId, setHoverId] = useState(null);
 
   // availableCharsが渡されていれば実データ、なければCHARSデモデータ
-  const joinedChars = availableChars ?? CHARS.filter(c => c.joined);
+  const rawChars = availableChars ?? CHARS.filter(c => c.joined);
+  // 実データのrole(attacker/guardian/commander)をROLESキー(front/ranged/rear/support)にマップ
+  const ROLE_MAP = { attacker:'front', guardian:'front', commander:'rear', ranged:'ranged', support:'support' };
+  const joinedChars = rawChars.map(c => ({
+    ...c,
+    role:    ROLE_MAP[c.role] ?? 'front',
+    atk:     c.atk  ?? c.charAttack ?? c.soldierAtk ?? 0,
+    def:     c.def  ?? c.charDefense ?? c.soldierDef ?? 0,
+    hp:      c.hp   ?? c.charHp ?? 100,
+    maxHp:   c.maxHp ?? c.charMaxHp ?? 100,
+    troops:  c.troops ?? c.soldiers ?? 0,
+    portrait: c.portrait ?? null,
+  }));
   const selectedIds = Object.values(formation).filter(Boolean).map(c => c.id);
 
   // ルール判定
