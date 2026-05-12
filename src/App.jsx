@@ -139,7 +139,7 @@ export default function App() {
 
       // ── アイテム ──
       case 'items':
-        return <ItemsScene onNavigate={navigate} inventory={game.inventory} />;
+        return <ItemsScene onNavigate={navigate} inventory={game.inventory} onRemoveItem={game.actions.removeItem} />;
 
       // ── 研究 ──
       case 'research':

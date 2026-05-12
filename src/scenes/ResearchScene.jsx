@@ -20,20 +20,19 @@ const DEMO_RESEARCH = [
 const RCAT_LABEL = { economy:'経済', military:'軍事', recon:'諜報', support:'支援' };
 const RCAT_COLOR = { economy:AC, military:PK, recon:TEAL, support:'#6a55b0' };
 
-export default function ResearchScene({ onNavigate, currentMeme = 2400 }) {
-  const [doneIds, setDoneIds] = useState(()=>new Set(DEMO_RESEARCH.filter(r=>r.done).map(r=>r.id)));
+export default function ResearchScene({ onNavigate, completedResearch=[], treasury=0, onResearch }) {
   const [selected, setSelected] = useState('r3');
-  const [meme, setMeme] = useState(currentMeme);
+  const meme = treasury;
 
   const sel = DEMO_RESEARCH.find(r => r.id === selected);
-  const isDone = sel ? doneIds.has(sel.id) : false;
   const isLocked = sel?.locked && !doneIds.has(sel.locked);
-  const canAfford = sel ? meme >= sel.cost : false;
-  const canResearch = !isDone && !isLocked && canAfford;
+  const canAfford = sel ? meme >= sel.cost && !completedResearch.includes(sel.id) : false;
+  const isDone = (id) => completedResearch.includes(id);
+  const canResearch = !isDone(sel?.id) && !isLocked && canAfford;
 
   const handleResearch = () => {
     if(!canResearch || !sel) return;
-    setMeme(m => m - sel.cost);
+    if (onResearch) onResearch(sel.id, sel.cost);
     setDoneIds(s => new Set([...s, sel.id]));
   };
 
@@ -150,7 +149,7 @@ export default function ResearchScene({ onNavigate, currentMeme = 2400 }) {
               </div>
 
               <div style={{marginTop:'auto'}}>
-                {isDone ? (
+                {isDone(sel?.id) ? (
                   <div style={{padding:'12px', borderRadius:8,
                     background:'rgba(42,154,88,.12)', border:'1px solid rgba(42,154,88,.3)',
                     color:'#2a9a58', textAlign:'center', fontWeight:700, fontSize:12,

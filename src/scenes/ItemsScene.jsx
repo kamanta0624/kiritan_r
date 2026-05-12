@@ -29,12 +29,13 @@ const KIND_COLOR = {
 const RARITY_COLOR = { common:'#8a8e96', rare:'#1a8a96', epic:'#9d4ed4', legendary:'#d4a044' };
 const RARITY_LABEL = { common:'COMMON', rare:'RARE', epic:'EPIC', legendary:'LEGENDARY' };
 
-export default function ItemsScene({ onNavigate }) {
+export default function ItemsScene({ onNavigate, inventory, onRemoveItem }) {
   const [selectedId, setSelectedId] = useState('i2');
   const [filter, setFilter] = useState('all');
 
-  const items = filter === 'all' ? DEMO_ITEMS : DEMO_ITEMS.filter(i => i.kind === filter);
-  const selected = DEMO_ITEMS.find(i => i.id === selectedId) || items[0] || null;
+  const allItems = inventory?.length ? inventory : DEMO_ITEMS;
+  const items = filter === 'all' ? allItems : allItems.filter(i => i.kind === filter);
+  const selected = allItems.find(i => i.id === selectedId) || items[0] || null;
   const equippedBy = selected?.equippedBy ? CHARS.find(c => c.id === selected.equippedBy) : null;
   const eligible = selected?.equip ? CHARS.filter(c => c.joined) : [];
 
@@ -51,7 +52,7 @@ export default function ItemsScene({ onNavigate }) {
             display:'flex', alignItems:'center', gap:6}}>
             <div style={{width:6, height:6, borderRadius:'50%', background:AC}}/>
             <span style={{fontFamily:"'Zen Maru Gothic'", fontSize:11, fontWeight:900, color:TX}}>
-              所持 {DEMO_ITEMS.length}種
+              所持 {allItems.length}種
             </span>
           </div>
         }/>

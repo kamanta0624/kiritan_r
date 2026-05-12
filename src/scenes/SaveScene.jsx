@@ -12,11 +12,18 @@ const DEMO_SLOTS = [
   { id:3, used:false, date:'', turn:0, bases:'', meme:0, location:'', leader:null },
 ];
 
-export default function SaveScene({ onNavigate, onClose, mode='save' }) {
+export default function SaveScene({ onNavigate, onClose, mode='save', slots: slotsProp, onSave, onLoad }) {
   // mode: 'save' or 'load'
   const [activeMode, setActiveMode] = useState(mode);
   const [selected, setSelected] = useState(1);
-  const [slots, setSlots] = useState(DEMO_SLOTS);
+  const slots = slotsProp?.map(s => ({
+    id: s.slot,
+    label: `スロット ${s.slot}`,
+    turn: s.empty ? null : s.turn,
+    date: s.empty ? null : (s.savedAt ? new Date(s.savedAt).toLocaleString('ja-JP', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}) : null),
+    empty: s.empty,
+  })) ?? DEMO_SLOTS;
+  const [_dummy, setDummy] = useState(0);
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState(null);
 
@@ -26,11 +33,7 @@ export default function SaveScene({ onNavigate, onClose, mode='save' }) {
     if(busy || !sel) return;
     setBusy(true);
     if(activeMode === 'save') {
-      const now = new Date();
-      const stamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-      setSlots(s => s.map(x => x.id===selected
-        ? { ...x, used:true, date:stamp, turn:GAME_STATE.turn, bases:GAME_STATE.bases, meme:GAME_STATE.meme, location:'仙台', leader:'c1' }
-        : x));
+      if (onSave) onSave(selected);
       setTimeout(() => { setBusy(false); setToast('セーブしました'); setTimeout(()=>setToast(null), 1600); }, 350);
     } else {
       // load

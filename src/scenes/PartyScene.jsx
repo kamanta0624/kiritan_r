@@ -282,15 +282,29 @@ function CharDetail({char, onClose}) {
   );
 }
 
-export default function PartyScene({ onNavigate }) {
+export default function PartyScene({ onNavigate, characters }) {
   const [hovered, setHovered] = useState(null);
   const [selected, setSelected] = useState(null);
   const [detail, setDetail] = useState(null);
 
   const activeId = hovered || selected;
-  const activeChar = CHARS.find(c=>c.id===activeId) || null;
-  const joined = CHARS.filter(c=>c.joined);
-  const locked  = CHARS.filter(c=>!c.joined);
+  const ROLE_MAP = { attacker:'front', guardian:'front', commander:'rear', ranged:'ranged', support:'support' };
+  // 実データがあればそちらを使う。フィールドを正規化してCHARS互換にする
+  const rawChars = characters ?? CHARS;
+  const allChars = rawChars.map(c => ({
+    ...c,
+    role:    ROLE_MAP[c.role] ?? c.role ?? 'front',
+    atk:     c.atk  ?? c.charAttack ?? c.soldierAtk ?? 0,
+    def:     c.def  ?? c.charDefense ?? c.soldierDef ?? 0,
+    hp:      c.hp   ?? c.charHp ?? 100,
+    maxHp:   c.maxHp ?? c.charMaxHp ?? 100,
+    troops:  c.troops ?? c.soldiers ?? 0,
+    joined:  c.joined ?? (c.status === 'active'),
+    portrait: c.portrait ?? null,
+  }));
+  const joined = allChars.filter(c=>c.joined);
+  const locked  = allChars.filter(c=>!c.joined);
+  const activeChar = allChars.find(c=>c.id===activeId) || null;
 
   const handleNameClick = useCallback((char)=>{
     if(!char.joined) return;
@@ -312,7 +326,7 @@ export default function PartyScene({ onNavigate }) {
             display:'flex', alignItems:'center', gap:6}}>
             <div style={{width:6, height:6, borderRadius:'50%', background:TEAL}}/>
             <span style={{fontFamily:"'Zen Maru Gothic'", fontSize:11, fontWeight:900, color:TX}}>
-              仲間 {joined.length}/{CHARS.length}
+              仲間 {joined.length}/{allChars.length}
             </span>
           </div>
         }
