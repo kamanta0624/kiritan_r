@@ -1,0 +1,3458 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>kiritan — Map</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Zen+Maru+Gothic:wght@700;900&family=Rajdhani:wght@500;600;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;overflow:hidden;background:#111;}
+#root{width:100vw;height:100vh;}
+
+@keyframes fadeIn    {from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)}}
+@keyframes popIn     {0%{opacity:0;transform:scale(.91)} 60%{transform:scale(1.04)} 100%{opacity:1;transform:scale(1)}}
+@keyframes slideUp   {from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)}}
+@keyframes pulse     {0%,100%{opacity:1} 50%{opacity:.5}}
+@keyframes areaNameShow {
+  0%   {opacity:0; letter-spacing:.4em;}
+  20%  {opacity:1; letter-spacing:.18em;}
+  70%  {opacity:1; letter-spacing:.18em;}
+  100% {opacity:0; letter-spacing:.22em;}
+}
+@keyframes fadeUp    {from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes scaleIn   {0%{opacity:0;transform:scale(.94)}60%{transform:scale(1.02)}100%{opacity:1;transform:scale(1)}}
+@keyframes portraitRise{from{opacity:0;transform:translateY(28px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes detailIn  {0%{opacity:0;transform:scale(.97) translateY(8px)}60%{transform:scale(1.01)}100%{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes shimmer   {from{background-position:200% 0}to{background-position:-200% 0}}
+
+/* Scene transition */
+@keyframes sceneFadeIn  {from{opacity:0} to{opacity:1}}
+@keyframes sceneFadeOut {from{opacity:1} to{opacity:0}}
+
+.scene-enter { animation: sceneFadeIn .22s ease both; }
+
+.fade-in  {animation:fadeIn .22s ease both;}
+.pop-in   {animation:popIn .22s ease both;}
+.slide-up {animation:slideUp .22s ease both;}
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SHARED DATA & TOKENS
+═══════════════════════════════════════════════════════ -->
+<script type="text/babel" id="shared-data">
+// ── Design tokens ──────────────────────────────────────────
+const PK='#c4427a', PK2='#9e2d5f';
+const AC='#b87010', AC2='#d4a044';
+const TEAL='#1a8a96';
+const TX='#1c1020', TXD='rgba(28,16,32,.55)', TXF='rgba(28,16,32,.24)';
+const BR='rgba(0,0,0,.08)';
+
+const glass = (extra={}) => ({
+  background:'rgba(255,253,251,.92)',
+  backdropFilter:'blur(16px)', WebkitBackdropFilter:'blur(16px)',
+  border:'1px solid rgba(255,255,255,.8)',
+  boxShadow:'0 2px 18px rgba(0,0,0,.13)',
+  ...extra,
+});
+
+// ── Game state (shared across scenes) ────────────────────
+const GAME_STATE = {
+  turn: 1,
+  meme: 500,
+  income: 600,
+  bases: '11/92',
+  round: '1 / 5',
+};
+
+// ── Character data ────────────────────────────────────────
+const ROLES = {
+  front:  {label:'前衛', color:PK,        bg:'rgba(196,66,122,.12)'},
+  ranged: {label:'間接', color:TEAL,      bg:'rgba(26,138,150,.12)'},
+  rear:   {label:'後衛', color:AC,        bg:'rgba(184,112,16,.12)'},
+  support:{label:'支援', color:'#6a55b0', bg:'rgba(106,85,176,.12)'},
+};
+
+const CHARS = [
+  {id:'c1', name:'東北きりたん', kana:'とうほく きりたん', portrait:'assets/portrait_kiritan.png',
+   role:'front', atk:6, def:4, meme:620, memeMax:800, spd:7,
+   origin:'東北', skill:'連続攻撃', skillDesc:'同ターンに2回攻撃できる',
+   status:'active', joined:true, quote:'みんなのために戦います！'},
+  {id:'c2', name:'音街ウナ', kana:'おとまち うな', portrait:'assets/portrait_una.png',
+   role:'ranged', atk:3, def:3, meme:5000, memeMax:5000, spd:5,
+   origin:'東北', skill:'超波動', skillDesc:'広範囲の敵のミームを大幅に削る',
+   status:'active', joined:true, quote:'音楽で世界を変えるよ！'},
+  {id:'c3', name:'彩澄しゅお', kana:'あやすみ しゅお', portrait:'assets/portrait_shuo.png',
+   role:'ranged', atk:4, def:3, meme:320, memeMax:400, spd:6,
+   origin:'東北', skill:'精密射撃', skillDesc:'敵単体に確実にダメージを与える',
+   status:'active', joined:true, quote:'狙った標的は外さない。'},
+  {id:'c4', name:'ずんだもん', kana:'ずんだもん', portrait:'assets/portrait_zundamon.png',
+   role:'rear', atk:4, def:9, meme:400, memeMax:400, spd:4,
+   origin:'東北', skill:'ずんだの守り', skillDesc:'味方全体の防御を1ターン強化',
+   status:'active', joined:true, quote:'なのだ！絶対に守るのだ！'},
+  {id:'c5', name:'北海道めろん', kana:'ほっかいどう めろん', portrait:'assets/portrait_meron.png',
+   role:'front', atk:10, def:8, meme:500, memeMax:500, spd:8,
+   origin:'北海道', skill:'大地の咆哮', skillDesc:'前列全体に強力なダメージ',
+   status:'active', joined:true, quote:'北の大地の力、見せてやる。'},
+  {id:'c6', name:'ベルン', kana:'べるん', portrait:'assets/portrait_bern_fog.png',
+   role:'rear', atk:8, def:10, meme:518, memeMax:518, spd:3,
+   origin:'北海道', skill:'霧の障壁', skillDesc:'味方全体にシールドを展開',
+   status:'active', joined:true, quote:'……守ります。'},
+  {id:'c7', name:'沖縄あわも', kana:'おきなわ あわも', portrait:'assets/portrait_awamo.png',
+   role:'front', atk:10, def:8, meme:500, memeMax:500, spd:9,
+   origin:'沖縄', skill:'南風一閃', skillDesc:'単体に素早く2連撃',
+   status:'active', joined:true, quote:'太陽みたいに突っ込むよ！'},
+  {id:'c8',  name:'伊達かがみ', kana:'だて かがみ', portrait:null,
+   role:'support', atk:3, def:5, meme:0, memeMax:300, spd:6,
+   origin:'東北', skill:'策士の眼', skillDesc:'???', joined:false, quote:''},
+  {id:'c9',  name:'花巻ほのか', kana:'はなまき ほのか', portrait:null,
+   role:'rear', atk:5, def:7, meme:0, memeMax:350, spd:4,
+   origin:'東北', skill:'???', skillDesc:'???', joined:false, quote:''},
+  {id:'c10', name:'山形さくら', kana:'やまがた さくら', portrait:null,
+   role:'ranged', atk:6, def:4, meme:0, memeMax:280, spd:7,
+   origin:'東北', skill:'???', skillDesc:'???', joined:false, quote:''},
+  {id:'c11', name:'函館みなみ', kana:'はこだて みなみ', portrait:null,
+   role:'support', atk:2, def:6, meme:0, memeMax:260, spd:5,
+   origin:'北海道', skill:'???', skillDesc:'???', joined:false, quote:''},
+  {id:'c12', name:'釧路そら', kana:'くしろ そら', portrait:null,
+   role:'ranged', atk:5, def:3, meme:0, memeMax:320, spd:8,
+   origin:'北海道', skill:'???', skillDesc:'???', joined:false, quote:''},
+  {id:'c13', name:'旭川ゆき', kana:'あさひかわ ゆき', portrait:null,
+   role:'front', atk:7, def:6, meme:0, memeMax:400, spd:6,
+   origin:'北海道', skill:'???', skillDesc:'???', joined:false, quote:''},
+  {id:'c14', name:'帯広ひかり', kana:'おびひろ ひかり', portrait:null,
+   role:'rear', atk:4, def:8, meme:0, memeMax:380, spd:3,
+   origin:'北海道', skill:'???', skillDesc:'???', joined:false, quote:''},
+  {id:'c15', name:'会津あおい', kana:'あいず あおい', portrait:null,
+   role:'support', atk:3, def:5, meme:0, memeMax:290, spd:6,
+   origin:'東北', skill:'???', skillDesc:'???', joined:false, quote:''},
+];
+
+// export to window
+Object.assign(window, {
+  PK, PK2, AC, AC2, TEAL, TX, TXD, TXF, BR,
+  glass, GAME_STATE, ROLES, CHARS,
+});
+</script>
+
+<!-- ═══════════════════════════════════════════════════════
+     SHARED UI COMPONENTS
+═══════════════════════════════════════════════════════ -->
+<script type="text/babel" id="shared-ui">
+const {useState, useEffect, useRef, useCallback, useMemo} = React;
+
+function fmtN(n){ return n >= 1000 ? n.toLocaleString() : String(n); }
+
+// ── Common Top Bar ─────────────────────────────────────────
+function TopBar({ scene, areaName, currentArea, breadcrumb, rightSlot }) {
+  return (
+    <div style={{
+      ...glass({borderRadius:0, border:'none', borderBottom:`1px solid ${BR}`,
+        background:'rgba(255,253,251,.97)'}),
+      position:'absolute', top:0, left:0, right:0, height:52,
+      display:'flex', alignItems:'center', padding:'0 16px', gap:0, zIndex:10,
+    }}>
+      <img src="assets/logo_tohoku.png" alt="東北家"
+        style={{height:28, objectFit:'contain', marginRight:12}}/>
+      <div style={{width:1, height:'55%', background:BR, marginRight:12}}/>
+
+      {breadcrumb && (
+        <div style={{display:'flex', alignItems:'center', gap:6}}>
+          {breadcrumb.map((item, i) => (
+            <React.Fragment key={i}>
+              {i > 0 && <span style={{fontSize:11, color:TXF}}>›</span>}
+              <span style={{
+                fontSize:11,
+                color: i === breadcrumb.length - 1 ? TX : TXD,
+                fontFamily:"'Noto Sans JP'",
+                fontWeight: i === breadcrumb.length - 1 ? 700 : 400,
+              }}>{item}</span>
+            </React.Fragment>
+          ))}
+        </div>
+      )}
+
+      {!breadcrumb && (
+        <>
+          {[
+            {label:'ターン', val: String(GAME_STATE.turn), c:TX},
+            {label:'ミーム', val: String(GAME_STATE.meme), c:PK},
+            {label:'収入',   val:`+${GAME_STATE.income}/T`, c:AC},
+            {label:'拠点',   val: GAME_STATE.bases, c:TX},
+          ].map((item,i) => (
+            <div key={i} style={{display:'flex', alignItems:'center', gap:4,
+              padding:'0 11px', borderRight:`1px solid ${BR}`, height:'100%'}}>
+              <span style={{fontSize:10, color:TXD, whiteSpace:'nowrap'}}>{item.label}</span>
+              <span style={{fontFamily:'Rajdhani', fontWeight:700, fontSize:15,
+                color:item.c, whiteSpace:'nowrap'}}>{item.val}</span>
+            </div>
+          ))}
+          <div style={{marginLeft:'auto', paddingLeft:12, fontFamily:'Rajdhani',
+            fontSize:15, fontWeight:700, letterSpacing:1, color:TX,
+            whiteSpace:'nowrap', flexShrink:0}}>
+            ROUND {GAME_STATE.round}
+          </div>
+        </>
+      )}
+
+      {rightSlot && (
+        <div style={{marginLeft: breadcrumb ? 'auto' : 16}}>
+          {rightSlot}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Common Bottom Bar ──────────────────────────────────────
+function BottomBar({ scene, onNavigate, extraLeft, extraRight }) {
+  const isMap = scene === 'map';
+  const isParty = scene === 'party';
+
+  return (
+    <div style={{
+      ...glass({borderRadius:0, border:'none', borderTop:`1px solid ${BR}`,
+        background:'rgba(255,253,251,.97)'}),
+      position:'absolute', bottom:0, left:0, right:0, height:52,
+      display:'flex', alignItems:'center', padding:'0 16px', gap:10, zIndex:10,
+    }}>
+
+      {/* ── Map scene buttons ── */}
+      {isMap && (
+        <>
+          <button style={{display:'flex', alignItems:'center', gap:6, padding:'8px 16px',
+            borderRadius:20, background:'rgba(0,0,0,.05)', border:`1px solid ${BR}`,
+            color:TXD, cursor:'pointer', fontSize:12, fontFamily:"'Noto Sans JP'",
+            whiteSpace:'nowrap'}}>
+            ≡ メニュー
+          </button>
+          {['建設','アイテム'].map(l => (
+            <button key={l} style={{padding:'7px 14px', borderRadius:20,
+              background:'rgba(0,0,0,.04)', border:`1px solid ${BR}`,
+              color:TXD, cursor:'pointer', fontSize:12,
+              fontFamily:"'Noto Sans JP'", whiteSpace:'nowrap'}}>
+              {l}
+            </button>
+          ))}
+          <NavButton label="仲間" onClick={() => onNavigate('party')}
+            activeColor={TEAL} activeBg='rgba(26,138,150,.12)'/>
+          <NavButton label="🎬 ADVテスト" onClick={() => onNavigate('adv')}
+            activeColor={PK} activeBg='rgba(196,66,122,.12)'/>
+          <div style={{flex:1}}/>
+          <button
+            onClick={() => onNavigate('turnEnd')}
+            style={{
+              padding:'9px 22px', borderRadius:20,
+              background:`linear-gradient(135deg,${PK},${PK2})`,
+              border:'none', color:'#fff', cursor:'pointer',
+              fontFamily:"'Noto Sans JP'", fontSize:13, fontWeight:700,
+              boxShadow:`0 2px 16px rgba(196,66,122,.4)`, whiteSpace:'nowrap',
+            }}>ターン終了 →</button>
+        </>
+      )}
+
+      {/* ── Party scene buttons ── */}
+      {isParty && (
+        <>
+          <NavButton
+            label="← マップに戻る"
+            onClick={() => onNavigate('map')}
+            activeColor={TEAL}
+            activeBg='rgba(26,138,150,.1)'
+          />
+          <div style={{flex:1}}/>
+          <div style={{fontSize:10, color:TXF, fontFamily:"'Noto Sans JP'"}}>
+            編成済み：{CHARS.filter(c=>c.joined).length} 人
+          </div>
+        </>
+      )}
+
+      {extraLeft}
+      {extraRight}
+    </div>
+  );
+}
+
+// ── Nav button helper ──────────────────────────────────────
+function NavButton({ label, onClick, activeColor, activeBg }) {
+  const [hov, setHov] = React.useState(false);
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        padding:'7px 14px', borderRadius:20,
+        background: hov ? activeBg : 'rgba(0,0,0,.04)',
+        border:`1px solid ${hov ? activeColor+'44' : BR}`,
+        color: hov ? activeColor : TXD,
+        cursor:'pointer', fontSize:12,
+        fontFamily:"'Noto Sans JP'", whiteSpace:'nowrap',
+        transition:'all .15s',
+      }}>
+      {label}
+    </button>
+  );
+}
+
+Object.assign(window, { TopBar, BottomBar, NavButton, fmtN });
+</script>
+
+<!-- ═══════════════════════════════════════════════════════
+     MAP SCENE
+═══════════════════════════════════════════════════════ -->
+<script type="text/babel" id="map-scene">
+// ── Map constants ──────────────────────────────────────────
+const MAP_W = 2800, MAP_H = 1600, BOUNDARY_X = 1400;
+
+const OWN = {
+  player:  {c:TEAL,      fill:'rgba(26,138,150,.18)',  label:'自拠点'},
+  enemy:   {c:PK,        fill:'rgba(196,66,122,.18)',  label:'敵拠点'},
+  ally:    {c:'#2a9a58', fill:'rgba(42,154,88,.18)',   label:'友軍'},
+  neutral: {c:'#8a8e96', fill:'rgba(138,142,150,.18)', label:'中立'},
+};
+
+const NODES = [
+  {id:'n1', name:'仙台',     px:1900, py:680,  type:'city',    owner:'player', troops:600, income:200, canAttack:false},
+  {id:'n2', name:'福島',     px:2060, py:890,  type:'town',    owner:'enemy',  troops:150, income:76,  canAttack:true},
+  {id:'n3', name:'郡山',     px:2280, py:620,  type:'town',    owner:'enemy',  troops:200, income:90,  canAttack:true},
+  {id:'n4', name:'会津若松', px:1700, py:480,  type:'village', owner:'ally',   troops:100, income:60},
+  {id:'n5', name:'白河',     px:2400, py:990,  type:'fort',    owner:'enemy',  troops:180, income:80},
+  {id:'n6', name:'いわき',   px:2570, py:660,  type:'fort',    owner:'enemy',  troops:220, income:100},
+  {id:'n7', name:'山形',     px:1640, py:340,  type:'village', owner:'ally',   troops:80,  income:70},
+  {id:'n8', name:'宇都宮',   px:2500, py:1140, type:'city',    owner:'enemy',  troops:300, income:110},
+  {id:'n9',  name:'札幌',   px:680,  py:700,  type:'city',    owner:'enemy',  troops:500, income:180},
+  {id:'n10', name:'函館',   px:880,  py:1080, type:'town',    owner:'enemy',  troops:160, income:80},
+  {id:'n11', name:'旭川',   px:520,  py:400,  type:'village', owner:'neutral',troops:60,  income:50},
+  {id:'n12', name:'帯広',   px:980,  py:580,  type:'fort',    owner:'enemy',  troops:140, income:70},
+  {id:'n13', name:'釧路',   px:1180, py:790,  type:'village', owner:'enemy',  troops:100, income:60},
+];
+const EDGES = [
+  ['n1','n2'],['n1','n4'],['n2','n3'],['n2','n5'],['n3','n6'],
+  ['n4','n7'],['n5','n8'],['n3','n5'],['n1','n7'],['n1','n3'],
+  ['n9','n10'],['n9','n11'],['n9','n12'],['n10','n13'],['n12','n13'],['n11','n12'],
+];
+
+// ── Background SVGs ────────────────────────────────────────
+function TohokuBg({w, h}) {
+  return (
+    <svg width={w} height={h} style={{display:'block'}}>
+      <defs>
+        <linearGradient id="tBg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#c4d9c0"/>
+          <stop offset="60%" stopColor="#b2c9b8"/>
+          <stop offset="100%" stopColor="#a8bfc0"/>
+        </linearGradient>
+        <radialGradient id="tVig" cx="50%" cy="50%" r="70%">
+          <stop offset="20%" stopColor="transparent"/>
+          <stop offset="100%" stopColor="rgba(80,110,95,.5)"/>
+        </radialGradient>
+      </defs>
+      <rect width={w} height={h} fill="url(#tBg)"/>
+      <ellipse cx={w*.22} cy={h*.38} rx={w*.18} ry={h*.22} fill="rgba(145,180,130,.5)"/>
+      <ellipse cx={w*.55} cy={h*.3}  rx={w*.2}  ry={h*.18} fill="rgba(150,185,135,.45)"/>
+      <ellipse cx={w*.7}  cy={h*.65} rx={w*.15} ry={h*.2}  fill="rgba(140,175,125,.4)"/>
+      <ellipse cx={w*.35} cy={h*.7}  rx={w*.18} ry={h*.16} fill="rgba(148,183,133,.42)"/>
+      <ellipse cx={w*.22} cy={h*.38} rx={w*.14} ry={h*.17} fill="none" stroke="rgba(255,255,255,.3)" strokeWidth="1"/>
+      <ellipse cx={w*.55} cy={h*.3}  rx={w*.15} ry={h*.13} fill="none" stroke="rgba(255,255,255,.25)" strokeWidth="1"/>
+      <path d={`M${w*.28},${h*.12} Q${w*.26},${h*.4} ${w*.3},${h*.75}`} fill="none" stroke="rgba(100,155,195,.6)" strokeWidth="2.5"/>
+      <path d={`M${w*.58},${h*.35} Q${w*.56},${h*.55} ${w*.6},${h*.72}`} fill="none" stroke="rgba(100,155,195,.45)" strokeWidth="1.8"/>
+      {Array.from({length:10}).map((_,i)=>(
+        <line key={`gh${i}`} x1={0} y1={(i+1)*h/10} x2={w} y2={(i+1)*h/10} stroke="rgba(255,255,255,.1)" strokeWidth=".5"/>
+      ))}
+      {Array.from({length:14}).map((_,i)=>(
+        <line key={`gv${i}`} x1={(i+1)*w/14} y1={0} x2={(i+1)*w/14} y2={h} stroke="rgba(255,255,255,.1)" strokeWidth=".5"/>
+      ))}
+      <rect width={w} height={h} fill="url(#tVig)" opacity=".35"/>
+    </svg>
+  );
+}
+
+function HokkaidoBg({w, h}) {
+  return (
+    <svg width={w} height={h} style={{display:'block'}}>
+      <defs>
+        <linearGradient id="hBg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#cddde8"/>
+          <stop offset="60%" stopColor="#bfd0e0"/>
+          <stop offset="100%" stopColor="#b8ccd8"/>
+        </linearGradient>
+        <radialGradient id="hVig" cx="50%" cy="50%" r="70%">
+          <stop offset="20%" stopColor="transparent"/>
+          <stop offset="100%" stopColor="rgba(70,100,130,.45)"/>
+        </radialGradient>
+      </defs>
+      <rect width={w} height={h} fill="url(#hBg)"/>
+      <ellipse cx={w*.3}  cy={h*.4}  rx={w*.2}  ry={h*.24} fill="rgba(200,215,205,.6)"/>
+      <ellipse cx={w*.65} cy={h*.35} rx={w*.18} ry={h*.2}  fill="rgba(205,220,210,.55)"/>
+      <ellipse cx={w*.5}  cy={h*.72} rx={w*.22} ry={h*.18} fill="rgba(198,214,203,.5)"/>
+      <ellipse cx={w*.15} cy={h*.6}  rx={w*.12} ry={h*.16} fill="rgba(202,218,207,.45)"/>
+      <ellipse cx={w*.3}  cy={h*.4}  rx={w*.1}  ry={h*.1}  fill="rgba(240,245,240,.3)"/>
+      <ellipse cx={w*.65} cy={h*.35} rx={w*.08} ry={h*.09} fill="rgba(240,245,242,.25)"/>
+      <path d={`M${w*.42},${h*.1} Q${w*.4},${h*.35} ${w*.38},${h*.65}`} fill="none" stroke="rgba(130,175,210,.65)" strokeWidth="2.5"/>
+      <path d={`M${w*.72},${h*.28} Q${w*.7},${h*.5} ${w*.68},${h*.7}`}  fill="none" stroke="rgba(130,175,210,.5)"  strokeWidth="1.8"/>
+      <ellipse cx={w*.88} cy={h*.15} rx={w*.15} ry={h*.14} fill="rgba(170,195,218,.35)"/>
+      {Array.from({length:10}).map((_,i)=>(
+        <line key={`gh${i}`} x1={0} y1={(i+1)*h/10} x2={w} y2={(i+1)*h/10} stroke="rgba(255,255,255,.12)" strokeWidth=".5"/>
+      ))}
+      {Array.from({length:14}).map((_,i)=>(
+        <line key={`gv${i}`} x1={(i+1)*w/14} y1={0} x2={(i+1)*w/14} y2={h} stroke="rgba(255,255,255,.12)" strokeWidth=".5"/>
+      ))}
+      <rect width={w} height={h} fill="url(#hVig)" opacity=".35"/>
+    </svg>
+  );
+}
+
+// ── Node shape ─────────────────────────────────────────────
+function NodeShape({type, color, selected, canAttack}) {
+  const shadow = 'rgba(0,0,0,.25)';
+  switch(type) {
+    case 'city': return (
+      <g>
+        <filter id="cityGlow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <path d="M-13,4 L-13,-5 L-9,-5 L-9,-11 L-5,-11 L-5,-5 L-1,-5 L-1,-11 L3,-11 L3,-5 L7,-5 L7,-11 L11,-11 L11,-5 L14,-5 L14,10 L-13,10 Z" fill={shadow} transform="translate(1,2)"/>
+        <path d="M-13,4 L-13,-5 L-9,-5 L-9,-11 L-5,-11 L-5,-5 L-1,-5 L-1,-11 L3,-11 L3,-5 L7,-5 L7,-11 L11,-11 L11,-5 L14,-5 L14,10 L-13,10 Z"
+          fill="rgba(255,255,255,.9)" stroke={color} strokeWidth={selected?2.5:1.8} filter={canAttack?"url(#cityGlow)":undefined}/>
+        <path d="M-13,4 L-13,-5 L-9,-5 L-9,-11 L-5,-11 L-5,-5 L-1,-5 L-1,-11 L3,-11 L3,-5 L7,-5 L7,-11 L11,-11 L11,-5 L14,-5 L14,10 L-13,10 Z" fill={color} opacity=".18"/>
+        <rect x={-3} y={3} width={7} height={7} rx={1} fill={color} opacity=".5"/>
+        <circle cx={0.5} cy={-1} r={3} fill={color} opacity=".7"/>
+      </g>
+    );
+    case 'town': return (
+      <g>
+        <path d="M0,-12 L11,0 L11,9 L-11,9 L-11,0 Z" fill={shadow} transform="translate(1,2)"/>
+        <path d="M0,-12 L11,0 L11,9 L-11,9 L-11,0 Z" fill="rgba(255,255,255,.9)" stroke={color} strokeWidth={selected?2.5:1.8}/>
+        <path d="M0,-12 L11,0 L11,9 L-11,9 L-11,0 Z" fill={color} opacity=".18"/>
+        <rect x={-4} y={1} width={4} height={5} rx={1} fill={color} opacity=".5"/>
+        <rect x={2}  y={1} width={4} height={5} rx={1} fill={color} opacity=".5"/>
+        <line x1={0} y1={-12} x2={0} y2={0} stroke={color} strokeWidth={1} opacity=".5"/>
+      </g>
+    );
+    case 'village': return (
+      <g>
+        <circle cx={1} cy={2} r={9} fill={shadow}/>
+        <circle cx={0} cy={0} r={9} fill="rgba(255,255,255,.9)" stroke={color} strokeWidth={selected?2.5:1.8}/>
+        <circle cx={0} cy={0} r={9} fill={color} opacity=".18"/>
+        <line x1={0} y1={-5} x2={0} y2={5} stroke={color} strokeWidth={1.5} opacity=".7"/>
+        <line x1={-5} y1={0} x2={5} y2={0} stroke={color} strokeWidth={1.5} opacity=".7"/>
+      </g>
+    );
+    case 'fort': return (
+      <g>
+        <path d="M0,-12 L10,0 L0,12 L-10,0 Z" fill={shadow} transform="translate(1,2)"/>
+        <path d="M0,-12 L10,0 L0,12 L-10,0 Z" fill="rgba(255,255,255,.9)" stroke={color} strokeWidth={selected?2.5:1.8}/>
+        <path d="M0,-12 L10,0 L0,12 L-10,0 Z" fill={color} opacity=".18"/>
+        <path d="M0,-6 L5,0 L0,6 L-5,0 Z" fill={color} opacity=".35"/>
+        <circle cx={0} cy={-12} r={2} fill={color} opacity=".6"/>
+        <circle cx={10} cy={0} r={2} fill={color} opacity=".6"/>
+        <circle cx={0} cy={12} r={2} fill={color} opacity=".6"/>
+        <circle cx={-10} cy={0} r={2} fill={color} opacity=".6"/>
+      </g>
+    );
+    default: return <circle r={9} fill={color}/>;
+  }
+}
+
+// ── Map SVG ────────────────────────────────────────────────
+function MapLayer({selNode, onNodeClick}) {
+  return (
+    <svg width={MAP_W} height={MAP_H}
+      style={{position:'absolute', top:0, left:0, overflow:'visible', display:'block'}}>
+      <line x1={BOUNDARY_X} y1={0} x2={BOUNDARY_X} y2={MAP_H}
+        stroke="rgba(255,255,255,.2)" strokeWidth="2" strokeDasharray="8 10"/>
+      {EDGES.map(([a,b],i)=>{
+        const na=NODES.find(n=>n.id===a), nb=NODES.find(n=>n.id===b);
+        if(!na||!nb) return null;
+        return (
+          <g key={i}>
+            <line x1={na.px} y1={na.py} x2={nb.px} y2={nb.py} stroke="rgba(255,255,255,.5)" strokeWidth="2.5"/>
+            <line x1={na.px} y1={na.py} x2={nb.px} y2={nb.py} stroke="rgba(0,0,0,.1)" strokeWidth="1.2"/>
+          </g>
+        );
+      })}
+      {NODES.map(n=>{
+        const ow=OWN[n.owner]||OWN.neutral, sel=selNode?.id===n.id;
+        return (
+          <g key={n.id} transform={`translate(${n.px},${n.py})`}
+            style={{cursor:'pointer'}} onClick={()=>onNodeClick(n)}>
+            {sel && <circle r={22} fill={ow.fill} stroke={ow.c} strokeWidth="1.5" opacity=".8"/>}
+            {n.canAttack && !sel && (
+              <circle r={20} fill="none" stroke={PK} strokeWidth="1.5" opacity=".6"
+                style={{animation:'pulse 1.3s ease-in-out infinite'}}/>
+            )}
+            <NodeShape type={n.type} color={ow.c} selected={sel} canAttack={n.canAttack}/>
+            <g transform="translate(0,20)">
+              <rect x={-30} y={-1} width={60} height={16} rx={4}
+                fill="rgba(255,253,251,.9)" stroke={ow.c} strokeWidth=".8"/>
+              <text x={0} y={11} textAnchor="middle"
+                style={{fontSize:9, fontFamily:'Noto Sans JP',
+                  fontWeight:sel||n.canAttack?700:500,
+                  fill:n.canAttack?PK:TX}}>
+                {n.name}
+              </text>
+            </g>
+            <g transform="translate(16,-16)">
+              <rect x={-10} y={-7} width={20} height={12} rx={3} fill={ow.c}/>
+              <text x={0} y={2} textAnchor="middle"
+                style={{fontSize:7, fontFamily:'Noto Sans JP', fontWeight:700, fill:'#fff'}}>
+                {n.type==='city'?'都市':n.type==='town'?'街':n.type==='village'?'村':'砦'}
+              </text>
+            </g>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+// ── Area name overlay ──────────────────────────────────────
+function AreaNameOverlay({areaName, triggerKey}) {
+  const [visible, setVisible] = React.useState(false);
+  const timerRef = React.useRef(null);
+  React.useEffect(()=>{
+    if(!areaName) return;
+    setVisible(true);
+    if(timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(()=>setVisible(false), 2400);
+    return()=>clearTimeout(timerRef.current);
+  },[triggerKey]);
+  if(!visible || !areaName) return null;
+  const isHokkaido = areaName==='北海道';
+  return (
+    <div style={{position:'absolute', top:24, right:24, pointerEvents:'none', zIndex:30,
+      display:'flex', flexDirection:'column', alignItems:'flex-end',
+      animation:'areaNameShow 2.4s ease forwards'}}>
+      <div style={{width:40, height:1.5, background:isHokkaido?'rgba(180,205,228,.9)':'rgba(160,195,155,.9)', marginBottom:6}}/>
+      <div style={{fontFamily:"'Zen Maru Gothic'", fontSize:36, fontWeight:900,
+        letterSpacing:'.18em', color:'rgba(255,255,255,.95)',
+        textShadow:'0 2px 20px rgba(0,0,0,.5), 0 0 40px rgba(0,0,0,.3)', lineHeight:1}}>
+        {areaName}
+      </div>
+      <div style={{fontFamily:'Rajdhani', fontSize:12, fontWeight:600, letterSpacing:'.28em',
+        color:'rgba(255,255,255,.65)', textTransform:'uppercase', marginTop:4}}>
+        {isHokkaido?'HOKKAIDO':'TOHOKU'}
+      </div>
+      <div style={{width:40, height:1.5, background:isHokkaido?'rgba(180,205,228,.9)':'rgba(160,195,155,.9)', marginTop:6}}/>
+    </div>
+  );
+}
+
+// ── Node popup ─────────────────────────────────────────────
+function NodePopup({node, onClose, onAttack}) {
+  const ow = OWN[node.owner] || OWN.neutral;
+  const typeLabel = {city:'都市',town:'街',village:'村',fort:'砦'}[node.type]||node.type;
+  return (
+    <div className="pop-in" style={{
+      ...glass({borderRadius:10, padding:'13px 14px 12px',
+        border:`1.5px solid ${ow.c}66`,
+        boxShadow:`0 0 0 1px ${ow.c}22, 0 6px 28px rgba(0,0,0,.2)`,
+        minWidth:195}),
+      position:'relative',
+    }}>
+      <button onClick={onClose} style={{position:'absolute', top:8, right:8,
+        background:'transparent', border:'none', color:TXD, cursor:'pointer', fontSize:14, lineHeight:1}}>✕</button>
+      <div style={{display:'flex', alignItems:'center', gap:7, marginBottom:10}}>
+        <div style={{width:9, height:9, borderRadius:'50%', background:ow.c, flexShrink:0}}/>
+        <div style={{fontFamily:"'Zen Maru Gothic'", fontSize:16, fontWeight:900, color:TX}}>{node.name}</div>
+        <span style={{marginLeft:'auto', fontSize:8, padding:'2px 6px', borderRadius:10, fontWeight:700,
+          background:`${ow.c}22`, color:ow.c, border:`1px solid ${ow.c}44`}}>{typeLabel}</span>
+      </div>
+      <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:5,
+        marginBottom:node.canAttack?10:0}}>
+        {[
+          ['収入', `${node.income} M/T`, AC2],
+          ['防御部隊', `${fmtN(node.troops)} 兵`, TXD],
+          ['勢力', ow.label, ow.c],
+          ['種別', typeLabel, TX],
+        ].map(([k,v,c])=>(
+          <div key={k} style={{background:'rgba(0,0,0,.04)', borderRadius:6, padding:'5px 7px'}}>
+            <div style={{fontSize:8, color:TXD, marginBottom:1}}>{k}</div>
+            <div style={{fontFamily:'Rajdhani', fontSize:12, fontWeight:700, color:c||TX}}>{v}</div>
+          </div>
+        ))}
+      </div>
+      {node.canAttack && (
+        <button
+          onClick={() => { onClose(); onAttack(node); }}
+          style={{
+            width:'100%', padding:'9px', borderRadius:7, marginTop:10,
+            background:`linear-gradient(135deg,${PK},${PK2})`,
+            border:'none', color:'#fff', cursor:'pointer',
+            fontFamily:"'Noto Sans JP'", fontSize:12, fontWeight:700,
+            boxShadow:`0 3px 14px rgba(196,66,122,.45)`,
+          }}>⚔ 攻撃する</button>
+      )}
+    </div>
+  );
+}
+
+// ── Mini-map ───────────────────────────────────────────────
+function MiniMap({offsetX, offsetY, vpW, vpH}) {
+  const mmW=140, mmH=80;
+  const scaleX=mmW/MAP_W, scaleY=mmH/MAP_H;
+  return (
+    <div style={{...glass({borderRadius:8, padding:0, border:'1px solid rgba(255,255,255,.7)',
+      overflow:'hidden', boxShadow:'0 2px 12px rgba(0,0,0,.2)'}),
+      position:'absolute', bottom:16, right:16, zIndex:20}}>
+      <svg width={mmW} height={mmH}>
+        <rect x={0}     y={0} width={mmW/2} height={mmH} fill="rgba(190,210,225,.6)"/>
+        <rect x={mmW/2} y={0} width={mmW/2} height={mmH} fill="rgba(175,200,170,.6)"/>
+        <line x1={mmW/2} y1={0} x2={mmW/2} y2={mmH} stroke="rgba(255,255,255,.4)" strokeWidth="1"/>
+        {NODES.map(n=>{
+          const ow=OWN[n.owner]||OWN.neutral;
+          return <circle key={n.id} cx={n.px*scaleX} cy={n.py*scaleY} r={2.5} fill={ow.c} opacity=".8"/>;
+        })}
+        <rect x={offsetX*scaleX} y={offsetY*scaleY}
+          width={vpW*scaleX} height={vpH*scaleY}
+          fill="rgba(255,255,255,.15)" stroke="rgba(255,255,255,.7)" strokeWidth="1.2" rx={1}/>
+      </svg>
+      <div style={{position:'absolute', top:4, left:6,
+        fontSize:7, fontFamily:'Rajdhani', fontWeight:600, color:'rgba(255,255,255,.8)',
+        textShadow:'0 1px 4px rgba(0,0,0,.5)', letterSpacing:'.1em'}}>MINIMAP</div>
+    </div>
+  );
+}
+
+// ── Legend ─────────────────────────────────────────────────
+function Legend() {
+  return (
+    <div style={{...glass({borderRadius:8, padding:'8px 10px', boxShadow:'0 2px 12px rgba(0,0,0,.15)'}),
+      position:'absolute', top:16, left:16, zIndex:20, minWidth:110}}>
+      <div style={{fontSize:8, fontFamily:'Rajdhani', fontWeight:700, color:TXD, letterSpacing:'.12em', marginBottom:6}}>LEGEND</div>
+      {[{color:TEAL,label:'自拠点'},{color:PK,label:'敵拠点'},{color:'#2a9a58',label:'友軍'},{color:'#8a8e96',label:'中立'}].map(f=>(
+        <div key={f.label} style={{display:'flex', alignItems:'center', gap:5, marginBottom:3}}>
+          <div style={{width:8, height:8, borderRadius:'50%', background:f.color, flexShrink:0}}/>
+          <span style={{fontSize:9, color:TX}}>{f.label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── Map Scene ──────────────────────────────────────────────
+function MapScene({ onNavigate, onAttackNode }) {
+  const vpRef = React.useRef(null);
+  const [vpSize, setVpSize] = React.useState({w: window.innerWidth, h: window.innerHeight - 104});
+  const initOffsetX = Math.max(0, Math.min(1900 - window.innerWidth/2, MAP_W - window.innerWidth));
+  const initOffsetY = Math.max(0, Math.min(680  - (window.innerHeight-104)/2, MAP_H - (window.innerHeight-104)));
+  const [offset, setOffset] = React.useState({x: initOffsetX, y: initOffsetY});
+  const dragRef = React.useRef(null);
+
+  const currentArea = (offset.x + vpSize.w/2) < BOUNDARY_X ? 'hokkaido' : 'tohoku';
+  const AREA_NAMES = {hokkaido:'北海道', tohoku:'東北'};
+  const [areaNameInfo, setAreaNameInfo] = React.useState({name:AREA_NAMES[currentArea], key:0});
+  const prevAreaRef = React.useRef(currentArea);
+
+  React.useEffect(()=>{
+    if(prevAreaRef.current !== currentArea){
+      prevAreaRef.current = currentArea;
+      setAreaNameInfo(p=>({name:AREA_NAMES[currentArea], key:p.key+1}));
+    }
+  },[currentArea]);
+
+  React.useEffect(()=>{
+    const resize=()=>setVpSize({w:window.innerWidth, h:window.innerHeight-104});
+    window.addEventListener('resize', resize);
+    return()=>window.removeEventListener('resize', resize);
+  },[]);
+
+  const clamp = React.useCallback((ox,oy)=>({
+    x:Math.max(0,Math.min(ox,MAP_W-vpSize.w)),
+    y:Math.max(0,Math.min(oy,MAP_H-vpSize.h)),
+  }),[vpSize]);
+
+  const onPointerDown = React.useCallback(e=>{
+    e.preventDefault();
+    const cx=e.touches?e.touches[0].clientX:e.clientX;
+    const cy=e.touches?e.touches[0].clientY:e.clientY;
+    dragRef.current={startX:cx, startY:cy, offsetX:offset.x, offsetY:offset.y, moved:false};
+  },[offset]);
+
+  const onPointerMove = React.useCallback(e=>{
+    if(!dragRef.current) return;
+    const cx=e.touches?e.touches[0].clientX:e.clientX;
+    const cy=e.touches?e.touches[0].clientY:e.clientY;
+    const dx=cx-dragRef.current.startX, dy=cy-dragRef.current.startY;
+    if(Math.abs(dx)>3||Math.abs(dy)>3) dragRef.current.moved=true;
+    setOffset(clamp(dragRef.current.offsetX-dx, dragRef.current.offsetY-dy));
+  },[clamp]);
+
+  const onPointerUp = React.useCallback(()=>{ dragRef.current=null; },[]);
+
+  const [selNode, setSelNode] = React.useState(null);
+  const handleNodeClick = React.useCallback(n=>{
+    if(dragRef.current?.moved) return;
+    setSelNode(prev=>prev?.id===n.id?null:n);
+  },[]);
+
+  const getPopupPos = React.useCallback((n)=>{
+    const sx=n.px-offset.x, sy=n.py-offset.y;
+    const popW=210, popH=220;
+    let left=sx+24, top=Math.max(8,Math.min(sy-40,vpSize.h-popH-8));
+    if(left+popW>vpSize.w-8) left=sx-popW-24;
+    return {left, top};
+  },[offset, vpSize]);
+
+  const tohokuOpacity  = currentArea==='tohoku'  ? 1 : 0;
+  const hokkaidoOpacity = currentArea==='hokkaido' ? 1 : 0;
+
+  return (
+    <div className="scene-enter" style={{width:'100vw', height:'100vh',
+      fontFamily:"'Noto Sans JP',sans-serif", color:TX,
+      position:'relative', overflow:'hidden'}}>
+
+      {/* TOP BAR */}
+      <TopBar scene="map" currentArea={currentArea}
+        rightSlot={
+          <div style={{
+            padding:'4px 12px', borderRadius:20,
+            background:currentArea==='tohoku'?'rgba(160,195,155,.25)':'rgba(180,205,225,.25)',
+            border:`1px solid ${currentArea==='tohoku'?'rgba(145,185,135,.5)':'rgba(160,190,215,.5)'}`,
+            display:'flex', alignItems:'center', gap:6,
+            transition:'background .6s, border-color .6s',
+          }}>
+            <div style={{width:6, height:6, borderRadius:'50%',
+              background:currentArea==='tohoku'?'#2a9a58':'#4488bb',
+              transition:'background .6s'}}/>
+            <span style={{fontFamily:"'Zen Maru Gothic'", fontSize:11, fontWeight:900, color:TX}}>
+              {AREA_NAMES[currentArea]}
+            </span>
+          </div>
+        }
+      />
+
+      {/* MAP VIEWPORT */}
+      <div
+        ref={vpRef}
+        onMouseDown={onPointerDown} onMouseMove={onPointerMove}
+        onMouseUp={onPointerUp} onMouseLeave={onPointerUp}
+        onTouchStart={onPointerDown} onTouchMove={onPointerMove} onTouchEnd={onPointerUp}
+        style={{position:'absolute', top:52, left:0, right:0, bottom:52,
+          overflow:'hidden', cursor:'grab', userSelect:'none'}}>
+
+        {/* Backgrounds */}
+        <div style={{position:'absolute', inset:0, zIndex:0}}>
+          <div style={{position:'absolute', inset:0, opacity:tohokuOpacity, transition:'opacity .9s ease', pointerEvents:'none'}}>
+            <TohokuBg w={vpSize.w} h={vpSize.h}/>
+          </div>
+          <div style={{position:'absolute', inset:0, opacity:hokkaidoOpacity, transition:'opacity .9s ease', pointerEvents:'none'}}>
+            <HokkaidoBg w={vpSize.w} h={vpSize.h}/>
+          </div>
+        </div>
+
+        {/* Draggable map */}
+        <div style={{position:'absolute',
+          transform:`translate(${-offset.x}px,${-offset.y}px)`,
+          width:MAP_W, height:MAP_H, zIndex:1}}>
+          <MapLayer selNode={selNode} onNodeClick={handleNodeClick}/>
+        </div>
+
+        <AreaNameOverlay areaName={areaNameInfo.name} triggerKey={areaNameInfo.key}/>
+
+        {/* Node popup */}
+        {selNode && (()=>{
+          const pos = getPopupPos(selNode);
+          return (
+            <div style={{position:'absolute', zIndex:20, ...pos}}>
+              <NodePopup
+                node={selNode}
+                onClose={()=>setSelNode(null)}
+                onAttack={(node)=>{ onAttackNode(node); }}
+              />
+            </div>
+          );
+        })()}
+
+        <MiniMap offsetX={offset.x} offsetY={offset.y} vpW={vpSize.w} vpH={vpSize.h}/>
+        <Legend/>
+
+        {/* boundary glow */}
+        {(()=>{
+          const bx = BOUNDARY_X - offset.x;
+          if(bx < -40 || bx > vpSize.w + 40) return null;
+          return (
+            <div style={{position:'absolute', left:bx-20, top:0, bottom:0, width:40,
+              background:'linear-gradient(to right,transparent,rgba(255,255,255,.15),transparent)',
+              pointerEvents:'none', zIndex:2}}/>
+          );
+        })()}
+      </div>
+
+      {/* BOTTOM BAR */}
+      <BottomBar scene="map" onNavigate={onNavigate}/>
+    </div>
+  );
+}
+
+Object.assign(window, { MapScene });
+</script>
+
+<!-- ═══════════════════════════════════════════════════════
+     PARTY SCENE
+═══════════════════════════════════════════════════════ -->
+<script type="text/babel" id="party-scene">
+
+function StatBar({label, val, max=10, color}) {
+  const pct = Math.min(val/max,1)*100;
+  return (
+    <div style={{display:'flex', alignItems:'center', gap:8}}>
+      <div style={{width:28, fontSize:9, color:TXD, fontFamily:'Noto Sans JP', flexShrink:0}}>{label}</div>
+      <div style={{flex:1, height:5, borderRadius:3, background:'rgba(0,0,0,.08)', overflow:'hidden'}}>
+        <div style={{width:`${pct}%`, height:'100%', borderRadius:3,
+          background:`linear-gradient(90deg,${color}cc,${color})`,
+          transition:'width .5s ease'}}/>
+      </div>
+      <div style={{width:20, textAlign:'right', fontFamily:'Rajdhani', fontWeight:700,
+        fontSize:11, color, flexShrink:0}}>{val}</div>
+    </div>
+  );
+}
+
+function MemeBar({val, max, color}) {
+  const pct = max>0 ? Math.min(val/max,1)*100 : 0;
+  return (
+    <div style={{display:'flex', alignItems:'center', gap:8}}>
+      <div style={{width:28, fontSize:9, color:TXD, flexShrink:0}}>ミーム</div>
+      <div style={{flex:1, height:5, borderRadius:3, background:'rgba(0,0,0,.08)', overflow:'hidden'}}>
+        <div style={{width:`${pct}%`, height:'100%', borderRadius:3,
+          background:`linear-gradient(90deg,${color}99,${color})`,
+          transition:'width .5s ease'}}/>
+      </div>
+      <div style={{width:44, textAlign:'right', fontFamily:'Rajdhani', fontWeight:700,
+        fontSize:10, color:TXD, flexShrink:0}}>{val.toLocaleString()}</div>
+    </div>
+  );
+}
+
+function LeftPanel({char, onConfirm}) {
+  const [key, setKey] = React.useState(0);
+  const prevId = React.useRef(null);
+  React.useEffect(()=>{
+    if(char && char.id !== prevId.current){
+      prevId.current = char.id;
+      setKey(k=>k+1);
+    }
+  },[char]);
+
+  if(!char) {
+    return (
+      <div style={{flex:'0 0 42%', display:'flex', alignItems:'center', justifyContent:'center',
+        position:'relative', overflow:'hidden'}}>
+        <svg style={{position:'absolute',inset:0,width:'100%',height:'100%',opacity:.06}} aria-hidden="true">
+          <defs><pattern id="dotGrid" width="24" height="24" patternUnits="userSpaceOnUse">
+            <circle cx="12" cy="12" r="1" fill={TX}/>
+          </pattern></defs>
+          <rect width="100%" height="100%" fill="url(#dotGrid)"/>
+        </svg>
+        <div style={{textAlign:'center', opacity:.35, pointerEvents:'none'}}>
+          <div style={{fontSize:48, marginBottom:12, opacity:.4}}>⟳</div>
+          <div style={{fontFamily:"'Zen Maru Gothic'", fontSize:14, fontWeight:700, color:TX,
+            letterSpacing:'.18em'}}>仲間を選択</div>
+          <div style={{fontSize:10, color:TXD, marginTop:6, letterSpacing:'.08em'}}>
+            右のリストからキャラクターを選んでください
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const role = ROLES[char.role] || ROLES.front;
+  return (
+    <div key={key} style={{flex:'0 0 42%', display:'flex', flexDirection:'column',
+      position:'relative', overflow:'hidden', animation:'fadeIn .18s ease both'}}>
+      <div style={{flex:1, position:'relative', overflow:'hidden', minHeight:0,
+        display:'flex', alignItems:'flex-end', justifyContent:'center'}}>
+        <div style={{position:'absolute', inset:0,
+          background:`radial-gradient(ellipse 80% 70% at 50% 100%, ${role.color}22 0%, transparent 70%)`,
+          pointerEvents:'none'}}/>
+        <div style={{position:'absolute', bottom:-60, left:'50%', transform:'translateX(-50%)',
+          width:400, height:400, borderRadius:'50%', border:`1px solid ${role.color}22`, pointerEvents:'none'}}/>
+        {char.joined && char.portrait ? (
+          <img key={char.id} src={char.portrait} alt={char.name}
+            style={{position:'relative', zIndex:2, width:'auto', height:'100%',
+              maxHeight:'calc(100vh - 220px)', objectFit:'contain', objectPosition:'bottom center',
+              animation:'portraitRise .38s cubic-bezier(.2,.8,.3,1) both',
+              display:'block', maxWidth:'100%'}}/>
+        ) : (
+          <div style={{position:'relative', zIndex:2, width:200, height:'60%', maxHeight:360,
+            display:'flex', alignItems:'center', justifyContent:'center',
+            background:`repeating-linear-gradient(45deg,rgba(0,0,0,.04) 0px,rgba(0,0,0,.04) 1px,transparent 1px,transparent 12px)`,
+            border:`2px dashed rgba(0,0,0,.1)`, borderRadius:12,
+            animation:'portraitRise .38s cubic-bezier(.2,.8,.3,1) both'}}>
+            <div style={{textAlign:'center', opacity:.4}}>
+              <div style={{fontSize:36, marginBottom:8}}>🔒</div>
+              <div style={{fontFamily:'Noto Sans JP', fontSize:10, color:TXD}}>未加入</div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div style={{
+        ...glass({borderRadius:'12px 12px 0 0', border:'1px solid rgba(255,255,255,.9)',
+          borderBottom:'none', boxShadow:`0 -4px 24px rgba(0,0,0,.1), inset 0 1px 0 rgba(255,255,255,.8)`}),
+        padding:'16px 20px 14px', animation:'fadeUp .22s .06s ease both', flexShrink:0,
+      }}>
+        <div style={{display:'flex', alignItems:'flex-end', gap:10, marginBottom:12}}>
+          <div>
+            <div style={{fontSize:9, color:TXD, fontFamily:'Noto Sans JP',
+              letterSpacing:'.12em', marginBottom:2}}>{char.kana}</div>
+            <div style={{fontFamily:"'Zen Maru Gothic'", fontSize:22, fontWeight:900,
+              color:TX, lineHeight:1.1, letterSpacing:'.04em'}}>{char.name}</div>
+          </div>
+          <div style={{marginLeft:'auto', display:'flex', flexDirection:'column', alignItems:'flex-end', gap:4}}>
+            <span style={{fontSize:9, padding:'3px 9px', borderRadius:20, fontWeight:700,
+              fontFamily:'Noto Sans JP', background:role.bg, color:role.color,
+              border:`1px solid ${role.color}44`}}>{role.label}</span>
+            <span style={{fontSize:9, color:TXD, fontFamily:'Noto Sans JP'}}>{char.origin}</span>
+          </div>
+        </div>
+        {char.joined && char.quote && (
+          <div style={{fontFamily:'Noto Sans JP', fontSize:10, color:TXD, fontStyle:'italic',
+            borderLeft:`2px solid ${role.color}66`, paddingLeft:8, marginBottom:12, lineHeight:1.5}}>
+            「{char.quote}」
+          </div>
+        )}
+        <div style={{display:'flex', flexDirection:'column', gap:6, marginBottom:10}}>
+          <StatBar label="攻撃" val={char.atk} max={12} color={PK}/>
+          <StatBar label="防御" val={char.def} max={12} color={TEAL}/>
+          <StatBar label="速度" val={char.spd} max={12} color={AC}/>
+          <MemeBar val={char.meme} max={char.memeMax} color='#6a55b0'/>
+        </div>
+        {char.joined && (
+          <div style={{background:`${role.color}0d`, borderRadius:8, padding:'7px 10px',
+            border:`1px solid ${role.color}22`, marginBottom:12}}>
+            <div style={{display:'flex', alignItems:'center', gap:6, marginBottom:2}}>
+              <span style={{fontSize:8, fontWeight:700, color:role.color,
+                fontFamily:'Rajdhani', letterSpacing:'.1em'}}>SKILL</span>
+              <span style={{fontFamily:'Noto Sans JP', fontSize:11, fontWeight:700, color:TX}}>
+                {char.skill}
+              </span>
+            </div>
+            <div style={{fontSize:9, color:TXD, fontFamily:'Noto Sans JP', lineHeight:1.5}}>
+              {char.skillDesc}
+            </div>
+          </div>
+        )}
+        {char.joined ? (
+          <button onClick={onConfirm} style={{
+            width:'100%', padding:'11px', borderRadius:8,
+            background:`linear-gradient(135deg,${role.color},${role.color}bb)`,
+            border:'none', color:'#fff', cursor:'pointer',
+            fontFamily:"'Noto Sans JP'", fontSize:12, fontWeight:700, letterSpacing:'.08em',
+            boxShadow:`0 3px 16px ${role.color}55`,
+          }}>キャラクター詳細を見る →</button>
+        ) : (
+          <div style={{width:'100%', padding:'10px', borderRadius:8, textAlign:'center',
+            background:'rgba(0,0,0,.04)', border:`1px dashed rgba(0,0,0,.12)`,
+            fontSize:11, color:TXD, fontFamily:'Noto Sans JP'}}>
+            🔒 まだ仲間になっていません
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function NameItem({char, isHovered, isSelected, onHover, onLeave, onClick, index}) {
+  const role = ROLES[char.role] || ROLES.front;
+  const active = isHovered || isSelected;
+  return (
+    <div onMouseEnter={onHover} onMouseLeave={onLeave} onClick={onClick}
+      style={{position:'relative', padding:'10px 14px', borderRadius:8, cursor:'pointer',
+        userSelect:'none', transition:'background .15s, transform .12s, box-shadow .15s',
+        background:active?(char.joined?`${role.color}14`:'rgba(0,0,0,.05)'):'transparent',
+        border:`1px solid ${active&&char.joined?`${role.color}44`:'transparent'}`,
+        transform:active?'translateX(3px)':'none',
+        animation:`fadeUp .2s ${index*0.025}s ease both`,
+        opacity:char.joined?1:.5,
+        display:'flex', flexDirection:'column', gap:2}}>
+      <div style={{position:'absolute', left:5, top:'50%', transform:'translateY(-50%)',
+        width:3, height:active?'70%':'40%', borderRadius:2,
+        background:char.joined?role.color:'rgba(0,0,0,.2)', transition:'height .15s'}}/>
+      <div style={{display:'flex', alignItems:'center', gap:6, paddingLeft:4}}>
+        {char.portrait ? (
+          <div style={{width:20, height:20, borderRadius:'50%', flexShrink:0, overflow:'hidden',
+            border:`1.5px solid ${active?role.color+'66':'rgba(0,0,0,.1)'}`, transition:'border-color .15s'}}>
+            <img src={char.portrait} alt="" style={{width:'100%',height:'100%',objectFit:'cover',objectPosition:'top'}}/>
+          </div>
+        ) : (
+          <div style={{width:20, height:20, borderRadius:'50%', flexShrink:0,
+            background:'rgba(0,0,0,.06)', border:'1.5px dashed rgba(0,0,0,.15)',
+            display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, color:TXD}}>?</div>
+        )}
+        <span style={{fontFamily:"'Zen Maru Gothic'", fontWeight:900, fontSize:13,
+          color:active&&char.joined?role.color:char.joined?TX:TXD,
+          transition:'color .15s', letterSpacing:'.02em', lineHeight:1.2}}>{char.name}</span>
+      </div>
+      <div style={{paddingLeft:30, display:'flex', gap:6, alignItems:'center'}}>
+        <span style={{fontSize:8, fontFamily:'Noto Sans JP', fontWeight:700,
+          color:char.joined?role.color:TXD, opacity:active?1:.7}}>{role.label}</span>
+        <span style={{fontSize:8, color:TXF, fontFamily:'Rajdhani'}}>
+          {char.joined?char.origin:'???'}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function CharDetail({char, onClose}) {
+  const role = ROLES[char.role] || ROLES.front;
+  return (
+    <div style={{position:'fixed', inset:0, zIndex:100,
+      background:'rgba(10,8,14,.75)', backdropFilter:'blur(8px)', WebkitBackdropFilter:'blur(8px)',
+      display:'flex', alignItems:'center', justifyContent:'center', animation:'fadeIn .18s ease both'}}
+      onClick={e=>{ if(e.target===e.currentTarget) onClose(); }}>
+      <div style={{...glass({borderRadius:16, border:`1.5px solid ${role.color}55`,
+          boxShadow:`0 0 0 1px ${role.color}22, 0 20px 60px rgba(0,0,0,.45)`}),
+        width:'min(800px,92vw)', maxHeight:'90vh', display:'flex', overflow:'hidden',
+        animation:'detailIn .24s ease both'}}>
+        <div style={{flex:'0 0 320px', position:'relative', overflow:'hidden',
+          background:`linear-gradient(160deg,${role.color}18 0%,transparent 60%)`,
+          display:'flex', alignItems:'flex-end', justifyContent:'center', minHeight:400}}>
+          <div style={{position:'absolute', bottom:-80, left:'50%', transform:'translateX(-50%)',
+            width:400, height:400, borderRadius:'50%',
+            background:`radial-gradient(circle,${role.color}22 0%,transparent 70%)`, pointerEvents:'none'}}/>
+          <img src={char.portrait} alt={char.name}
+            style={{position:'relative', zIndex:1, width:'100%', height:'auto',
+              maxHeight:'100%', objectFit:'contain', objectPosition:'bottom',
+              animation:'portraitRise .4s ease both'}}/>
+        </div>
+        <div style={{flex:1, padding:'32px 28px', overflowY:'auto',
+          display:'flex', flexDirection:'column', gap:16, position:'relative'}}>
+          <button onClick={onClose} style={{position:'absolute', top:16, right:16,
+            background:'transparent', border:'none', color:TXD, cursor:'pointer', fontSize:18, lineHeight:1, padding:4}}>✕</button>
+          <div>
+            <div style={{fontSize:10, color:TXD, fontFamily:'Noto Sans JP',
+              letterSpacing:'.15em', marginBottom:4}}>{char.kana}</div>
+            <div style={{fontFamily:"'Zen Maru Gothic'", fontSize:28, fontWeight:900,
+              color:TX, letterSpacing:'.04em', lineHeight:1}}>{char.name}</div>
+            <div style={{display:'flex', gap:8, marginTop:8, alignItems:'center'}}>
+              <span style={{fontSize:10, padding:'3px 10px', borderRadius:20, fontWeight:700,
+                fontFamily:'Noto Sans JP', background:role.bg, color:role.color,
+                border:`1px solid ${role.color}44`}}>{role.label}</span>
+              <span style={{fontSize:10, color:TXD, fontFamily:'Noto Sans JP'}}>{char.origin}出身</span>
+            </div>
+          </div>
+          {char.quote && (
+            <div style={{fontFamily:'Noto Sans JP', fontSize:12, color:TXD, fontStyle:'italic',
+              borderLeft:`3px solid ${role.color}88`, paddingLeft:12, lineHeight:1.7}}>
+              「{char.quote}」
+            </div>
+          )}
+          <div style={{background:'rgba(0,0,0,.03)', borderRadius:10, padding:'14px 16px', border:`1px solid ${BR}`}}>
+            <div style={{fontSize:9, fontFamily:'Rajdhani', fontWeight:700,
+              color:TXD, letterSpacing:'.15em', marginBottom:10}}>STATS</div>
+            <div style={{display:'flex', flexDirection:'column', gap:8}}>
+              <StatBar label="攻撃" val={char.atk} max={12} color={PK}/>
+              <StatBar label="防御" val={char.def} max={12} color={TEAL}/>
+              <StatBar label="速度" val={char.spd} max={12} color={AC}/>
+              <MemeBar val={char.meme} max={char.memeMax} color='#6a55b0'/>
+            </div>
+          </div>
+          <div style={{background:`${role.color}0d`, borderRadius:10, padding:'14px 16px',
+            border:`1px solid ${role.color}28`}}>
+            <div style={{fontSize:9, fontFamily:'Rajdhani', fontWeight:700,
+              color:role.color, letterSpacing:'.15em', marginBottom:6}}>SKILL</div>
+            <div style={{fontFamily:'Noto Sans JP', fontSize:14, fontWeight:700, color:TX, marginBottom:4}}>{char.skill}</div>
+            <div style={{fontSize:11, color:TXD, fontFamily:'Noto Sans JP', lineHeight:1.6}}>{char.skillDesc}</div>
+          </div>
+          <div style={{display:'flex', gap:10, marginTop:'auto', paddingTop:8}}>
+            <button onClick={onClose} style={{flex:1, padding:'11px', borderRadius:8,
+              background:`linear-gradient(135deg,${role.color},${role.color}cc)`,
+              border:'none', color:'#fff', cursor:'pointer',
+              fontFamily:"'Noto Sans JP'", fontSize:12, fontWeight:700,
+              boxShadow:`0 3px 16px ${role.color}44`}}>編成に追加 +</button>
+            <button onClick={onClose} style={{padding:'11px 16px', borderRadius:8,
+              background:'rgba(0,0,0,.05)', border:`1px solid ${BR}`,
+              color:TXD, cursor:'pointer', fontFamily:"'Noto Sans JP'", fontSize:12}}>戻る</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PartyScene({ onNavigate }) {
+  const [hovered, setHovered] = React.useState(null);
+  const [selected, setSelected] = React.useState(null);
+  const [detail, setDetail] = React.useState(null);
+
+  const activeId = hovered || selected;
+  const activeChar = CHARS.find(c=>c.id===activeId) || null;
+  const joined = CHARS.filter(c=>c.joined);
+  const locked  = CHARS.filter(c=>!c.joined);
+
+  const handleNameClick = React.useCallback((char)=>{
+    if(!char.joined) return;
+    if(selected===char.id) setDetail(char);
+    else setSelected(char.id);
+  },[selected]);
+
+  return (
+    <div className="scene-enter" style={{width:'100vw', height:'100vh',
+      fontFamily:"'Noto Sans JP',sans-serif", position:'relative', overflow:'hidden',
+      background:'rgba(248,246,244,1)'}}>
+
+      {/* TOP BAR */}
+      <TopBar scene="party"
+        breadcrumb={['マップ','仲間']}
+        rightSlot={
+          <div style={{padding:'4px 12px', borderRadius:20,
+            background:'rgba(26,138,150,.1)', border:'1px solid rgba(26,138,150,.25)',
+            display:'flex', alignItems:'center', gap:6}}>
+            <div style={{width:6, height:6, borderRadius:'50%', background:TEAL}}/>
+            <span style={{fontFamily:"'Zen Maru Gothic'", fontSize:11, fontWeight:900, color:TX}}>
+              仲間 {joined.length}/{CHARS.length}
+            </span>
+          </div>
+        }
+      />
+
+      {/* MAIN */}
+      <div style={{position:'absolute', top:52, left:0, right:0, bottom:52,
+        display:'flex', overflow:'hidden'}}>
+
+        <LeftPanel char={activeChar} onConfirm={()=>{ if(activeChar&&activeChar.joined) setDetail(activeChar); }}/>
+
+        <div style={{width:1, background:`linear-gradient(to bottom,transparent,${BR},transparent)`, flexShrink:0}}/>
+
+        <div style={{flex:1, overflowY:'auto', padding:'20px 16px',
+          background:`repeating-linear-gradient(0deg,rgba(0,0,0,.012) 0px,rgba(0,0,0,.012) 1px,transparent 1px,transparent 48px)`}}>
+
+          {/* PARTY MEMBERS */}
+          <div style={{marginBottom:8}}>
+            <div style={{display:'flex', alignItems:'center', gap:8, marginBottom:8, padding:'0 6px'}}>
+              <div style={{width:3, height:14, borderRadius:2, background:TEAL}}/>
+              <span style={{fontFamily:'Rajdhani', fontWeight:700, fontSize:11, color:TXD, letterSpacing:'.15em'}}>PARTY MEMBERS</span>
+              <span style={{fontSize:10, color:TXF, fontFamily:'Noto Sans JP'}}>仲間</span>
+              <span style={{marginLeft:'auto', fontSize:9, padding:'2px 8px', borderRadius:10,
+                background:'rgba(26,138,150,.1)', color:TEAL, border:'1px solid rgba(26,138,150,.25)',
+                fontFamily:'Rajdhani', fontWeight:700}}>{joined.length}</span>
+            </div>
+            <div style={{display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:4}}>
+              {joined.map((c,i)=>(
+                <NameItem key={c.id} char={c} index={i}
+                  isHovered={hovered===c.id} isSelected={selected===c.id}
+                  onHover={()=>setHovered(c.id)} onLeave={()=>setHovered(null)}
+                  onClick={()=>handleNameClick(c)}/>
+              ))}
+            </div>
+          </div>
+
+          <div style={{height:1, background:BR, margin:'16px 6px'}}/>
+
+          {/* LOCKED */}
+          <div>
+            <div style={{display:'flex', alignItems:'center', gap:8, marginBottom:8, padding:'0 6px'}}>
+              <div style={{width:3, height:14, borderRadius:2, background:'rgba(0,0,0,.2)'}}/>
+              <span style={{fontFamily:'Rajdhani', fontWeight:700, fontSize:11, color:TXF, letterSpacing:'.15em'}}>LOCKED</span>
+              <span style={{fontSize:10, color:TXF, fontFamily:'Noto Sans JP'}}>未加入</span>
+              <span style={{marginLeft:'auto', fontSize:9, padding:'2px 8px', borderRadius:10,
+                background:'rgba(0,0,0,.05)', color:TXD, border:`1px solid ${BR}`,
+                fontFamily:'Rajdhani', fontWeight:700}}>{locked.length}</span>
+            </div>
+            <div style={{display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:4}}>
+              {locked.map((c,i)=>(
+                <NameItem key={c.id} char={c} index={i}
+                  isHovered={hovered===c.id} isSelected={false}
+                  onHover={()=>setHovered(c.id)} onLeave={()=>setHovered(null)}
+                  onClick={()=>handleNameClick(c)}/>
+              ))}
+            </div>
+          </div>
+
+          <div style={{textAlign:'center', marginTop:24, paddingBottom:8,
+            fontSize:9, color:TXF, fontFamily:'Noto Sans JP', letterSpacing:'.08em'}}>
+            ホバーで詳細表示　／　クリックで選択　／　もう一度クリックで詳細画面へ
+          </div>
+        </div>
+      </div>
+
+      {/* BOTTOM BAR */}
+      <BottomBar scene="party" onNavigate={onNavigate}/>
+
+      {/* Character detail overlay */}
+      {detail && detail.joined && (
+        <CharDetail char={detail} onClose={()=>setDetail(null)}/>
+      )}
+    </div>
+  );
+}
+
+Object.assign(window, { PartyScene });
+</script>
+
+<!-- ═══════════════════════════════════════════════════════
+     ATTACK FORMATION SCENE
+═══════════════════════════════════════════════════════ -->
+<script type="text/babel" id="attack-formation-scene">
+
+// 前衛ロール判定
+const isFront = (c) => c.role === 'front';
+const isSupport = (c) => !isFront(c); // ranged/rear/support = 後衛扱い
+
+function FormationSlot({ slot, char, onRemove, label, color }) {
+  const role = char ? (ROLES[char.role] || ROLES.front) : null;
+  return (
+    <div style={{
+      position:'relative',
+      width: 110, height: 150,
+      borderRadius: 10,
+      border: `2px dashed ${char ? color+'88' : 'rgba(255,255,255,.2)'}`,
+      background: char ? `${color}12` : 'rgba(255,255,255,.04)',
+      display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
+      transition:'all .2s',
+      overflow:'hidden',
+    }}>
+      {/* slot label */}
+      <div style={{
+        position:'absolute', top:0, left:0, right:0,
+        padding:'3px 0', textAlign:'center',
+        background: char ? `${color}22` : 'rgba(255,255,255,.06)',
+        fontSize:8, fontFamily:'Rajdhani', fontWeight:700, letterSpacing:'.12em',
+        color: char ? color : 'rgba(255,255,255,.3)',
+      }}>{label}</div>
+
+      {char ? (
+        <>
+          {/* portrait */}
+          <div style={{
+            width:72, height:90, overflow:'hidden', borderRadius:6,
+            marginTop:14, flexShrink:0,
+            border:`1.5px solid ${role.color}55`,
+          }}>
+            {char.portrait
+              ? <img src={char.portrait} alt={char.name}
+                  style={{width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center'}}/>
+              : <div style={{width:'100%',height:'100%',display:'flex',alignItems:'center',justifyContent:'center',
+                  background:'rgba(0,0,0,.1)', fontSize:22, color:'rgba(255,255,255,.3)'}}>?</div>
+            }
+          </div>
+          <div style={{
+            fontSize:9, fontFamily:"'Zen Maru Gothic'", fontWeight:900,
+            color:'rgba(255,255,255,.9)', marginTop:5, textAlign:'center',
+            maxWidth:100, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap',
+          }}>{char.name}</div>
+          <div style={{
+            fontSize:7, padding:'1px 6px', borderRadius:8, marginTop:2,
+            background:`${role.color}33`, color:role.color, fontWeight:700,
+          }}>{role.label}</div>
+          {/* remove button */}
+          <button
+            onClick={() => onRemove(slot)}
+            style={{
+              position:'absolute', top:20, right:4,
+              width:18, height:18, borderRadius:'50%',
+              background:'rgba(0,0,0,.55)', border:'1px solid rgba(255,255,255,.2)',
+              color:'rgba(255,255,255,.7)', cursor:'pointer',
+              fontSize:10, lineHeight:'18px', textAlign:'center', padding:0,
+              display:'flex', alignItems:'center', justifyContent:'center',
+            }}>✕</button>
+        </>
+      ) : (
+        <div style={{textAlign:'center', opacity:.35}}>
+          <div style={{fontSize:28, marginBottom:4}}>＋</div>
+          <div style={{fontSize:8, color:'rgba(255,255,255,.5)', fontFamily:'Noto Sans JP'}}>空きスロット</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AttackFormationScene({ targetNode, onLaunch, onCancel }) {
+  // formation: { front1, front2, rear1, rear2 } — null or char
+  const [formation, setFormation] = React.useState({ front1:null, front2:null, rear1:null, rear2:null });
+  const [hoverId, setHoverId] = React.useState(null);
+
+  const joinedChars = CHARS.filter(c => c.joined);
+  const selectedIds = Object.values(formation).filter(Boolean).map(c => c.id);
+
+  // ルール判定
+  const frontCount = [formation.front1, formation.front2].filter(Boolean).length;
+  const rearCount  = [formation.rear1,  formation.rear2 ].filter(Boolean).length;
+  const totalCount = frontCount + rearCount;
+  const canLaunch  = frontCount >= 1 && totalCount >= 1;
+
+  const handleCharClick = (char) => {
+    if(selectedIds.includes(char.id)) {
+      // 外す
+      setFormation(prev => {
+        const next = {...prev};
+        Object.keys(next).forEach(k => { if(next[k]?.id === char.id) next[k] = null; });
+        return next;
+      });
+      return;
+    }
+    // 追加
+    if(isFront(char)) {
+      setFormation(prev => {
+        if(!prev.front1) return {...prev, front1: char};
+        if(!prev.front2) return {...prev, front2: char};
+        return prev; // 満杯
+      });
+    } else {
+      setFormation(prev => {
+        if(!prev.rear1) return {...prev, rear1: char};
+        if(!prev.rear2) return {...prev, rear2: char};
+        return prev;
+      });
+    }
+  };
+
+  const handleRemove = (slot) => {
+    setFormation(prev => ({...prev, [slot]: null}));
+  };
+
+  const frontChars  = joinedChars.filter(isFront);
+  const rearChars   = joinedChars.filter(c => !isFront(c));
+
+  // 敵情報
+  const ow = { c: PK, label: '敵拠点' };
+  const typeLabel = targetNode ? ({city:'都市',town:'街',village:'村',fort:'砦'}[targetNode.type]||targetNode.type) : '';
+
+  return (
+    <div className="scene-enter" style={{
+      width:'100vw', height:'100vh',
+      background:'linear-gradient(160deg,#0d0818 0%,#1a1030 60%,#0a1420 100%)',
+      fontFamily:"'Noto Sans JP',sans-serif",
+      color:'rgba(255,255,255,.9)',
+      display:'flex', flexDirection:'column',
+      position:'relative', overflow:'hidden',
+    }}>
+      {/* bg pattern */}
+      <div style={{position:'absolute',inset:0,pointerEvents:'none',zIndex:0,
+        backgroundImage:'repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0,rgba(255,255,255,.015) 1px,transparent 1px,transparent 40px),repeating-linear-gradient(90deg,rgba(255,255,255,.015) 0,rgba(255,255,255,.015) 1px,transparent 1px,transparent 40px)'}}/>
+
+      {/* TOP BAR */}
+      <div style={{
+        position:'relative', zIndex:10, height:52, flexShrink:0,
+        display:'flex', alignItems:'center', padding:'0 20px', gap:12,
+        background:'rgba(0,0,0,.4)', borderBottom:'1px solid rgba(255,255,255,.08)',
+        backdropFilter:'blur(12px)',
+      }}>
+        <img src="assets/logo_tohoku.png" alt="東北家" style={{height:26, objectFit:'contain'}}/>
+        <div style={{width:1, height:'55%', background:'rgba(255,255,255,.15)'}}/>
+        <div style={{display:'flex', alignItems:'center', gap:6}}>
+          <span style={{fontSize:11, color:'rgba(255,255,255,.4)', fontFamily:'Noto Sans JP'}}>マップ</span>
+          <span style={{fontSize:11, color:'rgba(255,255,255,.2)'}}>›</span>
+          <span style={{fontSize:11, color:'rgba(255,255,255,.9)', fontFamily:'Noto Sans JP', fontWeight:700}}>攻撃編成</span>
+        </div>
+        <div style={{marginLeft:'auto', display:'flex', alignItems:'center', gap:8}}>
+          {targetNode && (
+            <div style={{
+              padding:'4px 12px', borderRadius:20,
+              background:'rgba(196,66,122,.15)', border:'1px solid rgba(196,66,122,.35)',
+              display:'flex', alignItems:'center', gap:6,
+            }}>
+              <span style={{fontSize:10, color:'rgba(196,66,122,.8)', fontFamily:'Noto Sans JP'}}>攻撃目標</span>
+              <span style={{fontFamily:"'Zen Maru Gothic'", fontSize:13, fontWeight:900, color:PK}}>
+                {targetNode.name}
+              </span>
+              <span style={{fontSize:9, color:'rgba(255,255,255,.4)'}}>({typeLabel} · {targetNode.troops}兵)</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* MAIN */}
+      <div style={{flex:1, display:'flex', gap:0, minHeight:0, position:'relative', zIndex:1}}>
+
+        {/* ── LEFT: 編成スロット ── */}
+        <div style={{
+          flex:'0 0 360px', display:'flex', flexDirection:'column',
+          padding:'20px 24px', gap:16,
+          borderRight:'1px solid rgba(255,255,255,.07)',
+        }}>
+          <div style={{fontSize:10, fontFamily:'Rajdhani', fontWeight:700,
+            letterSpacing:'.18em', color:'rgba(255,255,255,.4)'}}>FORMATION — 出撃編成</div>
+
+          {/* 前衛ライン */}
+          <div>
+            <div style={{display:'flex', alignItems:'center', gap:8, marginBottom:10}}>
+              <div style={{width:3, height:14, borderRadius:2, background:PK}}/>
+              <span style={{fontSize:10, fontFamily:'Noto Sans JP', fontWeight:700, color:PK}}>前衛</span>
+              <span style={{fontSize:9, color:'rgba(255,255,255,.3)'}}>最大2人 · 攻撃の主力</span>
+              <span style={{marginLeft:'auto', fontFamily:'Rajdhani', fontWeight:700,
+                fontSize:12, color: frontCount>0 ? PK : 'rgba(255,255,255,.3)'}}>
+                {frontCount}/2
+              </span>
+            </div>
+            <div style={{display:'flex', gap:10}}>
+              <FormationSlot slot="front1" char={formation.front1} onRemove={handleRemove}
+                label="前衛①" color={PK}/>
+              <FormationSlot slot="front2" char={formation.front2} onRemove={handleRemove}
+                label="前衛②" color={PK}/>
+            </div>
+          </div>
+
+          {/* 後衛ライン */}
+          <div>
+            <div style={{display:'flex', alignItems:'center', gap:8, marginBottom:10}}>
+              <div style={{width:3, height:14, borderRadius:2, background:TEAL}}/>
+              <span style={{fontSize:10, fontFamily:'Noto Sans JP', fontWeight:700, color:TEAL}}>後衛</span>
+              <span style={{fontSize:9, color:'rgba(255,255,255,.3)'}}>最大2人 · 支援・間接</span>
+              <span style={{marginLeft:'auto', fontFamily:'Rajdhani', fontWeight:700,
+                fontSize:12, color: rearCount>0 ? TEAL : 'rgba(255,255,255,.3)'}}>
+                {rearCount}/2
+              </span>
+            </div>
+            <div style={{display:'flex', gap:10}}>
+              <FormationSlot slot="rear1" char={formation.rear1} onRemove={handleRemove}
+                label="後衛①" color={TEAL}/>
+              <FormationSlot slot="rear2" char={formation.rear2} onRemove={handleRemove}
+                label="後衛②" color={TEAL}/>
+            </div>
+          </div>
+
+          {/* ルール表示 */}
+          <div style={{
+            padding:'8px 12px', borderRadius:7,
+            background: canLaunch ? 'rgba(42,154,88,.12)' : 'rgba(196,66,122,.08)',
+            border:`1px solid ${canLaunch ? 'rgba(42,154,88,.3)' : 'rgba(196,66,122,.2)'}`,
+            fontSize:10, fontFamily:'Noto Sans JP', lineHeight:1.7,
+            color: canLaunch ? 'rgba(100,220,130,.9)' : 'rgba(255,180,180,.8)',
+          }}>
+            {canLaunch
+              ? `✓ 編成完了 — ${totalCount}人で出撃できます`
+              : '※ 前衛を最低1人選んでください'}
+          </div>
+
+          <div style={{marginTop:'auto', display:'flex', gap:8}}>
+            <button
+              onClick={onCancel}
+              style={{
+                flex:'0 0 auto', padding:'11px 18px', borderRadius:8,
+                background:'rgba(255,255,255,.05)', border:'1px solid rgba(255,255,255,.12)',
+                color:'rgba(255,255,255,.5)', cursor:'pointer',
+                fontFamily:"'Noto Sans JP'", fontSize:12,
+                transition:'all .15s',
+              }}
+              onMouseEnter={e=>{e.currentTarget.style.background='rgba(255,255,255,.1)';}}
+              onMouseLeave={e=>{e.currentTarget.style.background='rgba(255,255,255,.05)';}}
+            >← 戻る</button>
+            <button
+              onClick={() => canLaunch && onLaunch(formation, targetNode)}
+              style={{
+                flex:1, padding:'11px', borderRadius:8,
+                background: canLaunch
+                  ? `linear-gradient(135deg,${PK},${PK2})`
+                  : 'rgba(196,66,122,.2)',
+                border:`1px solid ${canLaunch ? PK : 'rgba(196,66,122,.25)'}`,
+                color: canLaunch ? '#fff' : 'rgba(255,255,255,.3)',
+                cursor: canLaunch ? 'pointer' : 'not-allowed',
+                fontFamily:"'Noto Sans JP'", fontSize:13, fontWeight:700,
+                boxShadow: canLaunch ? `0 3px 20px rgba(196,66,122,.5)` : 'none',
+                transition:'all .2s',
+              }}>
+              ⚔ 出撃する！
+            </button>
+          </div>
+        </div>
+
+        {/* ── RIGHT: キャラ選択リスト ── */}
+        <div style={{flex:1, display:'flex', flexDirection:'column', padding:'20px 20px', gap:16, overflowY:'auto'}}>
+          <div style={{fontSize:10, fontFamily:'Rajdhani', fontWeight:700,
+            letterSpacing:'.18em', color:'rgba(255,255,255,.4)'}}>SELECT CHARACTERS</div>
+
+          {/* 前衛キャラ */}
+          <div>
+            <div style={{display:'flex', alignItems:'center', gap:6, marginBottom:10}}>
+              <div style={{width:3, height:12, borderRadius:2, background:PK}}/>
+              <span style={{fontSize:9, fontFamily:'Noto Sans JP', fontWeight:700, color:PK}}>前衛キャラクター</span>
+            </div>
+            <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(190px,1fr))', gap:8}}>
+              {frontChars.map(c => {
+                const isSelected = selectedIds.includes(c.id);
+                const isFull = frontCount >= 2 && !isSelected;
+                const role = ROLES[c.role];
+                return (
+                  <div key={c.id}
+                    onClick={() => !isFull && handleCharClick(c)}
+                    onMouseEnter={() => setHoverId(c.id)}
+                    onMouseLeave={() => setHoverId(null)}
+                    style={{
+                      display:'flex', alignItems:'center', gap:10,
+                      padding:'10px 12px', borderRadius:8,
+                      background: isSelected ? `${PK}22` : hoverId===c.id && !isFull ? 'rgba(255,255,255,.07)' : 'rgba(255,255,255,.04)',
+                      border:`1.5px solid ${isSelected ? PK+'88' : hoverId===c.id && !isFull ? 'rgba(255,255,255,.2)' : 'rgba(255,255,255,.08)'}`,
+                      cursor: isFull ? 'not-allowed' : 'pointer',
+                      opacity: isFull ? 0.4 : 1,
+                      transition:'all .15s',
+                    }}>
+                    <div style={{width:44, height:52, borderRadius:6, overflow:'hidden', flexShrink:0,
+                      border:`1.5px solid ${isSelected ? PK+'66' : 'rgba(255,255,255,.1)'}`}}>
+                      {c.portrait
+                        ? <img src={c.portrait} alt={c.name} style={{width:'100%',height:'100%',objectFit:'cover',objectPosition:'top'}}/>
+                        : <div style={{width:'100%',height:'100%',background:'rgba(255,255,255,.05)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:16,color:'rgba(255,255,255,.2)'}}>?</div>
+                      }
+                    </div>
+                    <div style={{flex:1, minWidth:0}}>
+                      <div style={{fontFamily:"'Zen Maru Gothic'", fontSize:12, fontWeight:900,
+                        color: isSelected ? PK : 'rgba(255,255,255,.9)',
+                        overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{c.name}</div>
+                      <div style={{display:'flex', gap:6, marginTop:3, alignItems:'center'}}>
+                        <span style={{fontSize:7, padding:'1px 5px', borderRadius:4, fontWeight:700,
+                          background:`${role.color}33`, color:role.color}}>{role.label}</span>
+                        <span style={{fontSize:9, fontFamily:'Rajdhani', color:'rgba(255,255,255,.4)'}}>
+                          攻{c.atk} 守{c.def}
+                        </span>
+                      </div>
+                    </div>
+                    {isSelected && (
+                      <div style={{width:18, height:18, borderRadius:'50%', background:PK,
+                        display:'flex', alignItems:'center', justifyContent:'center',
+                        fontSize:10, color:'#fff', flexShrink:0}}>✓</div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div style={{height:1, background:'rgba(255,255,255,.07)'}}/>
+
+          {/* 後衛キャラ */}
+          <div>
+            <div style={{display:'flex', alignItems:'center', gap:6, marginBottom:10}}>
+              <div style={{width:3, height:12, borderRadius:2, background:TEAL}}/>
+              <span style={{fontSize:9, fontFamily:'Noto Sans JP', fontWeight:700, color:TEAL}}>後衛キャラクター</span>
+            </div>
+            <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(190px,1fr))', gap:8}}>
+              {rearChars.map(c => {
+                const isSelected = selectedIds.includes(c.id);
+                const isFull = rearCount >= 2 && !isSelected;
+                const role = ROLES[c.role];
+                return (
+                  <div key={c.id}
+                    onClick={() => !isFull && handleCharClick(c)}
+                    onMouseEnter={() => setHoverId(c.id)}
+                    onMouseLeave={() => setHoverId(null)}
+                    style={{
+                      display:'flex', alignItems:'center', gap:10,
+                      padding:'10px 12px', borderRadius:8,
+                      background: isSelected ? `${TEAL}22` : hoverId===c.id && !isFull ? 'rgba(255,255,255,.07)' : 'rgba(255,255,255,.04)',
+                      border:`1.5px solid ${isSelected ? TEAL+'88' : hoverId===c.id && !isFull ? 'rgba(255,255,255,.2)' : 'rgba(255,255,255,.08)'}`,
+                      cursor: isFull ? 'not-allowed' : 'pointer',
+                      opacity: isFull ? 0.4 : 1,
+                      transition:'all .15s',
+                    }}>
+                    <div style={{width:44, height:52, borderRadius:6, overflow:'hidden', flexShrink:0,
+                      border:`1.5px solid ${isSelected ? TEAL+'66' : 'rgba(255,255,255,.1)'}`}}>
+                      {c.portrait
+                        ? <img src={c.portrait} alt={c.name} style={{width:'100%',height:'100%',objectFit:'cover',objectPosition:'top'}}/>
+                        : <div style={{width:'100%',height:'100%',background:'rgba(255,255,255,.05)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:16,color:'rgba(255,255,255,.2)'}}>?</div>
+                      }
+                    </div>
+                    <div style={{flex:1, minWidth:0}}>
+                      <div style={{fontFamily:"'Zen Maru Gothic'", fontSize:12, fontWeight:900,
+                        color: isSelected ? TEAL : 'rgba(255,255,255,.9)',
+                        overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{c.name}</div>
+                      <div style={{display:'flex', gap:6, marginTop:3, alignItems:'center'}}>
+                        <span style={{fontSize:7, padding:'1px 5px', borderRadius:4, fontWeight:700,
+                          background:`${role.color}33`, color:role.color}}>{role.label}</span>
+                        <span style={{fontSize:9, fontFamily:'Rajdhani', color:'rgba(255,255,255,.4)'}}>
+                          攻{c.atk} 守{c.def}
+                        </span>
+                      </div>
+                    </div>
+                    {isSelected && (
+                      <div style={{width:18, height:18, borderRadius:'50%', background:TEAL,
+                        display:'flex', alignItems:'center', justifyContent:'center',
+                        fontSize:10, color:'#fff', flexShrink:0}}>✓</div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { AttackFormationScene });
+</script>
+
+<!-- ═══════════════════════════════════════════════════════
+     BATTLE SCENE (ActionScene + ResolveScene)
+═══════════════════════════════════════════════════════ -->
+<script type="text/babel" id="battle-scene">
+
+// BattleScene-local palette (prefix B_ to avoid collision)
+const B_AP = {
+  pk:'#c4427a', pk2:'#9e2d5f', pkBg:'rgba(196,66,122,.1)', pkBdr:'rgba(196,66,122,.35)',
+  ac:'#b87010', ac2:'#d4a044', acBg:'rgba(192,112,16,.1)', acBdr:'rgba(192,112,16,.35)',
+  teal:'#1a8a96', tealBg:'rgba(26,138,150,.1)', tealBdr:'rgba(26,138,150,.35)',
+  glass:'rgba(255,253,251,.93)', glassBdr:'rgba(255,255,255,.75)',
+  shadow:'0 2px 20px rgba(0,0,0,.13)',
+  tx:'#1c1020', txd:'rgba(28,16,32,.55)', txf:'rgba(28,16,32,.28)', br:'rgba(0,0,0,.07)',
+};
+const bGlass = (x={}) => ({background:B_AP.glass,backdropFilter:'blur(14px)',WebkitBackdropFilter:'blur(14px)',border:`1px solid ${B_AP.glassBdr}`,boxShadow:B_AP.shadow,...x});
+const bFmt = n => n>=1000 ? n.toLocaleString() : String(n);
+
+// Resolve constants
+const RPK2='#c4427a', RAC2='#d4a044', RBG2='#0a0816', RTX2='#f0ece4', RTXD2='rgba(240,236,228,.5)';
+const RPH2=['intro','battle','collision','resolve','result'];
+const RDUR2={intro:1500,battle:950,collision:700,resolve:1800};
+const ROUT2={atkTroopDmg:10,atkHPDmg:2,defTroopDmg:120,defHPDmg:3};
+
+function BRoleTag({role}){
+  const m={'前衛':{bg:'rgba(196,66,122,.12)',c:B_AP.pk,brd:B_AP.pkBdr},'間接':{bg:'rgba(26,138,150,.1)',c:B_AP.teal,brd:B_AP.tealBdr},'後衛':{bg:'rgba(0,0,0,.06)',c:B_AP.txd,brd:B_AP.br}};
+  const s=m[role]||m['後衛'];
+  return <span style={{fontSize:7,padding:'1px 4px',borderRadius:2,fontWeight:700,letterSpacing:.3,background:s.bg,color:s.c,border:`1px solid ${s.brd}`,flexShrink:0}}>{role}</span>;
+}
+
+function BMemeBar({meme,max,teamMax,ally}){
+  const pct=Math.max(0,Math.min(100,(meme/teamMax)*100));
+  const low=meme/max<.3;
+  return(
+    <div style={{height:5,background:'rgba(0,0,0,.1)',borderRadius:4,overflow:'hidden',position:'relative'}}>
+      <div style={{position:'absolute',inset:0,width:`${pct}%`,borderRadius:4,
+        background:low?'linear-gradient(90deg,#c04040,#e05555)':ally?`linear-gradient(90deg,${B_AP.pk2},${B_AP.pk})`:`linear-gradient(90deg,#8a6010,${B_AP.ac2})`,
+        transition:'width .4s ease'}}/>
+    </div>
+  );
+}
+
+function BUnitCard({unit,ally,phase,targetId,onTarget,teamMax}){
+  const [hov,setHov]=React.useState(false);
+  const [clicked,setClicked]=React.useState(false);
+  const isActive=unit.status==='active',isDone=unit.status==='done';
+  const isTargetable=!ally&&phase==='targeting',isTargeted=targetId===unit.id;
+  let brd=B_AP.br;
+  if(isActive) brd=B_AP.pk;
+  if(isTargeted) brd=B_AP.ac2;
+  if(isTargetable&&hov) brd=B_AP.ac2;
+  return(
+    <div
+      className={`${isActive?'active-glow':isTargeted?'target-ring':''}${isTargeted?' targeted-shake':''}`}
+      onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)}
+      onClick={()=>{if(!isTargetable)return;onTarget(unit.id);setClicked(true);setTimeout(()=>setClicked(false),400);}}
+      style={{...bGlass(),flex:isActive?2.6:0.85,minHeight:0,position:'relative',borderRadius:8,border:`1.5px solid ${brd}`,display:'flex',overflow:'hidden',opacity:isDone?.62:1,cursor:isTargetable?'crosshair':'default',transition:'flex .28s ease,border-color .18s,opacity .25s',background:isActive?'rgba(255,240,246,.96)':isTargeted?'rgba(255,248,232,.95)':B_AP.glass}}>
+      <div style={{width:isActive?80:52,flexShrink:0,overflow:'hidden',position:'relative',transition:'width .28s ease',background:ally?(isActive?'linear-gradient(180deg,rgba(255,210,228,.3),rgba(255,240,248,.15))':'rgba(196,66,122,.06)'):(isActive?'linear-gradient(180deg,rgba(255,240,200,.3),rgba(255,250,225,.15))':'rgba(212,160,68,.08)')}}>
+        {unit.portrait?<img src={unit.portrait} alt={unit.name} style={{width:'100%',height:'100%',display:'block',objectFit:'cover',objectPosition:isActive?'center 15%':'center top'}}/>
+          :<div style={{width:'100%',height:'100%',display:'flex',alignItems:'center',justifyContent:'center'}}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={ally?'rgba(196,66,122,.3)':'rgba(192,112,16,.3)'} strokeWidth="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>}
+        {isDone&&<div style={{position:'absolute',inset:0,background:'rgba(255,255,255,.35)'}}/>}
+      </div>
+      <div style={{flex:1,padding:isActive?'8px 9px':'5px 8px',display:'flex',flexDirection:'column',gap:isActive?4:2,minWidth:0}}>
+        <div style={{display:'flex',alignItems:'center',gap:4}}>
+          {isActive?<span style={{fontFamily:"'Zen Maru Gothic',sans-serif",fontSize:15,fontWeight:900,color:B_AP.pk,flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{unit.name}</span>
+            :<span style={{fontSize:11,fontWeight:700,color:B_AP.tx,flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{unit.name}</span>}
+          <BRoleTag role={unit.role}/>
+        </div>
+        <div>
+          <div style={{display:'flex',alignItems:'baseline',gap:4,marginBottom:2}}>
+            <span style={{fontFamily:'Rajdhani',fontWeight:700,fontSize:isActive?20:13,color:ally?B_AP.pk:B_AP.ac,lineHeight:1}}>{bFmt(unit.meme)}</span>
+            <span style={{fontFamily:'Rajdhani',fontSize:10,color:B_AP.txd}}>/ {bFmt(unit.max)}</span>
+          </div>
+          <BMemeBar meme={unit.meme} max={unit.max} teamMax={teamMax} ally={ally}/>
+        </div>
+        {isActive&&<div style={{marginTop:'auto',background:'rgba(255,255,255,.75)',border:`1px solid ${B_AP.pkBdr}`,borderRadius:6,padding:'5px 8px',fontSize:11,color:B_AP.tx,fontStyle:'italic',lineHeight:1.5}}>
+          「さあ、いくよ！」
+        </div>}
+        <div style={{display:'flex',gap:8,alignItems:'center'}}>
+          <span style={{fontFamily:'Rajdhani',fontSize:11,color:B_AP.txd}}>攻<b style={{color:B_AP.tx}}>{unit.atk}</b></span>
+          <span style={{fontFamily:'Rajdhani',fontSize:11,color:B_AP.txd}}>守<b style={{color:B_AP.tx}}>{unit.def}</b></span>
+          {unit.bonus&&<span style={{fontSize:8,color:B_AP.ac,background:B_AP.acBg,borderRadius:2,padding:'1px 4px',border:`1px solid ${B_AP.acBdr}`}}>{unit.bonus}</span>}
+        </div>
+      </div>
+      <div className={isActive?'badge-blink':''} style={{position:'absolute',top:4,right:5,fontSize:8,fontWeight:700,padding:'1px 6px',borderRadius:10,...(isActive?{background:B_AP.pk,color:'#fff',boxShadow:`0 0 8px ${B_AP.pkBdr}`}:isDone?{background:'rgba(0,0,0,.08)',color:B_AP.txd}:{background:'rgba(0,0,0,.05)',color:B_AP.txf,border:`1px solid ${B_AP.br}`})}}>
+        {isActive?'行動中':isDone?'完了':'待機'}
+      </div>
+      {clicked&&<div style={{position:'absolute',inset:0,borderRadius:7,background:'rgba(255,200,60,.55)',pointerEvents:'none',animation:'clickFlash .4s ease forwards'}}/>}
+      {isTargetable&&hov&&!isTargeted&&(
+        <div style={{position:'absolute',inset:0,borderRadius:7,pointerEvents:'none',background:'rgba(212,160,68,.13)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:6}}>
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke={B_AP.ac2} strokeWidth="1.6" style={{filter:'drop-shadow(0 0 6px rgba(212,160,68,.8))',animation:'crosshairSpin 3s linear infinite'}}>
+            <circle cx="12" cy="12" r="7"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/>
+          </svg>
+          <span style={{fontSize:10,fontWeight:700,letterSpacing:1.5,color:'#fff',background:'rgba(180,100,0,.85)',padding:'3px 12px',borderRadius:4}}>TARGET</span>
+        </div>
+      )}
+      {isTargeted&&(
+        <div style={{position:'absolute',inset:0,borderRadius:7,pointerEvents:'none',background:'rgba(212,160,68,.1)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke={B_AP.ac2} strokeWidth="2" style={{filter:`drop-shadow(0 0 8px ${B_AP.ac2})`}}>
+            <circle cx="12" cy="12" r="7"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/>
+            <circle cx="12" cy="12" r="2" fill={B_AP.ac2}/>
+          </svg>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BActionPanel({active,phase,action,targetId,enemies,onAction,onConfirm,onBack}){
+  const tgt=enemies.find(u=>u.id===targetId);
+  const btns=[
+    {key:'attack',label:'攻撃',color:B_AP.pk,border:B_AP.pkBdr,activeBg:B_AP.pk,idleBg:B_AP.pkBg},
+    {key:'defend',label:'防御',color:B_AP.teal,border:B_AP.tealBdr,activeBg:B_AP.teal,idleBg:B_AP.tealBg},
+    {key:'retreat',label:'撤退',color:B_AP.txd,border:B_AP.br,activeBg:'rgba(0,0,0,.12)',idleBg:'rgba(0,0,0,.04)'},
+  ];
+  return(
+    <div style={{...bGlass({borderRadius:8,padding:'10px 12px',flexShrink:0})}}>
+      <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:7}}>
+        <span style={{fontSize:11,color:B_AP.txd}}>行動:</span>
+        <span style={{fontFamily:"'Zen Maru Gothic',sans-serif",fontSize:15,fontWeight:900,color:B_AP.pk}}>{active?.name}</span>
+        <div style={{marginLeft:'auto',display:'flex',gap:4}}>
+          {['行動選択','対象選択'].map((s,i)=>{
+            const cur=(i===0&&phase==='idle')||(i===1&&phase==='targeting');
+            const done=(i===0&&phase==='targeting');
+            return(
+              <React.Fragment key={s}>
+                {i>0&&<span style={{color:B_AP.txf,fontSize:9,alignSelf:'center'}}>›</span>}
+                <span style={{fontSize:9,padding:'2px 7px',borderRadius:10,fontWeight:600,background:cur?B_AP.pk:done?B_AP.pkBg:'transparent',color:cur?'#fff':done?B_AP.pk:B_AP.txf,border:`1px solid ${cur?B_AP.pk:done?B_AP.pkBdr:B_AP.br}`}}>{s}</span>
+              </React.Fragment>
+            );
+          })}
+        </div>
+      </div>
+      <div style={{fontSize:11,color:B_AP.txd,padding:'4px 8px',marginBottom:7,background:'rgba(0,0,0,.04)',borderRadius:4,border:`1px solid ${B_AP.br}`,minHeight:26,display:'flex',alignItems:'center'}}>
+        {phase==='idle'&&'行動を選択してください'}
+        {phase==='targeting'&&!tgt&&'▶ 攻撃する敵ユニットをクリック'}
+        {phase==='targeting'&&tgt&&<span>攻撃対象: <b style={{color:B_AP.ac}}>{tgt.name}</b>　—　確定または別の敵を選択</span>}
+      </div>
+      <div style={{display:'flex',gap:6}}>
+        {btns.map(b=>{
+          const sel=action===b.key;
+          return(
+            <button key={b.key} onClick={()=>onAction(b.key)} style={{flex:1,padding:'9px 4px',borderRadius:6,border:`1.5px solid ${sel?b.color:b.border}`,background:sel?b.activeBg:b.idleBg,color:sel?'#fff':b.color,cursor:'pointer',fontFamily:"'Noto Sans JP',sans-serif",fontSize:14,fontWeight:700,boxShadow:sel?`0 2px 14px ${b.border}`:'none',transition:'all .15s ease'}}>
+              {b.label}
+              {sel&&b.key==='attack'&&tgt&&<div style={{fontSize:9,opacity:.8,fontWeight:400,marginTop:1}}>→ {tgt.name}</div>}
+            </button>
+          );
+        })}
+      </div>
+      {phase==='targeting'&&tgt&&(
+        <div className="confirm-pop" style={{display:'flex',gap:5,marginTop:7}}>
+          <button onClick={onBack} style={{padding:'6px 12px',borderRadius:5,border:`1px solid ${B_AP.br}`,background:'rgba(0,0,0,.04)',color:B_AP.txd,cursor:'pointer',fontSize:11,fontFamily:"'Noto Sans JP',sans-serif"}}>← 戻る</button>
+          <button onClick={onConfirm} style={{flex:1,padding:'8px',borderRadius:5,background:B_AP.pk,border:'none',color:'#fff',cursor:'pointer',fontFamily:"'Noto Sans JP',sans-serif",fontSize:12,fontWeight:700,letterSpacing:.4,boxShadow:`0 2px 16px rgba(196,66,122,.45)`}}>✓　行動確定</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ActionScene — uses formation passed in
+function BActionScene({round, formation, targetNode, onComplete}){
+  const enemies = [
+    {id:'e1',name:'北海道めろん',role:'前衛',atk:10,def:8,meme:500,max:500,portrait:'assets/portrait_meron.png'},
+    {id:'e2',name:'ベルン',role:'後衛',atk:8,def:10,meme:518,max:518,bonus:'兵守+1',portrait:'assets/portrait_bern_fog.png'},
+    {id:'e3',name:'沖縄あわも',role:'前衛',atk:10,def:8,meme:500,max:500,portrait:'assets/portrait_awamo.png'},
+    {id:'e4',name:'フォーグ',role:'後衛',atk:8,def:9,meme:478,max:478,bonus:'兵守+1',portrait:'assets/portrait_bern_fog.png'},
+  ];
+
+  // Build allies from formation
+  const buildAllies = () => {
+    const slots = ['front1','front2','rear1','rear2'];
+    const chars = slots.map(k => formation[k]).filter(Boolean);
+    return chars.map((c,i) => ({
+      id: c.id, name: c.name,
+      role: ROLES[c.role]?.label || c.role,
+      atk: c.atk, def: c.def,
+      meme: c.meme, max: c.memeMax,
+      status: i===0 ? 'active' : 'pending',
+      portrait: c.portrait,
+    }));
+  };
+
+  const [allies, setAllies] = React.useState(buildAllies);
+  const [phase, setPhase] = React.useState('idle');
+  const [action, setAction] = React.useState(null);
+  const [targetId, setTargetId] = React.useState(null);
+  const [log, setLog] = React.useState([]);
+  const [btnReady, setBtnReady] = React.useState(false);
+  const active = allies.find(u=>u.status==='active');
+  const allDone = !active;
+
+  React.useEffect(()=>{
+    if(allDone) setTimeout(()=>setBtnReady(true),300);
+    else setBtnReady(false);
+  },[allDone]);
+
+  const advance = () => setAllies(prev=>{
+    const idx = prev.findIndex(u=>u.status==='active');
+    const nxt = prev.findIndex((u,i)=>i>idx&&u.status==='pending');
+    return prev.map((u,i)=>i===idx?{...u,status:'done'}:i===nxt?{...u,status:'active'}:u);
+  });
+
+  const handleAction = key => {
+    if(key==='attack'){setAction('attack');setPhase('targeting');}
+    else{setLog(p=>[...p,{txt:`${active.name} → ${key==='defend'?'防御態勢':'撤退'}`}]);setPhase('idle');setAction(null);setTargetId(null);advance();}
+  };
+  const handleConfirm = () => {
+    const tgt = enemies.find(u=>u.id===targetId);
+    if(tgt) setLog(p=>[...p,{txt:`${active.name} → ${tgt.name}  攻撃`}]);
+    setPhase('idle');setAction(null);setTargetId(null);advance();
+  };
+
+  const enemyName = targetNode?.name || '敵拠点';
+
+  return(
+    <div style={{width:'100%',height:'100%',fontFamily:"'Noto Sans JP',sans-serif",color:B_AP.tx,display:'flex',flexDirection:'column',overflow:'hidden',position:'relative',backgroundImage:'url(assets/bg_battle.jpg)',backgroundSize:'cover',backgroundPosition:'center'}}>
+      <div style={{position:'absolute',inset:0,background:'rgba(220,210,200,.12)',pointerEvents:'none'}}/>
+      <div style={{...bGlass({borderRadius:0,border:'none',borderBottom:'1px solid rgba(0,0,0,.1)',background:'rgba(255,253,251,.96)'}),display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 14px',height:42,flexShrink:0,zIndex:10,position:'relative'}}>
+        <div style={{display:'flex',alignItems:'center',gap:8}}>
+          <img src="assets/logo_tohoku.png" alt="東北家" style={{height:28,objectFit:'contain'}}/>
+          <span style={{color:B_AP.txd,fontSize:11}}>→</span>
+          <span style={{fontFamily:"'Zen Maru Gothic',sans-serif",fontSize:14,fontWeight:900,color:B_AP.pk}}>{enemyName}</span>
+        </div>
+        <div style={{textAlign:'center'}}>
+          <div style={{fontFamily:'Rajdhani',fontSize:16,fontWeight:700,letterSpacing:2,color:B_AP.tx}}>ROUND {round} / 5</div>
+          <div style={{fontSize:9,color:B_AP.txd}}>行動選択フェーズ</div>
+        </div>
+        <div style={{fontFamily:"'Zen Maru Gothic',sans-serif",fontSize:14,fontWeight:900,color:B_AP.ac}}>{enemyName}</div>
+      </div>
+      <div style={{flex:1,display:'grid',gridTemplateColumns:'248px 1fr 248px',gap:6,padding:6,minHeight:0,position:'relative',zIndex:1}}>
+        <div style={{display:'flex',flexDirection:'column',gap:4}}>
+          <div style={{fontFamily:'Rajdhani',fontSize:9,fontWeight:700,letterSpacing:2,color:B_AP.pk,paddingLeft:4,marginBottom:-1,textShadow:'0 1px 4px rgba(255,255,255,.8)'}}>東北家 ── 自軍</div>
+          {allies.map(u=><BUnitCard key={u.id} unit={u} ally={true} phase={phase} targetId={targetId} onTarget={()=>{}} teamMax={5000}/>)}
+        </div>
+        <div style={{display:'flex',flexDirection:'column',gap:6}}>
+          <div style={{flexShrink:0,display:'flex',justifyContent:'center'}}>
+            <div style={{...bGlass({padding:'5px 16px',borderRadius:20,border:'1px solid rgba(0,0,0,.1)'}),display:'flex',alignItems:'center',gap:10}}>
+              <span style={{fontFamily:"'Zen Maru Gothic',sans-serif",fontWeight:900,fontSize:13,color:B_AP.pk}}>東北家</span>
+              <span style={{color:B_AP.txf,fontSize:11}}>vs</span>
+              <span style={{fontFamily:"'Zen Maru Gothic',sans-serif",fontWeight:900,fontSize:13,color:B_AP.ac}}>{enemyName}</span>
+            </div>
+          </div>
+          <div style={{...bGlass({borderRadius:6,padding:'6px 10px',flexShrink:0}),minHeight:44}}>
+            {log.slice(-2).map((e,i)=>(
+              <div key={i} style={{fontSize:10,color:B_AP.txd,lineHeight:1.8,opacity:i===log.slice(-2).length-1?1:.5}}>
+                <span style={{color:B_AP.txf,marginRight:5}}>▸</span>{e.txt}
+              </div>
+            ))}
+          </div>
+          <div style={{flex:1}}/>
+          {allDone&&(
+            <div className="confirm-pop" style={{display:'flex',flexDirection:'column',gap:6}}>
+              <div style={{...bGlass({borderRadius:7,padding:'8px 16px',border:`1.5px solid ${B_AP.pkBdr}`,background:'rgba(255,240,246,.96)'}),textAlign:'center',color:B_AP.pk,fontWeight:700,fontSize:12}}>全員の行動が完了しました</div>
+              <button onClick={onComplete} style={{padding:'13px',borderRadius:7,background:btnReady?B_AP.pk:'rgba(196,66,122,.3)',border:`2px solid ${B_AP.pk}`,color:'#fff',cursor:'pointer',fontFamily:"'Noto Sans JP',sans-serif",fontSize:15,fontWeight:700,letterSpacing:1,boxShadow:btnReady?'0 0 28px rgba(196,66,122,.65),0 4px 20px rgba(196,66,122,.4)':'none',transition:'all .4s ease',display:'flex',alignItems:'center',justifyContent:'center',gap:10}}>
+                <span style={{fontSize:18}}>⚔️</span><span>戦闘解決へ</span><span style={{fontSize:20,opacity:.8}}>→</span>
+              </button>
+            </div>
+          )}
+          {!allDone&&<BActionPanel active={active} phase={phase} action={action} targetId={targetId} enemies={enemies} onAction={handleAction} onConfirm={handleConfirm} onBack={()=>{setPhase('idle');setAction(null);setTargetId(null);}}/>}
+        </div>
+        <div style={{display:'flex',flexDirection:'column',gap:4}}>
+          <div style={{fontFamily:'Rajdhani',fontSize:9,fontWeight:700,letterSpacing:2,color:B_AP.ac,paddingLeft:4,marginBottom:-1,textShadow:'0 1px 4px rgba(255,255,255,.8)'}}>敵軍</div>
+          {enemies.map(u=><BUnitCard key={u.id} unit={u} ally={false} phase={phase} targetId={targetId} onTarget={setTargetId} teamMax={518}/>)}
+        </div>
+      </div>
+      <div style={{...bGlass({borderRadius:0,border:'none',borderTop:'1px solid rgba(0,0,0,.1)',background:'rgba(255,253,251,.96)'}),display:'flex',alignItems:'center',height:34,padding:'0 10px',flexShrink:0,zIndex:10,position:'relative'}}>
+        {[{label:'ターン',val:'1',c:B_AP.tx},{label:'ミーム',val:'500',c:B_AP.pk},{label:'収入',val:'+600/T',c:B_AP.ac},{label:'拠点',val:'11/92',c:B_AP.tx}].map((item,i)=>(
+          <div key={i} style={{display:'flex',alignItems:'center',gap:5,padding:'0 10px',height:'100%',borderRight:`1px solid ${B_AP.br}`,fontSize:11}}>
+            <span style={{color:B_AP.txd}}>{item.label}</span>
+            <span style={{color:item.c,fontFamily:'Rajdhani',fontWeight:700,fontSize:13}}>{item.val}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ResolveScene
+function BResolveScene({round, formation, targetNode, onComplete}){
+  const firstChar = formation && (formation.front1 || formation.front2);
+  const RATKER2 = firstChar ? {
+    name: firstChar.name,
+    portrait: firstChar.portrait || 'assets/portrait_kiritan.png',
+    troops:10, maxTroops:10, hp:8, maxHp:10, atk:firstChar.atk,
+    color:RPK2, glow:'rgba(196,66,122,.75)',
+    lines:{intro:'「全力でいきます！」',battle:'「行くよ！！」',collision:'「くっ…！」',resolve:'「やった…！」',result:'「次も頑張ります！」'},
+  } : {
+    name:'東北きりたん', portrait:'assets/portrait_kiritan.png',
+    troops:10,maxTroops:10,hp:8,maxHp:10,atk:6,
+    color:RPK2,glow:'rgba(196,66,122,.75)',
+    lines:{intro:'「全力でいきます！」',battle:'「行くよ！！」',collision:'「くっ…！」',resolve:'「やった…！」',result:'「次も頑張ります！」'},
+  };
+  const RDEFDR2 = {
+    name: targetNode?.name || '敵',
+    portrait:'assets/portrait_meron.png',
+    troops:targetNode?.troops||500, maxTroops:targetNode?.troops||500,
+    hp:10, maxHp:10, atk:10,
+    color:RAC2, glow:'rgba(212,160,68,.75)',
+    lines:{intro:'「やってみろ！」',battle:'「防御陣形！」',collision:'「ぐっ…！」',resolve:'「損害は出たが…」',result:'「まだまだだ」'},
+  };
+
+  const [phaseIdx,setPhaseIdx]=React.useState(0);
+  const phase=RPH2[phaseIdx];
+  const [atkT,setAtkT]=React.useState(RATKER2.troops);
+  const [defT,setDefT]=React.useState(RDEFDR2.troops);
+  const [atkHP,setAtkHP]=React.useState(RATKER2.hp);
+  const [defHP,setDefHP]=React.useState(RDEFDR2.hp);
+  const [showIntro,setShowIntro]=React.useState(true);
+  const [introFading,setIntroFading]=React.useState(false);
+  const [showBattle,setShowBattle]=React.useState(false);
+  const [showCollision,setShowCollision]=React.useState(false);
+  const [showBurst,setShowBurst]=React.useState(false);
+  const [atkShake,setAtkShake]=React.useState(false);
+  const [defShake,setDefShake]=React.useState(false);
+  const [atkBanner,setAtkBanner]=React.useState(null);
+  const [defBanner,setDefBanner]=React.useState(null);
+  const timers=React.useRef([]);
+  const T=(fn,ms)=>{const t=setTimeout(fn,ms);timers.current.push(t);};
+  const clearT=()=>{timers.current.forEach(clearTimeout);timers.current=[];};
+
+  const skipToResult=React.useCallback(()=>{
+    clearT();
+    const fA=Math.max(0,RATKER2.troops-ROUT2.atkTroopDmg),fD=Math.max(0,RDEFDR2.troops-ROUT2.defTroopDmg);
+    const fAH=Math.max(0,RATKER2.hp-ROUT2.atkHPDmg),fDH=Math.max(0,RDEFDR2.hp-ROUT2.defHPDmg);
+    setShowIntro(false);setIntroFading(false);setShowBattle(false);setShowCollision(false);setShowBurst(false);
+    setAtkT(fA);setDefT(fD);setAtkHP(fAH);setDefHP(fDH);
+    setPhaseIdx(RPH2.indexOf('result'));
+    T(()=>{if(fA<=0)setAtkBanner('全滅');if(fDH<=0)setDefBanner('撃破');},300);
+  },[]);
+
+  React.useEffect(()=>{
+    if(phase==='intro'){
+      T(()=>{setIntroFading(true);T(()=>{setShowIntro(false);setIntroFading(false);setPhaseIdx(RPH2.indexOf('battle'));},380);},RDUR2.intro-380);
+    } else if(phase==='battle'){
+      setShowBattle(true);
+      T(()=>{setShowBattle(false);setPhaseIdx(RPH2.indexOf('collision'));},RDUR2.battle);
+    } else if(phase==='collision'){
+      setShowCollision(true);T(()=>setShowBurst(true),100);
+      T(()=>{setDefShake(true);T(()=>setDefShake(false),450);},150);
+      T(()=>{setAtkShake(true);T(()=>setAtkShake(false),450);},250);
+      T(()=>{setShowCollision(false);setPhaseIdx(RPH2.indexOf('resolve'));},RDUR2.collision);
+    } else if(phase==='resolve'){
+      setShowBurst(false);
+      const steps=24,atkTF=Math.max(0,RATKER2.troops-ROUT2.atkTroopDmg),defTF=Math.max(0,RDEFDR2.troops-ROUT2.defTroopDmg);
+      const atkHF=Math.max(0,RATKER2.hp-ROUT2.atkHPDmg),defHF=Math.max(0,RDEFDR2.hp-ROUT2.defHPDmg);
+      Array.from({length:steps}).forEach((_,i)=>{
+        T(()=>{const p=(i+1)/steps,lerp=(a,b)=>Math.round(a+(b-a)*p);
+          setAtkT(lerp(RATKER2.troops,atkTF));setDefT(lerp(RDEFDR2.troops,defTF));
+          setAtkHP(lerp(RATKER2.hp,atkHF));setDefHP(lerp(RDEFDR2.hp,defHF));
+        },(i/steps)*RDUR2.resolve);
+      });
+      T(()=>setPhaseIdx(RPH2.indexOf('result')),RDUR2.resolve);
+    } else if(phase==='result'){
+      T(()=>{if(atkT<=0)setAtkBanner('全滅');if(defHP<=0)setDefBanner('撃破');},350);
+    }
+    return ()=>clearT();
+  },[phase]);
+
+  const atkLine=RATKER2.lines[phase]||RATKER2.lines.intro;
+  const defLine=RDEFDR2.lines[phase]||RDEFDR2.lines.intro;
+
+  return(
+    <div onClick={()=>{if(phase!=='result')skipToResult();}}
+      style={{width:'100%',height:'100%',background:RBG2,fontFamily:"'Noto Sans JP',sans-serif",color:RTX2,display:'flex',flexDirection:'column',overflow:'hidden',position:'relative',cursor:phase==='result'?'default':'pointer'}}>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 16px',height:46,background:'rgba(5,5,20,.96)',borderBottom:'1px solid rgba(255,255,255,.07)',flexShrink:0,zIndex:10}}>
+        <div style={{display:'flex',alignItems:'center',gap:8,fontSize:12}}>
+          <img src="assets/logo_tohoku.png" alt="" style={{height:26,objectFit:'contain'}}/>
+          <span style={{color:RPK2,fontWeight:700}}>東北家</span>
+          <span style={{color:RTXD2,fontSize:10}}>→</span>
+          <span style={{fontWeight:600}}>{RDEFDR2.name}</span>
+        </div>
+        <div style={{fontFamily:'Rajdhani',fontSize:15,fontWeight:700,letterSpacing:1}}>ROUND {round} / 5 — 戦闘解決</div>
+        <div style={{fontFamily:'Rajdhani',fontSize:12,color:RTXD2}}>
+          <span style={{color:RAC2,fontWeight:700}}>{RDEFDR2.name}</span>
+        </div>
+      </div>
+      <div style={{flex:1,minHeight:0,position:'relative',overflow:'hidden'}}>
+        <div style={{position:'absolute',inset:0,backgroundImage:'url(assets/bg_battle.jpg)',backgroundSize:'cover',backgroundPosition:'center 40%',filter:'brightness(.5) contrast(1.1)'}}/>
+        <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at 50% 50%,transparent 25%,rgba(0,0,0,.65) 100%)'}}/>
+        {/* troop counters */}
+        <div style={{position:'absolute',top:14,left:12}}>
+          <div style={{fontFamily:"'Noto Sans JP'",fontSize:10,fontWeight:700,color:RTXD2,letterSpacing:1,textShadow:'0 1px 4px rgba(0,0,0,.9)'}}>部下数.</div>
+          {atkBanner
+            ?<div style={{fontFamily:"'Zen Maru Gothic'",fontSize:52,fontWeight:900,lineHeight:1,color:'#ff1111',textShadow:'0 0 20px #ff0000',animation:'bannerDrop .55s cubic-bezier(.16,1,.3,1) both'}}>{atkBanner}</div>
+            :<div key={atkT} style={{fontFamily:'Rajdhani',fontSize:44,fontWeight:900,lineHeight:1,color:'#7fff00',textShadow:'0 0 16px rgba(80,255,0,.8)',animation:'countDrop .18s ease'}}>{atkT}</div>}
+        </div>
+        <div style={{position:'absolute',top:14,right:12,textAlign:'right'}}>
+          <div style={{fontFamily:"'Noto Sans JP'",fontSize:10,fontWeight:700,color:RTXD2,letterSpacing:1,textShadow:'0 1px 4px rgba(0,0,0,.9)'}}>部下数.</div>
+          <div key={defT} style={{fontFamily:'Rajdhani',fontSize:44,fontWeight:900,lineHeight:1,color:'#7fff00',textShadow:'0 0 16px rgba(80,255,0,.8)',animation:'countDrop .18s ease'}}>{defT}</div>
+        </div>
+        {showBattle&&(
+          <div style={{position:'absolute',inset:0,pointerEvents:'none',zIndex:20}}>
+            {Array.from({length:4}).map((_,i)=>(
+              <div key={i} style={{position:'absolute',top:`${12+i*18}%`,left:'9%',animation:`chibiFlyR 0.6s ${i*.07}s ease-in both`}}>
+                <div style={{width:40,height:40,borderRadius:'50%',overflow:'hidden',border:`2.5px solid ${RPK2}`,boxShadow:`0 0 10px rgba(196,66,122,.75)`}}>
+                  <img src={RATKER2.portrait} style={{width:'100%',height:'100%',objectFit:'cover',objectPosition:'center top',transform:'scaleX(-1)'}}/>
+                </div>
+              </div>
+            ))}
+            {Array.from({length:5}).map((_,i)=>(
+              <div key={i} style={{position:'absolute',top:`${10+i*16}%`,right:'9%',animation:`chibiFlyL 0.6s ${i*.07}s ease-in both`}}>
+                <div style={{width:40,height:40,borderRadius:'50%',overflow:'hidden',border:`2.5px solid ${RAC2}`,boxShadow:`0 0 10px rgba(212,160,68,.75)`}}>
+                  <img src={RDEFDR2.portrait} style={{width:'100%',height:'100%',objectFit:'cover',objectPosition:'center top'}}/>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        {showCollision&&(
+          <div style={{position:'absolute',left:'50%',top:'45%',transform:'translate(-50%,-50%)',zIndex:35,pointerEvents:'none'}}>
+            <div style={{width:90,height:90,borderRadius:'50%',background:'radial-gradient(circle,rgba(255,255,255,.98) 0%,rgba(255,200,50,.85) 35%,transparent 70%)',animation:'blastExpand .55s ease-out forwards'}}/>
+          </div>
+        )}
+        {showBurst&&(
+          <div style={{position:'absolute',left:'50%',top:'42%',transform:'translate(-50%,-50%)',zIndex:40,pointerEvents:'none',width:0,height:0}}>
+            <div style={{position:'absolute',whiteSpace:'nowrap',animation:'burstRight 1.1s ease forwards'}}>
+              <span style={{fontFamily:'Rajdhani',fontSize:50,fontWeight:900,color:'#ff2222',textShadow:'0 0 24px #ff0000,0 2px 0 rgba(0,0,0,.9)'}}>-{ROUT2.defTroopDmg}</span>
+            </div>
+            <div style={{position:'absolute',whiteSpace:'nowrap',animation:'burstLeft 1.1s ease .1s forwards'}}>
+              <span style={{fontFamily:'Rajdhani',fontSize:50,fontWeight:900,color:'#ff5522',textShadow:'0 0 24px #ff3300,0 2px 0 rgba(0,0,0,.9)'}}>-{ROUT2.atkTroopDmg}</span>
+            </div>
+          </div>
+        )}
+        {showIntro&&(
+          <div style={{position:'absolute',inset:0,display:'flex',zIndex:30,animation:introFading?'fadeOut .4s ease forwards':'fadeIn .4s ease'}}>
+            <div style={{flex:1,overflow:'hidden',position:'relative'}}>
+              <img src={RATKER2.portrait} style={{width:'100%',height:'100%',objectFit:'cover',objectPosition:'center top'}}/>
+              <div style={{position:'absolute',inset:0,background:'linear-gradient(90deg,transparent 55%,rgba(0,0,0,.7))'}}/>
+              <div style={{position:'absolute',bottom:10,left:10,fontFamily:"'Zen Maru Gothic'",fontSize:14,fontWeight:900,color:RATKER2.color,textShadow:'0 2px 8px rgba(0,0,0,.9)'}}>{RATKER2.name}</div>
+            </div>
+            <div style={{width:200,flexShrink:0,background:'rgba(0,0,0,.8)',backdropFilter:'blur(10px)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:6}}>
+              <div style={{fontFamily:"'Zen Maru Gothic'",fontSize:60,fontWeight:900,lineHeight:1,color:'#fff',letterSpacing:4,textShadow:'0 0 24px rgba(255,255,255,.8)',animation:'introZoom .5s cubic-bezier(.16,1,.3,1) .25s both'}}>対決！</div>
+              <div style={{color:RTXD2,fontSize:12,letterSpacing:2}}>vs</div>
+            </div>
+            <div style={{flex:1,overflow:'hidden',position:'relative'}}>
+              <img src={RDEFDR2.portrait} style={{width:'100%',height:'100%',objectFit:'cover',objectPosition:'center top',transform:'scaleX(-1)'}}/>
+              <div style={{position:'absolute',inset:0,background:'linear-gradient(270deg,transparent 55%,rgba(0,0,0,.7))'}}/>
+              <div style={{position:'absolute',bottom:10,right:10,fontFamily:"'Zen Maru Gothic'",fontSize:14,fontWeight:900,color:RDEFDR2.color,textShadow:'0 2px 8px rgba(0,0,0,.9)'}}>{RDEFDR2.name}</div>
+            </div>
+          </div>
+        )}
+      </div>
+      {/* char panel */}
+      <div onClick={e=>e.stopPropagation()} style={{height:258,flexShrink:0,display:'flex',gap:10,background:'rgba(4,4,18,.97)',borderTop:'1px solid rgba(255,255,255,.07)',padding:'8px 12px'}}>
+        {/* atk card */}
+        <div style={{width:215,height:'100%',flexShrink:0,position:'relative',overflow:'hidden',borderRadius:6,border:`2px solid ${RATKER2.color}`,boxShadow:`0 0 22px ${RATKER2.glow}`,background:RBG2,animation:atkShake?'shake .4s ease':undefined}}>
+          <img src={RATKER2.portrait} alt={RATKER2.name} style={{width:'100%',height:'82%',objectFit:'cover',objectPosition:'center 12%',display:'block'}}/>
+          <div style={{position:'absolute',bottom:0,left:0,right:0,background:'linear-gradient(0deg,rgba(0,0,0,.95),rgba(0,0,0,.7))',borderTop:`2px solid ${RATKER2.color}`,padding:'4px 8px 5px'}}>
+            <div style={{fontFamily:"'Zen Maru Gothic'",fontSize:10,fontWeight:900,color:'rgba(255,255,255,.85)',marginBottom:1}}>{RATKER2.name}</div>
+            <div style={{display:'flex',alignItems:'baseline',gap:3}}>
+              <span style={{fontFamily:"'Noto Sans JP'",fontSize:10,fontWeight:700,color:'rgba(255,255,100,.7)'}}>HP.</span>
+              <span style={{fontFamily:'Rajdhani',fontSize:36,fontWeight:900,lineHeight:1,color:'#ffff00',textShadow:'0 0 16px #ffff00,0 2px 0 rgba(0,0,0,1)'}}>{atkHP}</span>
+            </div>
+          </div>
+        </div>
+        {/* center */}
+        <div style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:7,padding:'0 10px'}}>
+          <div style={{fontSize:10,color:RTXD2,background:'rgba(255,255,255,.04)',borderRadius:3,padding:'2px 10px',border:'1px solid rgba(255,255,255,.07)',letterSpacing:1}}>
+            {phase==='intro'?'戦闘開始':phase==='battle'?'攻撃中…':phase==='collision'?'衝突！':phase==='resolve'?'戦闘解決中…':'戦闘終了'}
+          </div>
+          <div style={{width:'100%',background:'rgba(196,66,122,.07)',borderRadius:4,padding:'5px 9px',border:'1px solid rgba(196,66,122,.2)'}}>
+            <span style={{fontSize:9,color:RPK2,fontWeight:700}}>{RATKER2.name}</span>
+            <div style={{fontSize:12,color:RTX2,marginTop:1,lineHeight:1.4}}>{atkLine}</div>
+          </div>
+          <div style={{width:'100%',background:'rgba(212,160,68,.07)',borderRadius:4,padding:'5px 9px',border:'1px solid rgba(212,160,68,.2)'}}>
+            <span style={{fontSize:9,color:RAC2,fontWeight:700}}>{RDEFDR2.name}</span>
+            <div style={{fontSize:12,color:RTX2,marginTop:1,lineHeight:1.4}}>{defLine}</div>
+          </div>
+          {phase==='result'&&(
+            <button onClick={e=>{e.stopPropagation();onComplete();}}
+              style={{marginTop:4,padding:'10px 32px',borderRadius:6,border:`2px solid ${RPK2}`,background:RPK2,color:'#fff',cursor:'pointer',fontSize:13,fontWeight:700,fontFamily:"'Noto Sans JP',sans-serif",boxShadow:'0 0 24px rgba(196,66,122,.5)',letterSpacing:.5}}>
+              マップに戻る →
+            </button>
+          )}
+          {phase!=='result'&&<div style={{fontSize:9,color:RTXD2,marginTop:4,animation:'pulse 1.5s infinite'}}>クリックでスキップ</div>}
+        </div>
+        {/* def card */}
+        <div style={{width:215,height:'100%',flexShrink:0,position:'relative',overflow:'hidden',borderRadius:6,border:`2px solid ${RDEFDR2.color}`,boxShadow:`0 0 22px ${RDEFDR2.glow}`,background:RBG2,animation:defShake?'shake .4s ease':undefined}}>
+          <img src={RDEFDR2.portrait} alt={RDEFDR2.name} style={{width:'100%',height:'82%',objectFit:'cover',objectPosition:'center 12%',display:'block',transform:'scaleX(-1)'}}/>
+          <div style={{position:'absolute',bottom:0,left:0,right:0,background:'linear-gradient(0deg,rgba(0,0,0,.95),rgba(0,0,0,.7))',borderTop:`2px solid ${RDEFDR2.color}`,padding:'4px 8px 5px'}}>
+            <div style={{fontFamily:"'Zen Maru Gothic'",fontSize:10,fontWeight:900,color:'rgba(255,255,255,.85)',marginBottom:1}}>{RDEFDR2.name}</div>
+            <div style={{display:'flex',alignItems:'baseline',gap:3}}>
+              <span style={{fontFamily:"'Noto Sans JP'",fontSize:10,fontWeight:700,color:'rgba(255,255,100,.7)'}}>HP.</span>
+              <span style={{fontFamily:'Rajdhani',fontSize:36,fontWeight:900,lineHeight:1,color:'#ffff00',textShadow:'0 0 16px #ffff00,0 2px 0 rgba(0,0,0,1)'}}>{defHP}</span>
+            </div>
+          </div>
+          {defBanner&&(
+            <div style={{position:'absolute',inset:0,background:'rgba(0,0,0,.55)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+              <div style={{fontFamily:"'Zen Maru Gothic'",fontSize:54,fontWeight:900,color:'#ffaa00',letterSpacing:4,textShadow:'0 0 24px #ffa000',animation:'bannerDrop .6s cubic-bezier(.16,1,.3,1) both'}}>{defBanner}</div>
+            </div>
+          )}
+        </div>
+      </div>
+      <div style={{height:32,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 14px',background:'rgba(5,5,20,.98)',borderTop:'1px solid rgba(255,255,255,.06)',fontSize:10,color:RTXD2}}>
+        <span>ターン <b style={{color:RTX2,fontFamily:'Rajdhani',fontSize:12}}>1</b>　ミーム <b style={{color:RPK2,fontFamily:'Rajdhani',fontSize:12}}>500</b></span>
+        <span style={{color:phase==='result'?'#7fff00':RTXD2,animation:phase!=='result'?'pulse 1.5s infinite':undefined}}>
+          {phase==='result'?'戦闘終了 — 「マップに戻る」を押してください':'戦闘アニメーション再生中…'}
+        </span>
+        <span style={{opacity:.4,fontSize:9}}>{phase!=='result'?'クリックでスキップ':''}</span>
+      </div>
+    </div>
+  );
+}
+
+// Battle Curtain
+function BCurtain({stage, label, toResolve}){
+  if(stage==='idle') return null;
+  const closing=stage==='closing', closed=stage==='closed', opening=stage==='opening';
+  return(
+    <div style={{
+      position:'absolute',inset:0,zIndex:9999,
+      background:toResolve?'linear-gradient(150deg,#0a0816,#1a0828)':'linear-gradient(150deg,#fff8f0,#ffe8d0)',
+      display:'flex',alignItems:'center',justifyContent:'center',
+      animation:closing?'curtainIn .42s cubic-bezier(.4,0,.2,1) forwards':opening?'curtainOut .42s cubic-bezier(.4,0,.2,1) forwards':'none',
+      opacity:closed?1:undefined,
+    }}>
+      {[0,1,2,3].map(i=>(
+        <div key={i} style={{position:'absolute',top:`${15+i*22}%`,left:'-5%',right:'-5%',height:'1px',background:`linear-gradient(90deg,transparent,${toResolve?'rgba(196,66,122,.3)':'rgba(184,112,16,.25)'},transparent)`,transform:`rotate(${-2+i*.8}deg)`}}/>
+      ))}
+      {(closed||opening)&&(
+        <div style={{textAlign:'center',animation:closed?'labelPop .5s .05s cubic-bezier(.16,1,.3,1) both':'none'}}>
+          <div style={{fontFamily:"'Zen Maru Gothic',sans-serif",fontSize:56,fontWeight:900,letterSpacing:8,color:toResolve?'#fff':'#1c1020',textShadow:toResolve?'0 0 40px rgba(196,66,122,.9),0 0 80px rgba(196,66,122,.4)':'0 0 30px rgba(184,112,16,.5)',lineHeight:1}}>{label}</div>
+          <div style={{marginTop:10,fontSize:11,letterSpacing:4,color:toResolve?'rgba(255,255,255,.4)':'rgba(28,16,32,.35)',fontFamily:'Rajdhani',fontWeight:600}}>
+            {toResolve?'— BATTLE RESOLUTION —':'— ACTION SELECTION —'}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// BattleFlow — wraps ActionScene + ResolveScene with curtain
+function BattleFlow({ formation, targetNode, onComplete }) {
+  const [scene, setBScene] = React.useState('action');
+  const [round, setRound] = React.useState(1);
+  const [curtain, setCurtain] = React.useState('idle');
+  const [curtainLabel, setCurtainLabel] = React.useState('');
+  const [toResolve, setToResolve] = React.useState(true);
+  const [actionKey, setActionKey] = React.useState(0);
+  const [resolveKey, setResolveKey] = React.useState(0);
+
+  const transition = (nextScene, label, isToResolve) => {
+    setToResolve(isToResolve);
+    setCurtainLabel(label);
+    setCurtain('closing');
+    setTimeout(()=>{
+      setCurtain('closed');
+      setBScene(nextScene);
+      if(nextScene==='resolve') setResolveKey(k=>k+1);
+      else { setRound(r=>Math.min(r+1,5)); setActionKey(k=>k+1); }
+      setTimeout(()=>{
+        setCurtain('opening');
+        setTimeout(()=>setCurtain('idle'),460);
+      },640);
+    },450);
+  };
+
+  return (
+    <div className="scene-enter" style={{width:'100%', height:'100%', position:'relative', overflow:'hidden'}}>
+      <div style={{position:'absolute',inset:0,opacity:scene==='action'?1:0,pointerEvents:scene==='action'?'all':'none',transition:'opacity .05s'}}>
+        <BActionScene key={actionKey} round={round} formation={formation} targetNode={targetNode}
+          onComplete={()=>transition('resolve','戦闘解決',true)}/>
+      </div>
+      <div style={{position:'absolute',inset:0,opacity:scene==='resolve'?1:0,pointerEvents:scene==='resolve'?'all':'none',transition:'opacity .05s'}}>
+        <BResolveScene key={resolveKey} round={round} formation={formation} targetNode={targetNode}
+          onComplete={onComplete}/>
+      </div>
+      <BCurtain stage={curtain} label={curtainLabel} toResolve={toResolve}/>
+    </div>
+  );
+}
+
+Object.assign(window, { BattleFlow });
+</script>
+
+<!-- ═══════════════════════════════════════════════════════
+     ENEMY TURN CUTIN OVERLAY
+═══════════════════════════════════════════════════════ -->
+<script type="text/babel" id="enemy-turn-cutin">
+
+// 敵派閥定義
+const ENEMY_FACTIONS = [
+  {
+    id:'metro',
+    name:'大都会連合',
+    motto:'圧倒的物量で蹂躙する',
+    portrait:'assets/portrait_meron.png',
+    leader:'北海道めろん',
+    color:'#d4a044',
+    accent:'#8a6010',
+    territory:['n8'],
+  },
+  {
+    id:'hokkaido',
+    name:'北海道勢',
+    motto:'雪原から全土へ',
+    portrait:'assets/portrait_bern_fog.png',
+    leader:'ベルン & フォーグ',
+    color:'#3d8fb0',
+    accent:'#1a4a66',
+    territory:['n9','n10','n12','n13'],
+  },
+  {
+    id:'south',
+    name:'南東北同盟',
+    motto:'南方からの侵攻',
+    portrait:'assets/portrait_awamo.png',
+    leader:'沖縄あわも',
+    color:'#b6452f',
+    accent:'#6e1f1a',
+    territory:['n2','n3','n5','n6'],
+  },
+];
+
+// Single faction cutin
+function FactionCutin({ faction, index, total, phase, onSkip }) {
+  // phase: 'in' (entering, ~600ms) | 'hold' (~1500ms) | 'out' (~500ms)
+  return (
+    <div
+      onClick={onSkip}
+      style={{
+        position:'absolute', inset:0, zIndex:10000,
+        background: `linear-gradient(135deg, ${faction.accent} 0%, #0a0610 50%, ${faction.accent} 100%)`,
+        display:'flex', alignItems:'stretch', overflow:'hidden',
+        cursor:'pointer',
+        animation: phase==='out' ? 'cutinOut .5s cubic-bezier(.4,0,.2,1) forwards' : 'cutinIn .5s cubic-bezier(.16,1,.3,1) both',
+      }}>
+
+      {/* diagonal accent stripes */}
+      <div style={{
+        position:'absolute', inset:0, pointerEvents:'none',
+        backgroundImage: `repeating-linear-gradient(135deg, transparent 0, transparent 80px, ${faction.color}15 80px, ${faction.color}15 90px)`,
+      }}/>
+
+      {/* speed lines from edges */}
+      {[...Array(8)].map((_,i) => (
+        <div key={i} style={{
+          position:'absolute',
+          top: `${i*12}%`, left: 0, right: 0,
+          height: 2,
+          background: `linear-gradient(90deg, transparent, ${faction.color}55, transparent)`,
+          transform: `skewY(${-2 + (i%3)}deg)`,
+          animation: `streak 1.2s ${i*.05}s ease-out both`,
+        }}/>
+      ))}
+
+      {/* === LEFT: portrait area === */}
+      <div style={{
+        flex:1, position:'relative', overflow:'hidden',
+        animation:'portraitSlideIn .6s cubic-bezier(.16,1,.3,1) both',
+      }}>
+        {/* large portrait */}
+        <img src={faction.portrait} alt={faction.leader}
+          style={{
+            position:'absolute', top:'50%', left:'50%',
+            transform:'translate(-50%, -50%)',
+            height:'130%', width:'auto',
+            objectFit:'cover', objectPosition:'top center',
+            filter:`drop-shadow(0 20px 40px rgba(0,0,0,.6))`,
+          }}/>
+
+        {/* dark gradient overlay on portrait edge */}
+        <div style={{
+          position:'absolute', inset:0,
+          background: `linear-gradient(90deg, rgba(0,0,0,.5) 0%, transparent 30%, transparent 70%, ${faction.accent}cc 100%)`,
+        }}/>
+
+        {/* leader name strip */}
+        <div style={{
+          position:'absolute', bottom:'8%', left:'8%',
+          fontFamily:"'Zen Maru Gothic'", fontSize:18, fontWeight:900,
+          color: faction.color,
+          textShadow:`0 2px 12px rgba(0,0,0,.95), 0 0 24px ${faction.color}`,
+          padding:'6px 16px',
+          background:'rgba(0,0,0,.55)',
+          borderLeft:`4px solid ${faction.color}`,
+          animation:'fadeUp .5s .35s both',
+        }}>
+          {faction.leader}
+        </div>
+      </div>
+
+      {/* === RIGHT: text/banner area === */}
+      <div style={{
+        flex:'0 0 52%', position:'relative',
+        background: `linear-gradient(110deg, transparent 0%, rgba(0,0,0,.85) 18%, rgba(0,0,0,.92) 100%)`,
+        display:'flex', flexDirection:'column', justifyContent:'center',
+        padding:'0 6vw 0 4vw',
+        gap:18,
+      }}>
+        {/* phase tag */}
+        <div style={{
+          display:'flex', alignItems:'center', gap:10,
+          animation:'fadeRight .4s .15s both',
+        }}>
+          <div style={{width:48, height:2, background: faction.color}}/>
+          <div style={{
+            fontFamily:'Rajdhani', fontSize:14, fontWeight:700, letterSpacing:'.32em',
+            color: faction.color,
+            textShadow:`0 0 12px ${faction.color}`,
+          }}>ENEMY PHASE — {String(index+1).padStart(2,'0')}/{String(total).padStart(2,'0')}</div>
+        </div>
+
+        {/* main title */}
+        <div style={{
+          fontFamily:"'Zen Maru Gothic'", fontWeight:900,
+          fontSize:'min(7vw, 110px)', lineHeight:.95,
+          color:'#fff', letterSpacing:'.04em',
+          textShadow: `0 4px 28px rgba(0,0,0,.9), 0 0 40px ${faction.color}80`,
+          animation:'fadeRight .55s .25s both',
+        }}>
+          {faction.name}
+        </div>
+
+        {/* subtitle */}
+        <div style={{
+          fontFamily:"'Noto Sans JP'", fontWeight:700,
+          fontSize:'min(2.8vw, 40px)', lineHeight:1.2,
+          color: faction.color,
+          textShadow:`0 2px 12px rgba(0,0,0,.8)`,
+          animation:'fadeRight .5s .4s both',
+        }}>
+          「{faction.motto}」
+        </div>
+
+        {/* action banner */}
+        <div style={{
+          marginTop:8,
+          display:'inline-flex', alignSelf:'flex-start', alignItems:'center', gap:14,
+          padding:'12px 28px',
+          background:`linear-gradient(90deg, ${faction.color}, ${faction.accent})`,
+          borderLeft:`5px solid #fff`,
+          fontFamily:"'Zen Maru Gothic'", fontSize:'min(3.5vw, 50px)', fontWeight:900,
+          color:'#fff', letterSpacing:'.16em',
+          boxShadow:`0 6px 30px rgba(0,0,0,.5), 0 0 40px ${faction.color}66`,
+          animation:'bannerSlide .55s .55s cubic-bezier(.16,1,.3,1) both',
+        }}>
+          <span style={{fontSize:'.7em', opacity:.9}}>▶</span>
+          <span>行動開始</span>
+        </div>
+
+        {/* territory count */}
+        <div style={{
+          marginTop:6, display:'flex', gap:14, alignItems:'center',
+          fontFamily:'Rajdhani', fontSize:13, fontWeight:600,
+          color:'rgba(255,255,255,.5)', letterSpacing:'.16em',
+          animation:'fadeRight .4s .75s both',
+        }}>
+          <span>支配領 <b style={{color: faction.color, fontSize:18}}>{faction.territory.length}</b></span>
+          <span style={{opacity:.4}}>·</span>
+          <span style={{opacity:.6}}>クリックでスキップ</span>
+        </div>
+      </div>
+
+      {/* faction emblem at top-right */}
+      <div style={{
+        position:'absolute', top:24, right:32,
+        fontFamily:'Rajdhani', fontWeight:900, fontSize:11, letterSpacing:'.4em',
+        color:'rgba(255,255,255,.3)',
+        animation:'fadeIn .4s .2s both',
+      }}>
+        FACTION · {faction.id.toUpperCase()}
+      </div>
+    </div>
+  );
+}
+
+// Phase progress bar (top of screen during enemy turn)
+function EnemyTurnProgress({ index, total, faction }) {
+  return (
+    <div style={{
+      position:'absolute', top:0, left:0, right:0, zIndex:9998,
+      padding:'10px 24px',
+      background:'linear-gradient(180deg, rgba(0,0,0,.85), rgba(0,0,0,.0))',
+      pointerEvents:'none',
+    }}>
+      <div style={{
+        display:'flex', alignItems:'center', gap:12,
+        animation:'fadeIn .3s ease both',
+      }}>
+        <div style={{
+          fontFamily:'Rajdhani', fontWeight:700, fontSize:11, letterSpacing:'.28em',
+          color:'rgba(255,255,255,.55)',
+        }}>ENEMY TURN</div>
+        <div style={{flex:1, display:'flex', gap:6}}>
+          {Array.from({length:total}).map((_,i) => (
+            <div key={i} style={{
+              flex:1, height:3, borderRadius:2,
+              background: i<index ? faction.color
+                : i===index ? `linear-gradient(90deg, ${faction.color}, ${faction.color}66)`
+                : 'rgba(255,255,255,.12)',
+              boxShadow: i===index ? `0 0 8px ${faction.color}` : 'none',
+              transition:'all .3s',
+            }}/>
+          ))}
+        </div>
+        <div style={{
+          fontFamily:'Rajdhani', fontWeight:700, fontSize:13,
+          color: faction.color,
+        }}>{index+1}/{total}</div>
+      </div>
+    </div>
+  );
+}
+
+// Orchestrator — runs each faction cutin in sequence
+function EnemyTurnSequence({ onComplete }) {
+  const [idx, setIdx] = React.useState(0);
+  const [phase, setPhase] = React.useState('in'); // in | hold | out
+  const timers = React.useRef([]);
+  const T = (fn, ms) => { const t=setTimeout(fn,ms); timers.current.push(t); };
+  const clearT = () => { timers.current.forEach(clearTimeout); timers.current=[]; };
+
+  React.useEffect(() => {
+    clearT();
+    setPhase('in');
+    // hold
+    T(() => setPhase('hold'), 600);
+    // out
+    T(() => setPhase('out'), 600 + 1700);
+    // advance
+    T(() => {
+      if (idx < ENEMY_FACTIONS.length - 1) {
+        setIdx(i => i + 1);
+      } else {
+        onComplete();
+      }
+    }, 600 + 1700 + 500);
+    return clearT;
+  }, [idx]);
+
+  const handleSkip = () => {
+    clearT();
+    setPhase('out');
+    setTimeout(() => {
+      if (idx < ENEMY_FACTIONS.length - 1) setIdx(i => i + 1);
+      else onComplete();
+    }, 350);
+  };
+
+  const faction = ENEMY_FACTIONS[idx];
+  return (
+    <>
+      <EnemyTurnProgress index={idx} total={ENEMY_FACTIONS.length} faction={faction}/>
+      <FactionCutin
+        key={idx}
+        faction={faction}
+        index={idx}
+        total={ENEMY_FACTIONS.length}
+        phase={phase}
+        onSkip={handleSkip}
+      />
+    </>
+  );
+}
+
+// Final "your turn" cutin
+function PlayerTurnCutin({ onComplete }) {
+  const [phase, setPhase] = React.useState('in');
+  React.useEffect(() => {
+    const t1 = setTimeout(() => setPhase('hold'), 500);
+    const t2 = setTimeout(() => setPhase('out'), 500 + 1300);
+    const t3 = setTimeout(() => onComplete(), 500 + 1300 + 450);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+  }, []);
+
+  return (
+    <div onClick={onComplete} style={{
+      position:'absolute', inset:0, zIndex:10000,
+      background:'linear-gradient(135deg, #1a4a66 0%, #0a1828 50%, #1a8a96 100%)',
+      display:'flex', alignItems:'center', justifyContent:'center',
+      cursor:'pointer',
+      animation: phase==='out' ? 'cutinOut .45s cubic-bezier(.4,0,.2,1) forwards' : 'cutinIn .45s cubic-bezier(.16,1,.3,1) both',
+      overflow:'hidden',
+    }}>
+      {/* light sweeps */}
+      {[...Array(6)].map((_,i) => (
+        <div key={i} style={{
+          position:'absolute',
+          top:`${i*18}%`, left:'-30%', right:'-30%', height:1,
+          background:'linear-gradient(90deg, transparent, rgba(26,138,150,.5), transparent)',
+          transform:`rotate(${-3 + i*1}deg)`,
+          animation:`streak 1.2s ${i*.07}s ease-out both`,
+        }}/>
+      ))}
+
+      <div style={{textAlign:'center', position:'relative', zIndex:1}}>
+        <div style={{
+          fontFamily:'Rajdhani', fontWeight:700, fontSize:14, letterSpacing:'.5em',
+          color:'rgba(120,220,235,.85)',
+          textShadow:'0 0 20px rgba(26,138,150,.8)',
+          marginBottom:14,
+          animation:'fadeUp .4s both',
+        }}>YOUR TURN</div>
+        <div style={{
+          fontFamily:"'Zen Maru Gothic'", fontWeight:900,
+          fontSize:'min(11vw, 160px)', lineHeight:1,
+          color:'#fff',
+          textShadow:'0 0 60px rgba(120,220,235,.7), 0 0 24px rgba(255,255,255,.4)',
+          letterSpacing:'.1em',
+          animation:'titleZoom .55s cubic-bezier(.16,1,.3,1) both',
+        }}>東北家</div>
+        <div style={{
+          marginTop:10,
+          fontFamily:"'Zen Maru Gothic'", fontWeight:700,
+          fontSize:'min(4vw, 56px)', lineHeight:1,
+          color:'#7fdce5',
+          letterSpacing:'.3em',
+          textShadow:'0 0 20px rgba(120,220,235,.7)',
+          animation:'fadeUp .4s .25s both',
+        }}>行動開始</div>
+        <div style={{
+          marginTop:24, fontSize:11, letterSpacing:'.3em',
+          color:'rgba(255,255,255,.4)', fontFamily:'Rajdhani',
+          animation:'fadeIn .3s .5s both',
+        }}>クリックでスキップ</div>
+      </div>
+    </div>
+  );
+}
+
+// Inject keyframes for cutin
+(function(){
+  const id = '__cutin_kf';
+  if(document.getElementById(id)) return;
+  const s = document.createElement('style');
+  s.id = id;
+  s.textContent = `
+    @keyframes cutinIn { from{opacity:0;transform:scale(1.04)} to{opacity:1;transform:scale(1)} }
+    @keyframes cutinOut { from{opacity:1} to{opacity:0;transform:scale(.98)} }
+    @keyframes portraitSlideIn { from{transform:translateX(-80px) scale(1.02);opacity:0} to{transform:translateX(0) scale(1);opacity:1} }
+    @keyframes fadeRight { from{opacity:0;transform:translateX(40px)} to{opacity:1;transform:translateX(0)} }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes bannerSlide { from{opacity:0;transform:translateX(-30px) skewX(-8deg)} to{opacity:1;transform:translateX(0) skewX(0)} }
+    @keyframes streak { 0%{transform:translateX(-30%) skewY(0deg);opacity:0} 30%{opacity:1} 100%{transform:translateX(30%);opacity:0} }
+    @keyframes titleZoom { 0%{transform:scale(1.6);opacity:0;letter-spacing:.5em} 60%{transform:scale(.96)} 100%{transform:scale(1);opacity:1;letter-spacing:.1em} }
+  `;
+  document.head.appendChild(s);
+})();
+
+Object.assign(window, { EnemyTurnSequence, PlayerTurnCutin });
+</script>
+
+<!-- ═══════════════════════════════════════════════════════
+     ADV SCENE — Persona-style visual novel
+═══════════════════════════════════════════════════════ -->
+<script type="text/babel" id="adv-scene">
+
+// ── Scenario data ────────────────────────────────────────
+// expr: 'normal' (default), 'smile', 'angry', 'surprised', 'thinking'
+//       — 表情差分は portrait_<id>_<expr>.png を読みに行き、無ければ通常立ち絵にフォールバック
+// type: 'narration' (no speaker, full-width gray box), 'dialog' (speaker label + text)
+//       'cutin' (special — full-screen close-up with quote, ペルソナ風カットイン)
+const DEMO_SCENARIO = [
+  // セットアップ：3人が舞台に登場
+  { type:'setup', cast:[
+      {id:'c1', pos:'left'},   // きりたん
+      {id:'c4', pos:'center'}, // ずんだもん
+      {id:'c3', pos:'right'},  // しゅお
+    ], bg:'assets/bg_battle.jpg', location:'東北 — 仙台城本丸' },
+
+  { type:'narration', text:'長きにわたる遠征を経て、東北家は仙台へと帰還した。' },
+
+  { type:'dialog', speaker:'c1', expr:'normal',
+    text:'みんな、ご苦労さまでした。' },
+
+  { type:'dialog', speaker:'c1', expr:'smile',
+    text:'今回の遠征、無事に終えられたのは…全員のおかげです。' },
+
+  { type:'dialog', speaker:'c4', expr:'smile',
+    text:'なのだー！ずんだもんの守りが効いたのだ！' },
+
+  { type:'dialog', speaker:'c3', expr:'normal',
+    text:'ふふ、ずんだもんが一番頑張ったとは言えませんが…まあ、よしとしましょう。' },
+
+  { type:'dialog', speaker:'c4', expr:'angry',
+    text:'なっ…！しゅおさん、それは聞き捨てならないのだ！' },
+
+  { type:'dialog', speaker:'c3', expr:'smile',
+    text:'冗談ですよ、ずんだもん。' },
+
+  // ペルソナ風カットイン
+  { type:'cutin', speaker:'c1', expr:'normal',
+    text:'…でも、敵もこのまま黙ってはいないはず。', subtext:'次の動きを警戒します' },
+
+  { type:'dialog', speaker:'c1', expr:'thinking',
+    text:'特に大都会連合…あの物量は脅威です。' },
+
+  { type:'dialog', speaker:'c3', expr:'normal',
+    text:'同感ですね。北海道勢の動きも気になります。' },
+
+  { type:'dialog', speaker:'c4', expr:'normal',
+    text:'みんなで力を合わせれば、なんとかなるのだ！' },
+
+  { type:'dialog', speaker:'c1', expr:'smile',
+    text:'…そうですね。次のターンも、よろしくお願いします。' },
+
+  { type:'narration', text:'こうして、東北家の新たなターンが始まろうとしていた。' },
+
+  { type:'end' },
+];
+
+// ── Helper: get character + portrait ──────────────────────
+function getChar(id) {
+  return CHARS.find(c => c.id === id);
+}
+function getPortrait(char, expr) {
+  if(!char) return null;
+  // 差分対応（無ければベース立ち絵）
+  if(expr && expr !== 'normal' && char.portrait) {
+    // assets/portrait_kiritan.png → assets/portrait_kiritan_smile.png
+    const variant = char.portrait.replace(/\.(png|jpg|jpeg)$/i, `_${expr}.$1`);
+    // 実ファイルが無くてもonErrorで元立ち絵にフォールバックする実装
+    return { primary: variant, fallback: char.portrait };
+  }
+  return { primary: char.portrait, fallback: null };
+}
+
+// ── Standing portrait ────────────────────────────────────
+function StandingChar({ char, expr, pos, isActive, isSpeaking }) {
+  const portrait = getPortrait(char, expr);
+  if(!portrait?.primary) {
+    // No portrait fallback — show silhouette
+    return (
+      <div style={{
+        position:'absolute',
+        bottom:0,
+        ...(pos==='left'   ? {left:'4%'}   : {}),
+        ...(pos==='center' ? {left:'50%', transform:'translateX(-50%)'} : {}),
+        ...(pos==='right'  ? {right:'4%'}  : {}),
+        width:'min(28vw, 380px)', height:'88%',
+        background:'rgba(255,255,255,.05)',
+        border:'1px dashed rgba(255,255,255,.15)',
+        borderRadius:8,
+        display:'flex', alignItems:'center', justifyContent:'center',
+        color:'rgba(255,255,255,.3)', fontSize:14,
+        transition:'all .35s cubic-bezier(.16,1,.3,1)',
+      }}>
+        立ち絵なし
+      </div>
+    );
+  }
+
+  const [imgSrc, setImgSrc] = React.useState(portrait.primary);
+  React.useEffect(() => { setImgSrc(portrait.primary); }, [portrait.primary]);
+
+  // Position offset
+  const baseLeft = pos==='left' ? '6%' : pos==='center' ? '50%' : 'auto';
+  const baseRight = pos==='right' ? '6%' : 'auto';
+  const baseTransform = pos==='center' ? 'translateX(-50%)' : 'none';
+
+  return (
+    <div style={{
+      position:'absolute',
+      bottom: isSpeaking ? '-2%' : '-6%',
+      left:  baseLeft,
+      right: baseRight,
+      transform: `${baseTransform} ${isSpeaking ? 'scale(1.04)' : 'scale(1)'}`,
+      transformOrigin: pos==='center' ? '50% 100%' : pos==='left' ? '10% 100%' : '90% 100%',
+      width:'min(32vw, 460px)',
+      height:'92%',
+      transition:'all .45s cubic-bezier(.16,1,.3,1), filter .3s',
+      filter: isSpeaking
+        ? 'brightness(1.05) saturate(1.1) drop-shadow(0 12px 30px rgba(0,0,0,.5))'
+        : 'brightness(.4) saturate(.5) drop-shadow(0 4px 14px rgba(0,0,0,.5))',
+      zIndex: isSpeaking ? 5 : 2,
+      pointerEvents:'none',
+    }}>
+      <img
+        src={imgSrc}
+        alt={char.name}
+        onError={() => { if(portrait.fallback && imgSrc !== portrait.fallback) setImgSrc(portrait.fallback); }}
+        style={{
+          width:'100%', height:'100%',
+          objectFit:'contain', objectPosition:'bottom center',
+          display:'block',
+        }}
+      />
+      {/* Speaker glow ring (only when speaking) */}
+      {isSpeaking && (
+        <div style={{
+          position:'absolute', inset:'auto -8% -3% -8%', height:'30%',
+          background:`radial-gradient(ellipse at center bottom, ${PK}55, transparent 70%)`,
+          pointerEvents:'none',
+          animation:'fadeIn .35s ease both',
+        }}/>
+      )}
+    </div>
+  );
+}
+
+// ── Persona-style slash effect on speaker change ─────────
+function SlashEffect({ keyId }) {
+  return (
+    <div key={keyId} style={{
+      position:'absolute', inset:0, pointerEvents:'none', zIndex:6,
+      overflow:'hidden',
+    }}>
+      <div style={{
+        position:'absolute', top:'-20%', left:'-30%', right:'-30%', height:'140%',
+        background:'linear-gradient(115deg, transparent 40%, rgba(255,255,255,.55) 50%, transparent 60%)',
+        animation:'slashSweep .55s cubic-bezier(.4,0,.2,1) both',
+      }}/>
+    </div>
+  );
+}
+
+// ── Speaker name tag (ペルソナ風斜めパネル) ──────────────
+function SpeakerTag({ char, color }) {
+  return (
+    <div style={{
+      display:'inline-flex', alignItems:'center',
+      transform:'skewX(-12deg)',
+      background: `linear-gradient(110deg, ${color}, ${color}dd)`,
+      padding:'8px 26px 8px 22px',
+      boxShadow:`0 4px 18px ${color}66, inset 0 -2px 0 rgba(0,0,0,.25)`,
+      animation:'tagSlide .35s cubic-bezier(.16,1,.3,1) both',
+    }}>
+      <div style={{
+        transform:'skewX(12deg)',
+        display:'flex', alignItems:'baseline', gap:8,
+      }}>
+        <span style={{
+          fontFamily:"'Zen Maru Gothic'", fontSize:16, fontWeight:900,
+          color:'#fff', letterSpacing:'.06em',
+          textShadow:'0 1px 2px rgba(0,0,0,.4)',
+        }}>{char.name}</span>
+        <span style={{
+          fontFamily:'Rajdhani', fontSize:9, fontWeight:600,
+          color:'rgba(255,255,255,.7)', letterSpacing:'.18em',
+        }}>{(char.role||'').toUpperCase()}</span>
+      </div>
+    </div>
+  );
+}
+
+// ── Type-on text ─────────────────────────────────────────
+function useTypewriter(text, speed=24, paused=false) {
+  const [shown, setShown] = React.useState('');
+  const [done, setDone] = React.useState(false);
+  React.useEffect(() => {
+    if(paused) return;
+    setShown(''); setDone(false);
+    if(!text) { setDone(true); return; }
+    let i = 0;
+    const tick = () => {
+      i++;
+      setShown(text.slice(0, i));
+      if(i >= text.length) setDone(true);
+      else timer = setTimeout(tick, speed);
+    };
+    let timer = setTimeout(tick, speed);
+    return () => clearTimeout(timer);
+  }, [text, speed, paused]);
+  const finish = React.useCallback(() => { setShown(text || ''); setDone(true); }, [text]);
+  return [shown, done, finish];
+}
+
+// ── Dialog box (bottom) ─────────────────────────────────
+function DialogBox({ entry, char, color, onAdvance, onFinishType }) {
+  const [shown, done, finish] = useTypewriter(entry.text, 22);
+  React.useEffect(() => { if(done) onFinishType?.(); }, [done]);
+
+  return (
+    <div
+      onClick={(e) => {
+        e.stopPropagation();
+        if(!done) finish();
+        else onAdvance();
+      }}
+      style={{
+        position:'absolute', left:0, right:0, bottom:0, zIndex:20,
+        cursor:'pointer',
+      }}>
+      {/* Speaker tag (only for dialog) */}
+      {char && (
+        <div style={{
+          position:'absolute', left:24, top:-16,
+          zIndex:21,
+        }}>
+          <SpeakerTag char={char} color={color}/>
+        </div>
+      )}
+
+      {/* Box */}
+      <div style={{
+        position:'relative',
+        margin:'0 16px 16px 16px',
+        background: char
+          ? `linear-gradient(180deg, rgba(20,12,30,.95), rgba(8,6,18,.97))`
+          : `linear-gradient(180deg, rgba(35,32,40,.92), rgba(20,18,25,.95))`,
+        borderTop: char ? `2px solid ${color}` : '2px solid rgba(255,255,255,.18)',
+        borderLeft: '1px solid rgba(255,255,255,.06)',
+        borderRight: '1px solid rgba(255,255,255,.06)',
+        borderBottom: '1px solid rgba(255,255,255,.06)',
+        borderRadius: 6,
+        padding: char ? '24px 32px 22px 32px' : '20px 32px',
+        minHeight: char ? 110 : 80,
+        boxShadow:'0 -4px 24px rgba(0,0,0,.5)',
+        backdropFilter:'blur(4px)',
+        animation:'dialogFadeIn .3s ease both',
+      }}>
+        {/* corner accents */}
+        {char && [
+          {top:8, left:8}, {top:8, right:8},
+          {bottom:8, left:8}, {bottom:8, right:8},
+        ].map((p,i)=>(
+          <div key={i} style={{
+            position:'absolute', ...p, width:14, height:14,
+            borderColor: color,
+            borderStyle:'solid',
+            borderWidth: `${p.top!==undefined?1:0}px ${p.right!==undefined?1:0}px ${p.bottom!==undefined?1:0}px ${p.left!==undefined?1:0}px`,
+            opacity:.55,
+          }}/>
+        ))}
+
+        <div style={{
+          fontFamily:"'Noto Sans JP'",
+          fontSize: char ? 19 : 16,
+          fontStyle: char ? 'normal' : 'italic',
+          fontWeight: char ? 500 : 400,
+          color: char ? '#fff' : 'rgba(220,220,230,.78)',
+          lineHeight: 1.7,
+          letterSpacing:'.04em',
+          textShadow: char ? '0 1px 6px rgba(0,0,0,.6)' : 'none',
+          textAlign: char ? 'left' : 'center',
+          minHeight: char ? '2em' : '1.4em',
+        }}>
+          {shown}
+          {/* blinking cursor while typing */}
+          {!done && <span style={{
+            display:'inline-block', marginLeft:2,
+            color: color || 'rgba(255,255,255,.7)',
+            animation:'blink 1s steps(2) infinite',
+          }}>▾</span>}
+        </div>
+
+        {/* advance prompt */}
+        {done && (
+          <div style={{
+            position:'absolute', right:16, bottom:8,
+            fontSize:13, color: color || 'rgba(255,255,255,.6)',
+            animation:'bounceY 1.2s ease infinite',
+          }}>▼</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Persona-style cutin ─────────────────────────────────
+function PersonaCutin({ entry, char, color, onAdvance }) {
+  const portrait = getPortrait(char, entry.expr);
+  const [imgSrc, setImgSrc] = React.useState(portrait?.primary);
+  const [shown, done, finish] = useTypewriter(entry.text, 28);
+
+  return (
+    <div
+      onClick={(e) => {
+        e.stopPropagation();
+        if(!done) finish();
+        else onAdvance();
+      }}
+      style={{
+        position:'absolute', inset:0, zIndex:30,
+        background:`linear-gradient(135deg, ${color}33, rgba(8,4,16,.85) 50%, ${color}55)`,
+        cursor:'pointer',
+        overflow:'hidden',
+        animation:'cutinAppear .4s cubic-bezier(.16,1,.3,1) both',
+      }}>
+
+      {/* diagonal stripes */}
+      <div style={{
+        position:'absolute', inset:0, pointerEvents:'none',
+        backgroundImage:`repeating-linear-gradient(115deg, transparent 0, transparent 60px, ${color}18 60px, ${color}18 70px)`,
+      }}/>
+
+      {/* Portrait — large, right-aligned, slanted frame */}
+      <div style={{
+        position:'absolute', right:'-2%', top:'4%', bottom:'4%', width:'58%',
+        clipPath:'polygon(15% 0, 100% 0, 100% 100%, 0% 100%)',
+        animation:'cutinPortraitIn .5s cubic-bezier(.16,1,.3,1) both',
+      }}>
+        {imgSrc ? (
+          <img src={imgSrc} alt={char.name}
+            onError={() => { if(portrait?.fallback && imgSrc !== portrait.fallback) setImgSrc(portrait.fallback); }}
+            style={{
+              width:'100%', height:'100%',
+              objectFit:'cover', objectPosition:'center 18%',
+              filter:`drop-shadow(0 12px 30px ${color}88)`,
+            }}/>
+        ) : (
+          <div style={{width:'100%', height:'100%', background:`${color}22`}}/>
+        )}
+        {/* edge accent */}
+        <div style={{
+          position:'absolute', left:0, top:0, bottom:0, width:6,
+          background: `linear-gradient(180deg, transparent, ${color}, transparent)`,
+          boxShadow:`0 0 24px ${color}`,
+        }}/>
+      </div>
+
+      {/* Left side — large name + text */}
+      <div style={{
+        position:'absolute', left:'5%', top:'12%', width:'48%',
+        display:'flex', flexDirection:'column', gap:18,
+      }}>
+        <div style={{
+          fontFamily:'Rajdhani', fontSize:13, fontWeight:700, letterSpacing:'.4em',
+          color:`${color}`,
+          textShadow:`0 0 12px ${color}aa`,
+          animation:'fadeRight .35s .1s both',
+        }}>CHARACTER · CUT-IN</div>
+
+        <div style={{
+          transform:'skewX(-8deg)',
+          background:`linear-gradient(110deg, ${color}, rgba(0,0,0,.4))`,
+          padding:'14px 32px 14px 22px',
+          alignSelf:'flex-start',
+          boxShadow:`0 8px 32px ${color}99, inset 0 -3px 0 rgba(0,0,0,.3)`,
+          animation:'tagSlide .45s .2s both',
+        }}>
+          <div style={{transform:'skewX(8deg)'}}>
+            <div style={{
+              fontFamily:"'Zen Maru Gothic'", fontSize:'min(5vw, 52px)', fontWeight:900,
+              color:'#fff', lineHeight:1, letterSpacing:'.04em',
+              textShadow:`0 2px 12px rgba(0,0,0,.5)`,
+            }}>{char.name}</div>
+            {char.kana && (
+              <div style={{
+                marginTop:4,
+                fontFamily:"'Noto Sans JP'", fontSize:11, fontWeight:600,
+                color:'rgba(255,255,255,.85)', letterSpacing:'.32em',
+              }}>{char.kana.toUpperCase()}</div>
+            )}
+          </div>
+        </div>
+
+        {entry.subtext && (
+          <div style={{
+            fontFamily:"'Noto Sans JP'", fontSize:14, fontWeight:600,
+            color: color, letterSpacing:'.12em',
+            paddingLeft:8,
+            borderLeft:`3px solid ${color}`,
+            animation:'fadeRight .35s .35s both',
+          }}>{entry.subtext}</div>
+        )}
+
+        <div style={{
+          marginTop:14,
+          padding:'18px 22px',
+          background:`linear-gradient(180deg, rgba(20,12,30,.85), rgba(0,0,0,.85))`,
+          borderTop:`2px solid ${color}`,
+          borderLeft:'1px solid rgba(255,255,255,.07)',
+          borderRadius:6,
+          fontFamily:"'Noto Sans JP'", fontSize:18, fontWeight:500,
+          color:'#fff', lineHeight:1.7,
+          textShadow:'0 1px 6px rgba(0,0,0,.7)',
+          minHeight:'4em',
+          animation:'fadeRight .35s .45s both',
+        }}>
+          {shown}
+          {!done && <span style={{
+            display:'inline-block', marginLeft:2,
+            color, animation:'blink 1s steps(2) infinite',
+          }}>▾</span>}
+          {done && (
+            <div style={{
+              marginTop:8, fontSize:11, color:`${color}cc`, letterSpacing:'.2em',
+              animation:'fadeIn .3s both',
+            }}>▼ クリックで進む</div>
+          )}
+        </div>
+      </div>
+
+      {/* faction tag bottom-left */}
+      <div style={{
+        position:'absolute', bottom:24, left:24,
+        fontFamily:'Rajdhani', fontWeight:900, fontSize:11, letterSpacing:'.4em',
+        color:'rgba(255,255,255,.35)',
+      }}>{(char.origin||'').toUpperCase()} · {char.id.toUpperCase()}</div>
+    </div>
+  );
+}
+
+// ── Backlog overlay ─────────────────────────────────────
+function Backlog({ history, onClose }) {
+  return (
+    <div onClick={onClose} style={{
+      position:'absolute', inset:0, zIndex:50,
+      background:'rgba(8,4,16,.92)',
+      backdropFilter:'blur(8px)',
+      display:'flex', flexDirection:'column',
+      animation:'fadeIn .25s ease both',
+    }}>
+      <div style={{
+        padding:'18px 28px', display:'flex', alignItems:'center', gap:14,
+        borderBottom:'1px solid rgba(255,255,255,.08)',
+      }}>
+        <div style={{
+          fontFamily:'Rajdhani', fontSize:14, fontWeight:700, letterSpacing:'.32em',
+          color:'rgba(255,255,255,.5)',
+        }}>BACKLOG</div>
+        <div style={{flex:1}}/>
+        <button onClick={onClose} style={{
+          padding:'8px 18px', borderRadius:4,
+          background:'rgba(255,255,255,.08)', border:'1px solid rgba(255,255,255,.15)',
+          color:'rgba(255,255,255,.85)', cursor:'pointer',
+          fontFamily:"'Noto Sans JP'", fontSize:12,
+        }}>閉じる ✕</button>
+      </div>
+      <div onClick={(e)=>e.stopPropagation()} style={{
+        flex:1, overflowY:'auto', padding:'24px 32px', display:'flex', flexDirection:'column-reverse', gap:14,
+      }}>
+        {/* reverse order: newest at top */}
+        {history.slice().reverse().map((h, i) => {
+          const char = h.speaker ? getChar(h.speaker) : null;
+          const color = char ? (ROLES[char.role]?.color || PK) : 'rgba(255,255,255,.4)';
+          return (
+            <div key={i} style={{
+              padding:'14px 18px', borderRadius:6,
+              background: char ? 'rgba(20,12,30,.7)' : 'rgba(40,38,46,.5)',
+              borderLeft: char ? `3px solid ${color}` : `3px solid rgba(255,255,255,.18)`,
+            }}>
+              {char && (
+                <div style={{
+                  fontFamily:"'Zen Maru Gothic'", fontSize:13, fontWeight:900,
+                  color, marginBottom:4,
+                }}>{char.name}</div>
+              )}
+              <div style={{
+                fontFamily:"'Noto Sans JP'", fontSize:14, lineHeight:1.7,
+                color: char ? 'rgba(255,255,255,.92)' : 'rgba(220,220,230,.7)',
+                fontStyle: char ? 'normal' : 'italic',
+              }}>{h.text}</div>
+            </div>
+          );
+        })}
+        {history.length === 0 && (
+          <div style={{textAlign:'center', color:'rgba(255,255,255,.3)', padding:'40px 0'}}>
+            まだ履歴がありません
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Top control bar ─────────────────────────────────────
+function ADVTopBar({ location, onAuto, isAuto, onSkip, onLog, onExit }) {
+  const Btn = ({label, onClick, active}) => (
+    <button onClick={onClick} style={{
+      padding:'7px 16px', borderRadius:18,
+      background: active ? 'rgba(196,66,122,.5)' : 'rgba(255,255,255,.08)',
+      border:`1px solid ${active ? PK : 'rgba(255,255,255,.18)'}`,
+      color: active ? '#fff' : 'rgba(255,255,255,.85)',
+      fontFamily:"'Noto Sans JP'", fontSize:11, fontWeight:600,
+      cursor:'pointer', letterSpacing:'.08em',
+      backdropFilter:'blur(8px)',
+      transition:'all .15s',
+    }}>{label}</button>
+  );
+
+  return (
+    <div style={{
+      position:'absolute', top:0, left:0, right:0, zIndex:25,
+      padding:'12px 18px',
+      display:'flex', alignItems:'center', gap:10,
+      background:'linear-gradient(180deg, rgba(0,0,0,.6), transparent)',
+      pointerEvents:'none',
+    }}>
+      {location && (
+        <div style={{
+          padding:'7px 16px', borderRadius:4,
+          background:'rgba(0,0,0,.55)', border:'1px solid rgba(255,255,255,.12)',
+          fontFamily:"'Zen Maru Gothic'", fontSize:13, fontWeight:700,
+          color:'rgba(255,255,255,.92)', letterSpacing:'.08em',
+          backdropFilter:'blur(8px)', pointerEvents:'auto',
+        }}>◤ {location}</div>
+      )}
+      <div style={{flex:1}}/>
+      <div style={{display:'flex', gap:8, pointerEvents:'auto'}}>
+        <Btn label={isAuto ? '■ AUTO' : 'AUTO'} onClick={onAuto} active={isAuto}/>
+        <Btn label="SKIP →" onClick={onSkip}/>
+        <Btn label="LOG" onClick={onLog}/>
+        <Btn label="✕" onClick={onExit}/>
+      </div>
+    </div>
+  );
+}
+
+// ── Main ADVScene ───────────────────────────────────────
+function ADVScene({ scenario, onExit }) {
+  const [idx, setIdx] = React.useState(0);
+  const [cast, setCast] = React.useState([]); // [{id, pos}]
+  const [bg, setBg] = React.useState(null);
+  const [location, setLocation] = React.useState('');
+  const [history, setHistory] = React.useState([]); // dialog/narration only
+  const [isAuto, setIsAuto] = React.useState(false);
+  const [showLog, setShowLog] = React.useState(false);
+  const [slashKey, setSlashKey] = React.useState(0);
+  const [lastSpeaker, setLastSpeaker] = React.useState(null);
+
+  // Process setup-type entries (advance through them)
+  React.useEffect(() => {
+    if(idx >= scenario.length) return;
+    const e = scenario[idx];
+    if(e.type === 'setup') {
+      setCast(e.cast);
+      if(e.bg) setBg(e.bg);
+      if(e.location) setLocation(e.location);
+      setIdx(i => i + 1);
+    } else if(e.type === 'end') {
+      // hold — exit on advance
+    }
+  }, [idx, scenario]);
+
+  // Track speaker change for slash effect
+  const current = scenario[idx];
+  React.useEffect(() => {
+    if(current?.type === 'dialog' && current.speaker !== lastSpeaker) {
+      setSlashKey(k => k + 1);
+      setLastSpeaker(current.speaker);
+    } else if(current?.type === 'narration') {
+      setLastSpeaker(null);
+    }
+  }, [idx]);
+
+  // Add to history when entering a dialog/narration
+  React.useEffect(() => {
+    if(!current) return;
+    if(current.type === 'dialog' || current.type === 'narration' || current.type === 'cutin') {
+      setHistory(h => [...h, { speaker: current.speaker, text: current.text }]);
+    }
+  }, [idx]);
+
+  // Auto mode
+  const [autoReadyToAdvance, setAutoReadyToAdvance] = React.useState(false);
+  React.useEffect(() => {
+    if(!isAuto || !autoReadyToAdvance) return;
+    const t = setTimeout(() => advance(), 1800);
+    return () => clearTimeout(t);
+  }, [isAuto, autoReadyToAdvance, idx]);
+
+  const advance = React.useCallback(() => {
+    setAutoReadyToAdvance(false);
+    if(idx >= scenario.length - 1 || scenario[idx]?.type === 'end') {
+      onExit();
+      return;
+    }
+    setIdx(i => i + 1);
+  }, [idx, scenario, onExit]);
+
+  // Skip (right-click)
+  const handleContextMenu = (e) => {
+    e.preventDefault();
+    // Skip: jump to next 'narration' break or end
+    let next = idx + 1;
+    while(next < scenario.length && scenario[next].type === 'dialog') next++;
+    if(next >= scenario.length || scenario[next]?.type === 'end') {
+      onExit();
+      return;
+    }
+    // process all setups encountered
+    for(let i = idx + 1; i <= next; i++) {
+      const e = scenario[i];
+      if(e?.type === 'setup') {
+        setCast(e.cast);
+        if(e.bg) setBg(e.bg);
+        if(e.location) setLocation(e.location);
+      }
+    }
+    setIdx(next);
+  };
+
+  // Wheel up = backlog
+  const handleWheel = (e) => {
+    if(e.deltaY < 0 && !showLog) {
+      setShowLog(true);
+    }
+  };
+
+  if(!current) return null;
+
+  // For dialog/cutin, lookup char
+  const speakerChar = (current.type === 'dialog' || current.type === 'cutin') && current.speaker
+    ? getChar(current.speaker) : null;
+  const speakerColor = speakerChar
+    ? (ROLES[speakerChar.role]?.color || PK)
+    : PK;
+
+  return (
+    <div
+      className="scene-enter"
+      onContextMenu={handleContextMenu}
+      onWheel={handleWheel}
+      style={{
+        width:'100vw', height:'100vh',
+        position:'relative', overflow:'hidden',
+        background:'#0a0610',
+        fontFamily:"'Noto Sans JP'",
+        userSelect:'none',
+      }}>
+
+      {/* BG */}
+      {bg && (
+        <div style={{
+          position:'absolute', inset:0,
+          backgroundImage:`url(${bg})`,
+          backgroundSize:'cover', backgroundPosition:'center',
+          filter:'brightness(.55) saturate(.85) blur(1px)',
+        }}/>
+      )}
+      {/* BG dim overlay */}
+      <div style={{
+        position:'absolute', inset:0,
+        background:'linear-gradient(180deg, rgba(8,4,16,.4) 0%, rgba(8,4,16,.75) 100%)',
+      }}/>
+
+      {/* Standing characters */}
+      {cast.map(c => {
+        const char = getChar(c.id);
+        if(!char) return null;
+        const isSpeaking = current.type === 'dialog' && current.speaker === c.id;
+        // expr: lookup from current entry only if speaker matches
+        const expr = isSpeaking ? current.expr : 'normal';
+        return (
+          <StandingChar
+            key={c.id}
+            char={char}
+            expr={expr}
+            pos={c.pos}
+            isSpeaking={isSpeaking}
+          />
+        );
+      })}
+
+      {/* Slash effect */}
+      {slashKey > 0 && current.type === 'dialog' && <SlashEffect keyId={slashKey}/>}
+
+      {/* Cutin */}
+      {current.type === 'cutin' && speakerChar && (
+        <PersonaCutin
+          entry={current}
+          char={speakerChar}
+          color={speakerColor}
+          onAdvance={() => { setAutoReadyToAdvance(true); advance(); }}
+        />
+      )}
+
+      {/* Dialog/narration box */}
+      {(current.type === 'dialog' || current.type === 'narration') && (
+        <DialogBox
+          entry={current}
+          char={speakerChar}
+          color={speakerColor}
+          onAdvance={() => { setAutoReadyToAdvance(true); advance(); }}
+          onFinishType={() => setAutoReadyToAdvance(true)}
+        />
+      )}
+
+      {/* End screen */}
+      {current.type === 'end' && (
+        <div style={{
+          position:'absolute', inset:0, zIndex:40,
+          background:'rgba(8,4,16,.85)',
+          display:'flex', alignItems:'center', justifyContent:'center',
+          flexDirection:'column', gap:24,
+          animation:'fadeIn .4s both',
+        }}>
+          <div style={{
+            fontFamily:'Rajdhani', fontSize:14, fontWeight:700, letterSpacing:'.5em',
+            color:'rgba(255,255,255,.5)',
+          }}>END OF SCENE</div>
+          <button onClick={onExit} style={{
+            padding:'14px 40px', borderRadius:6,
+            background:`linear-gradient(135deg, ${PK}, ${PK2})`,
+            border:'none', color:'#fff',
+            fontFamily:"'Noto Sans JP'", fontSize:14, fontWeight:700, letterSpacing:'.16em',
+            cursor:'pointer',
+            boxShadow:`0 4px 24px ${PK}66`,
+          }}>続ける →</button>
+        </div>
+      )}
+
+      {/* Top bar */}
+      <ADVTopBar
+        location={location}
+        onAuto={() => setIsAuto(a => !a)}
+        isAuto={isAuto}
+        onSkip={() => onExit()}
+        onLog={() => setShowLog(true)}
+        onExit={onExit}
+      />
+
+      {/* Backlog */}
+      {showLog && <Backlog history={history} onClose={() => setShowLog(false)}/>}
+
+      {/* Hint at bottom-right */}
+      <div style={{
+        position:'absolute', right:14, bottom:140, zIndex:15,
+        fontSize:9, color:'rgba(255,255,255,.35)',
+        fontFamily:'Rajdhani', letterSpacing:'.2em',
+        textAlign:'right', lineHeight:1.7,
+        pointerEvents:'none',
+      }}>
+        左クリック: 進む<br/>
+        右クリック: スキップ<br/>
+        スクロール↑: バックログ
+      </div>
+    </div>
+  );
+}
+
+// Inject keyframes
+(function(){
+  const id = '__adv_kf';
+  if(document.getElementById(id)) return;
+  const s = document.createElement('style');
+  s.id = id;
+  s.textContent = `
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+    @keyframes bounceY { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
+    @keyframes slashSweep { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+    @keyframes tagSlide { from{opacity:0;transform:skewX(-12deg) translateX(-30px)} to{opacity:1;transform:skewX(-12deg) translateX(0)} }
+    @keyframes dialogFadeIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes cutinAppear { from{opacity:0} to{opacity:1} }
+    @keyframes cutinPortraitIn { from{opacity:0;transform:translateX(60px) scale(1.05)} to{opacity:1;transform:translateX(0) scale(1)} }
+    @keyframes fadeRight { from{opacity:0;transform:translateX(-30px)} to{opacity:1;transform:translateX(0)} }
+  `;
+  document.head.appendChild(s);
+})();
+
+Object.assign(window, { ADVScene, DEMO_SCENARIO });
+</script>
+
+<!-- ═══════════════════════════════════════════════════════
+     ROOT APP — SCENE ROUTER
+═══════════════════════════════════════════════════════ -->
+<script type="text/babel" id="app-root">
+const {useState, useCallback} = React;
+
+// Missing keyframes needed by battle scene — inject once
+(function(){
+  const id = '__battle_kf';
+  if(document.getElementById(id)) return;
+  const s = document.createElement('style');
+  s.id = id;
+  s.textContent = `
+    @keyframes activeGlow{0%,100%{box-shadow:0 0 0 2px rgba(196,66,122,.7),0 4px 24px rgba(196,66,122,.35);}50%{box-shadow:0 0 0 2px rgba(196,66,122,.9),0 4px 32px rgba(196,66,122,.5);}}
+    @keyframes badgePulse{0%,100%{opacity:1;}50%{opacity:.65;}}
+    @keyframes targetRing{0%,100%{box-shadow:0 0 0 2.5px rgba(192,121,24,.9),0 0 28px rgba(212,160,68,.65);}50%{box-shadow:0 0 0 3px #d4a044,0 0 44px rgba(212,160,68,.85);}}
+    @keyframes confirmPop{0%{opacity:0;transform:scale(.93);}60%{transform:scale(1.03);}100%{opacity:1;transform:scale(1);}}
+    @keyframes clickFlash{0%{opacity:.7;}100%{opacity:0;}}
+    @keyframes crosshairSpin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+    @keyframes targetCardShake{0%,100%{transform:scale(1.01);}25%{transform:scale(1.01) rotate(-.4deg);}75%{transform:scale(1.01) rotate(.4deg);}}
+    @keyframes introZoom{0%{transform:scale(4);opacity:0}100%{transform:scale(1);opacity:1}}
+    @keyframes blastExpand{0%{transform:scale(0);opacity:1}60%{transform:scale(2.5);opacity:.8}100%{transform:scale(5);opacity:0}}
+    @keyframes burstRight{0%{transform:translateX(0) scale(.6);opacity:1}30%{transform:translateX(55px) scale(1.3);opacity:1}100%{transform:translateX(210px) scale(.7);opacity:0}}
+    @keyframes burstLeft{0%{transform:translateX(0) scale(.6);opacity:1}30%{transform:translateX(-55px) scale(1.3);opacity:1}100%{transform:translateX(-210px) scale(.7);opacity:0}}
+    @keyframes chibiFlyR{0%{transform:translateX(0) scaleX(-1);opacity:1}80%{opacity:1}100%{transform:translateX(260px) scaleX(-1);opacity:0}}
+    @keyframes chibiFlyL{0%{transform:translateX(0);opacity:1}80%{opacity:1}100%{transform:translateX(-260px);opacity:0}}
+    @keyframes countDrop{from{transform:translateY(-10px);opacity:0}to{transform:translateY(0);opacity:1}}
+    @keyframes bannerDrop{0%{transform:scale(3.5) rotate(-5deg);opacity:0}55%{transform:scale(.92) rotate(2deg);opacity:1}75%{transform:scale(1.06) rotate(-1deg)}100%{transform:scale(1) rotate(0);opacity:1}}
+    @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+    @keyframes curtainIn{0%{clip-path:inset(50% 0 50% 0)}100%{clip-path:inset(0% 0 0% 0)}}
+    @keyframes curtainOut{0%{clip-path:inset(0% 0 0% 0)}100%{clip-path:inset(50% 0 50% 0)}}
+    @keyframes labelPop{0%{opacity:0;transform:scale(.8) translateY(10px)}60%{transform:scale(1.05) translateY(-2px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+  `;
+  document.head.appendChild(s);
+})();
+
+function App() {
+  const [scene, setScene] = useState('map');
+  const [attackTarget, setAttackTarget] = useState(null);
+  const [battleFormation, setBattleFormation] = useState(null);
+  // turnPhase: 'player' | 'enemy' (cutin sequence) | 'playerCutin' (your-turn cutin)
+  const [turnPhase, setTurnPhase] = useState('player');
+  const [turn, setTurn] = useState(1);
+  const [advScenario, setAdvScenario] = useState(null);
+  const [sceneBeforeAdv, setSceneBeforeAdv] = useState('map');
+
+  const handleNavigate = useCallback((dest) => {
+    if(dest === 'map')    setScene('map');
+    if(dest === 'party')  setScene('party');
+    if(dest === 'adv') {
+      setSceneBeforeAdv(scene);
+      setAdvScenario(DEMO_SCENARIO);
+      setScene('adv');
+    }
+    if(dest === 'turnEnd') {
+      setTurnPhase('enemy');
+    }
+  }, [scene]);
+
+  const handleAdvExit = useCallback(() => {
+    setAdvScenario(null);
+    setScene(sceneBeforeAdv || 'map');
+  }, [sceneBeforeAdv]);
+
+  const handleEnemyTurnComplete = useCallback(() => {
+    setTurnPhase('playerCutin');
+  }, []);
+
+  const handlePlayerCutinComplete = useCallback(() => {
+    setTurn(t => t + 1);
+    setTurnPhase('player');
+  }, []);
+
+  const handleAttackNode = useCallback((node) => {
+    setAttackTarget(node);
+    setScene('formation');
+  }, []);
+
+  const handleLaunch = useCallback((formation, node) => {
+    setBattleFormation(formation);
+    setAttackTarget(node);
+    setScene('battle');
+  }, []);
+
+  const handleBattleComplete = useCallback(() => {
+    setScene('map');
+    setAttackTarget(null);
+    setBattleFormation(null);
+  }, []);
+
+  return (
+    <div style={{width:'100vw', height:'100vh', overflow:'hidden'}}>
+      {scene === 'map' && (
+        <MapScene
+          onNavigate={handleNavigate}
+          onAttackNode={handleAttackNode}
+        />
+      )}
+      {scene === 'party' && (
+        <PartyScene
+          onNavigate={handleNavigate}
+        />
+      )}
+      {scene === 'formation' && (
+        <AttackFormationScene
+          targetNode={attackTarget}
+          onLaunch={handleLaunch}
+          onCancel={() => setScene('map')}
+        />
+      )}
+      {scene === 'battle' && (
+        <BattleFlow
+          formation={battleFormation}
+          targetNode={attackTarget}
+          onComplete={handleBattleComplete}
+        />
+      )}
+
+      {scene === 'adv' && advScenario && (
+        <ADVScene
+          scenario={advScenario}
+          onExit={handleAdvExit}
+        />
+      )}
+
+      {/* Enemy turn cutin sequence — overlays current scene */}
+      {turnPhase === 'enemy' && (
+        <EnemyTurnSequence onComplete={handleEnemyTurnComplete}/>
+      )}
+
+      {/* Your turn cutin */}
+      {turnPhase === 'playerCutin' && (
+        <PlayerTurnCutin onComplete={handlePlayerCutinComplete}/>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
