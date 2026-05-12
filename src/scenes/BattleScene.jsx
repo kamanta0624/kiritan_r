@@ -156,7 +156,7 @@ function BActionPanel({active,phase,action,targetId,enemies,onAction,onConfirm,o
 }
 
 // ActionScene — uses formation passed in
-export default function BActionScene({round, formation, targetNode, onComplete}){
+function BActionScene({round, formation, targetNode, onComplete}){
   const enemies = [
     {id:'e1',name:'北海道めろん',role:'前衛',atk:10,def:8,meme:500,max:500,portrait:'assets/portrait_meron.png'},
     {id:'e2',name:'ベルン',role:'後衛',atk:8,def:10,meme:518,max:518,bonus:'兵守+1',portrait:'assets/portrait_bern_fog.png'},
@@ -528,7 +528,7 @@ function BCurtain({stage, label, toResolve}){
 }
 
 // BattleFlow — wraps ActionScene + ResolveScene with curtain
-function BattleFlow({ formation, targetNode, onComplete }) {
+export default function BattleFlow({ formation, targetNode, onComplete }) {
   const [scene, setBScene] = useState('action');
   const [round, setRound] = useState(1);
   const [curtain, setCurtain] = useState('idle');

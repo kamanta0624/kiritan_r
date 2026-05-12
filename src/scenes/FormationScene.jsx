@@ -74,12 +74,13 @@ function FormationSlot({ slot, char, onRemove, label, color }) {
   );
 }
 
-export default function AttackFormationScene({ targetNode, onLaunch, onCancel }) {
+export default function AttackFormationScene({ targetNode, onLaunch, onCancel, availableChars }) {
   // formation: { front1, front2, rear1, rear2 } — null or char
   const [formation, setFormation] = useState({ front1:null, front2:null, rear1:null, rear2:null });
   const [hoverId, setHoverId] = useState(null);
 
-  const joinedChars = CHARS.filter(c => c.joined);
+  // availableCharsが渡されていれば実データ、なければCHARSデモデータ
+  const joinedChars = availableChars ?? CHARS.filter(c => c.joined);
   const selectedIds = Object.values(formation).filter(Boolean).map(c => c.id);
 
   // ルール判定
