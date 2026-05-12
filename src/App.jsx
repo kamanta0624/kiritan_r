@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useGame } from './context/GameContext.jsx';
 import './App.css';
 
 // シーンコンポーネント
@@ -30,6 +31,7 @@ const DEMO_NODE_OWN = {
 };
 
 export default function App() {
+  const game = useGame();
   const [scene, setScene]           = useState('title');
   const [sceneParams, setSceneParams] = useState({});
 
@@ -38,10 +40,14 @@ export default function App() {
     setScene(dest);
   };
 
+  const { getSaveSlots } = game.actions;
   const renderScene = () => {
     switch (scene) {
       case 'title':
-        return <TitleScene onNavigate={navigate} hasSaveData={true} hasNewGamePlus={false} />;
+        return <TitleScene onNavigate={(dest, params) => {
+          if (dest === 'map') game.actions.startNewGame();
+          navigate(dest, params);
+        }} hasSaveData={game.getSaveSlots?.()?.some(s => !s.empty) ?? false} hasNewGamePlus={false} />;
 
       case 'map':
         return <MapScene onNavigate={navigate} onAttackNode={() => navigate('formation')} />;
