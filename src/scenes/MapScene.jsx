@@ -154,14 +154,14 @@ function NodeShape({type, color, selected, canAttack}) {
 }
 
 // ── Map SVG ────────────────────────────────────────────────
-function MapLayer({selNode, onNodeClick}) {
+function MapLayer({selNode, onNodeClick, nodes=NODES}) {
   return (
     <svg width={MAP_W} height={MAP_H}
       style={{position:'absolute', top:0, left:0, overflow:'visible', display:'block'}}>
       <line x1={BOUNDARY_X} y1={0} x2={BOUNDARY_X} y2={MAP_H}
         stroke="rgba(255,255,255,.2)" strokeWidth="2" strokeDasharray="8 10"/>
       {EDGES.map(([a,b],i)=>{
-        const na=NODES.find(n=>n.id===a), nb=NODES.find(n=>n.id===b);
+        const na=nodes.find(n=>n.id===a), nb=nodes.find(n=>n.id===b);
         if(!na||!nb) return null;
         return (
           <g key={i}>
@@ -170,7 +170,7 @@ function MapLayer({selNode, onNodeClick}) {
           </g>
         );
       })}
-      {NODES.map(n=>{
+      {nodes.map(n=>{
         const ow=OWN[n.owner]||OWN.neutral, sel=selNode?.id===n.id;
         return (
           <g key={n.id} transform={`translate(${n.px},${n.py})`}
@@ -287,7 +287,7 @@ function NodePopup({node, onClose, onAttack}) {
 }
 
 // ── Mini-map ───────────────────────────────────────────────
-function MiniMap({offsetX, offsetY, vpW, vpH}) {
+function MiniMap({offsetX, offsetY, vpW, vpH, nodes=NODES}) {
   const mmW=140, mmH=80;
   const scaleX=mmW/MAP_W, scaleY=mmH/MAP_H;
   return (
@@ -298,7 +298,7 @@ function MiniMap({offsetX, offsetY, vpW, vpH}) {
         <rect x={0}     y={0} width={mmW/2} height={mmH} fill="rgba(190,210,225,.6)"/>
         <rect x={mmW/2} y={0} width={mmW/2} height={mmH} fill="rgba(175,200,170,.6)"/>
         <line x1={mmW/2} y1={0} x2={mmW/2} y2={mmH} stroke="rgba(255,255,255,.4)" strokeWidth="1"/>
-        {NODES.map(n=>{
+        {nodes.map(n=>{
           const ow=OWN[n.owner]||OWN.neutral;
           return <circle key={n.id} cx={n.px*scaleX} cy={n.py*scaleY} r={2.5} fill={ow.c} opacity=".8"/>;
         })}
@@ -330,7 +330,20 @@ function Legend() {
 }
 
 // ── Map Scene ──────────────────────────────────────────────
-export default function MapScene({ onNavigate, onAttackNode }) {
+export default function MapScene({ onNavigate, onAttackNode, onNodeClick, gameState, basesData, factionsData }) {
+  // 実データからownerをマージ
+  const liveNodes = React.useMemo(() => {
+    if (!basesData || !factionsData) return NODES;
+    const factionMap = Object.fromEntries(factionsData.map(f => [f.id, f]));
+    return NODES.map(n => {
+      const base = basesData.find(b => b.name === n.name);
+      if (!base) return n;
+      const faction = factionMap[base.factionId];
+      const isPlayer = faction?.isPlayer ?? false;
+      const owner = isPlayer ? 'player' : 'enemy';
+      return { ...n, baseId: base.id, factionId: base.factionId, owner, troops: base.soldiers ?? n.troops, income: base.income ?? n.income };
+    });
+  }, [basesData, factionsData]);
   const vpRef = useRef(null);
   const [vpSize, setVpSize] = useState({w: window.innerWidth, h: window.innerHeight - 104});
   const initOffsetX = Math.max(0, Math.min(1900 - window.innerWidth/2, MAP_W - window.innerWidth));
@@ -444,7 +457,7 @@ export default function MapScene({ onNavigate, onAttackNode }) {
         <div style={{position:'absolute',
           transform:`translate(${-offset.x}px,${-offset.y}px)`,
           width:MAP_W, height:MAP_H, zIndex:1}}>
-          <MapLayer selNode={selNode} onNodeClick={handleNodeClick}/>
+          <MapLayer selNode={selNode} onNodeClick={handleNodeClick} nodes={liveNodes}/>
         </div>
 
         <AreaNameOverlay areaName={areaNameInfo.name} triggerKey={areaNameInfo.key}/>
@@ -457,13 +470,13 @@ export default function MapScene({ onNavigate, onAttackNode }) {
               <NodePopup
                 node={selNode}
                 onClose={()=>setSelNode(null)}
-                onAttack={(node)=>{ onAttackNode(node); }}
+                onAttack={(node)=>{ onAttackNode(node); }} onNodeInfo={(node)=>{ if(onNodeClick) onNodeClick(node); }}
               />
             </div>
           );
         })()}
 
-        <MiniMap offsetX={offset.x} offsetY={offset.y} vpW={vpSize.w} vpH={vpSize.h}/>
+        <MiniMap offsetX={offset.x} offsetY={offset.y} vpW={vpSize.w} vpH={vpSize.h} nodes={liveNodes}/>
         <Legend/>
 
         {/* boundary glow */}

@@ -4,7 +4,7 @@ import './App.css';
 
 // シーンコンポーネント
 import TitleScene        from './scenes/TitleScene.jsx';
-import MapScene          from './scenes/MapScene.jsx';
+import MapSceneWrapper   from './scenes/MapSceneWrapper.jsx';
 import BaseMenuScene     from './scenes/BaseMenuScene.jsx';
 import FormationScene    from './scenes/FormationScene.jsx';
 import BattleScene       from './scenes/BattleScene.jsx';
@@ -50,7 +50,7 @@ export default function App() {
         }} hasSaveData={game.getSaveSlots?.()?.some(s => !s.empty) ?? false} hasNewGamePlus={false} />;
 
       case 'map':
-        return <MapScene onNavigate={navigate} onAttackNode={() => navigate('formation')} />;
+        return <MapSceneWrapper onNavigate={navigate} />;
 
       case 'base_menu':
         return (
@@ -59,7 +59,7 @@ export default function App() {
               node={sceneParams.node ?? DEMO_NODE_OWN}
               isOwned={sceneParams.isOwned ?? true}
               canAttack={sceneParams.canAttack ?? true}
-              hasDungeon={sceneParams.hasDungeon ?? true}
+              hasDungeon={sceneParams.hasDungeon ?? false}
               onNavigate={navigate}
               onClose={() => navigate('map')}
             />
