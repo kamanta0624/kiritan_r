@@ -80,24 +80,11 @@ export function BottomBar({ scene, onNavigate, onNextTurn, extraLeft, extraRight
       {/* ── Map scene buttons ── */}
       {isMap && (
         <>
-          <button style={{display:'flex', alignItems:'center', gap:6, padding:'8px 16px',
-            borderRadius:20, background:'rgba(0,0,0,.05)', border:`1px solid ${BR}`,
-            color:TXD, cursor:'pointer', fontSize:12, fontFamily:"'Noto Sans JP'",
-            whiteSpace:'nowrap'}}>
-            ≡ メニュー
-          </button>
-          {['建設','アイテム'].map(l => (
-            <button key={l} style={{padding:'7px 14px', borderRadius:20,
-              background:'rgba(0,0,0,.04)', border:`1px solid ${BR}`,
-              color:TXD, cursor:'pointer', fontSize:12,
-              fontFamily:"'Noto Sans JP'", whiteSpace:'nowrap'}}>
-              {l}
-            </button>
-          ))}
-          <NavButton label="仲間" onClick={() => onNavigate('party')}
-            activeColor={TEAL} activeBg='rgba(26,138,150,.12)'/>
-          <NavButton label="🎬 ADVテスト" onClick={() => onNavigate('adv')}
-            activeColor={PK} activeBg='rgba(196,66,122,.12)'/>
+          <NavButton label="≡ メニュー"   onClick={() => onNavigate('save', {mode:'save'})} activeColor={TEAL} activeBg='rgba(26,138,150,.08)'/>
+          <NavButton label="研究"         onClick={() => onNavigate('research')}  activeColor={AC}   activeBg='rgba(192,112,16,.08)'/>
+          <NavButton label="研究"         onClick={() => onNavigate('research')}  activeColor={AC}   activeBg='rgba(192,112,16,.08)'/>
+          <NavButton label="アイテム"     onClick={() => onNavigate('items')}     activeColor={AC}   activeBg='rgba(192,112,16,.08)'/>
+          <NavButton label="仲間"         onClick={() => onNavigate('characters')} activeColor={TEAL} activeBg='rgba(26,138,150,.12)'/>
           <div style={{flex:1}}/>
           <button
             onClick={() => { if (onNextTurn) onNextTurn(); else onNavigate('enemy_turn'); }}
