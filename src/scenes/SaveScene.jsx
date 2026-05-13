@@ -22,6 +22,11 @@ export default function SaveScene({ onNavigate, onClose, mode='save', slots: slo
     turn: s.empty ? null : s.turn,
     date: s.empty ? null : (s.savedAt ? new Date(s.savedAt).toLocaleString('ja-JP', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}) : null),
     empty: s.empty,
+    used: !s.empty,
+    meme: s.empty ? 0 : (s.meme ?? 0),
+    bases: s.empty ? '' : (s.bases ?? ''),
+    location: s.empty ? '' : (s.location ?? ''),
+    leader: s.empty ? null : (s.leader ?? null),
   })) ?? DEMO_SLOTS;
   const [_dummy, setDummy] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -37,7 +42,8 @@ export default function SaveScene({ onNavigate, onClose, mode='save', slots: slo
       setTimeout(() => { setBusy(false); setToast('セーブしました'); setTimeout(()=>setToast(null), 1600); }, 350);
     } else {
       // load
-      setTimeout(() => { setBusy(false); setToast('ロードしました'); setTimeout(()=>{setToast(null); onClose?.();}, 1100); }, 350);
+      if (onLoad) onLoad(selected);
+      setTimeout(() => { setBusy(false); setToast('ロードしました'); setTimeout(()=>setToast(null), 1600); }, 350);
     }
   };
 

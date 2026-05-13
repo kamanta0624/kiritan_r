@@ -330,7 +330,7 @@ function Legend() {
 }
 
 // ── Map Scene ──────────────────────────────────────────────
-export default function MapScene({ onNavigate, onAttackNode, onNodeClick, gameState, basesData, factionsData }) {
+export default function MapScene({ onNavigate, onAttackNode, onNodeClick, gameState, basesData, factionsData, onNextTurn }) {
   // 実データからownerをマージ
   const liveNodes = React.useMemo(() => {
     if (!basesData || !factionsData) return NODES;
@@ -492,7 +492,7 @@ export default function MapScene({ onNavigate, onAttackNode, onNodeClick, gameSt
       </div>
 
       {/* BOTTOM BAR */}
-      <BottomBar scene="map" onNavigate={onNavigate}/>
+      <BottomBar scene="map" onNavigate={onNavigate} onNextTurn={onNextTurn}/>
     </div>
   );
 }

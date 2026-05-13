@@ -73,6 +73,7 @@ export default function App() {
           gameState={gameState}
           basesData={bases}
           factionsData={factions}
+          onNextTurn={() => game.actions.nextTurn()}
         />;
 
       // ── 拠点メニュー ──

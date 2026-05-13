@@ -82,7 +82,16 @@ export default function AttackFormationScene({ targetNode, onLaunch, onCancel, a
   // availableCharsが渡されていれば実データ、なければCHARSデモデータ
   const rawChars = availableChars ?? CHARS.filter(c => c.joined);
   // 実データのrole(attacker/guardian/commander)をROLESキー(front/ranged/rear/support)にマップ
-  const ROLE_MAP = { attacker:'front', guardian:'front', commander:'rear', ranged:'ranged', support:'support' };
+  const ROLE_MAP = {
+    attacker:  'front',
+    guardian:  'front',
+    commander: 'rear',
+    song:      'rear',
+    front:     'front',
+    ranged:    'ranged',
+    rear:      'rear',
+    support:   'support',
+  };
   const joinedChars = rawChars.map(c => ({
     ...c,
     role:    ROLE_MAP[c.role] ?? 'front',
@@ -292,7 +301,7 @@ export default function AttackFormationScene({ targetNode, onLaunch, onCancel, a
               {frontChars.map(c => {
                 const isSelected = selectedIds.includes(c.id);
                 const isFull = frontCount >= 2 && !isSelected;
-                const role = ROLES[c.role];
+                const role = ROLES[ROLE_MAP[c.role] ?? 'front'] ?? ROLES['front'];
                 return (
                   <div key={c.id}
                     onClick={() => !isFull && handleCharClick(c)}
@@ -349,7 +358,7 @@ export default function AttackFormationScene({ targetNode, onLaunch, onCancel, a
               {rearChars.map(c => {
                 const isSelected = selectedIds.includes(c.id);
                 const isFull = rearCount >= 2 && !isSelected;
-                const role = ROLES[c.role];
+                const role = ROLES[ROLE_MAP[c.role] ?? 'front'] ?? ROLES['front'];
                 return (
                   <div key={c.id}
                     onClick={() => !isFull && handleCharClick(c)}

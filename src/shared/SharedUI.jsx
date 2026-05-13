@@ -65,7 +65,7 @@ export function TopBar({ scene, areaName, currentArea, breadcrumb, rightSlot, tu
 }
 
 // ── Common Bottom Bar ──────────────────────────────────────
-export function BottomBar({ scene, onNavigate, extraLeft, extraRight }) {
+export function BottomBar({ scene, onNavigate, onNextTurn, extraLeft, extraRight }) {
   const isMap = scene === 'map';
   const isParty = scene === 'party';
 
@@ -100,7 +100,7 @@ export function BottomBar({ scene, onNavigate, extraLeft, extraRight }) {
             activeColor={PK} activeBg='rgba(196,66,122,.12)'/>
           <div style={{flex:1}}/>
           <button
-            onClick={() => onNavigate('turnEnd')}
+            onClick={() => { if (onNextTurn) onNextTurn(); else onNavigate('enemy_turn'); }}
             style={{
               padding:'9px 22px', borderRadius:20,
               background:`linear-gradient(135deg,${PK},${PK2})`,

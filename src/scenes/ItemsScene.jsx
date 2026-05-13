@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PK, PK2, AC, AC2, TEAL, TX, TXD, TXF, BR, glass, GAME_STATE, ROLES, CHARS } from '../shared/tokens.js';
-import { TopBar } from '../shared/SharedUI.jsx';
+import { TopBar, NavButton } from '../shared/SharedUI.jsx';
 
 // ═══════════════════════════════════════════════════════════
 //   ItemsScene — アイテム管理

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { PK, PK2, AC, AC2, TEAL, TX, TXD, TXF, BR, glass, GAME_STATE, ROLES, CHARS } from '../shared/tokens.js';
-import { TopBar } from '../shared/SharedUI.jsx';
+import { TopBar, BottomBar } from '../shared/SharedUI.jsx';
 
 function StatBar({label, val, max=10, color}) {
   const pct = Math.min(val/max,1)*100;

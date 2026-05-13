@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PK, PK2, AC, AC2, TEAL, TX, TXD, TXF, BR, glass, GAME_STATE, ROLES, CHARS } from '../shared/tokens.js';
-import { TopBar } from '../shared/SharedUI.jsx';
+import { TopBar, NavButton } from '../shared/SharedUI.jsx';
 
 // ═══════════════════════════════════════════════════════════
 //   ResearchScene — 研究
@@ -25,15 +25,14 @@ export default function ResearchScene({ onNavigate, completedResearch=[], treasu
   const meme = treasury;
 
   const sel = DEMO_RESEARCH.find(r => r.id === selected);
-  const isLocked = sel?.locked && !doneIds.has(sel.locked);
-  const canAfford = sel ? meme >= sel.cost && !completedResearch.includes(sel.id) : false;
   const isDone = (id) => completedResearch.includes(id);
+  const isLocked = sel?.locked && !isDone(sel.locked);
+  const canAfford = sel ? meme >= sel.cost && !isDone(sel.id) : false;
   const canResearch = !isDone(sel?.id) && !isLocked && canAfford;
 
   const handleResearch = () => {
     if(!canResearch || !sel) return;
     if (onResearch) onResearch(sel.id, sel.cost);
-    setDoneIds(s => new Set([...s, sel.id]));
   };
 
   return (
@@ -54,7 +53,7 @@ export default function ResearchScene({ onNavigate, completedResearch=[], treasu
               background:'rgba(26,138,150,.1)', border:'1px solid rgba(26,138,150,.25)',
               display:'flex', alignItems:'center', gap:6}}>
               <span style={{fontSize:10, color:TXD}}>完了</span>
-              <span style={{fontFamily:'Rajdhani', fontWeight:900, fontSize:14, color:TEAL}}>{doneIds.size}/{DEMO_RESEARCH.length}</span>
+              <span style={{fontFamily:'Rajdhani', fontWeight:900, fontSize:14, color:TEAL}}>{completedResearch.length}/{DEMO_RESEARCH.length}</span>
             </div>
           </div>
         }/>
@@ -68,8 +67,8 @@ export default function ResearchScene({ onNavigate, completedResearch=[], treasu
           </div>
           <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))', gap:10}}>
             {DEMO_RESEARCH.map(r => {
-              const done = doneIds.has(r.id);
-              const locked = r.locked && !doneIds.has(r.locked);
+              const done = isDone(r.id);
+              const locked = r.locked && !isDone(r.locked);
               const lockedBy = locked ? DEMO_RESEARCH.find(x => x.id === r.locked) : null;
               const affordable = meme >= r.cost;
               const active = selected === r.id;
