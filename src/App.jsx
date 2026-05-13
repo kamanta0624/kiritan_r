@@ -17,6 +17,7 @@ import GameEndScene     from './scenes/GameEndScene.jsx';
 import DungeonScene     from './scenes/DungeonScene.jsx';
 import NewGamePlusScene from './scenes/NewGamePlusScene.jsx';
 import ADVScene         from './scenes/ADVScene.jsx';
+import BattleQAScene    from './scenes/BattleQAScene.jsx';
 
 export default function App() {
   const game = useGame();
@@ -43,6 +44,11 @@ export default function App() {
     !(c.penaltyTurns > 0) &&
     !c.usedThisTurn
   );
+
+  // QAモード
+  if (new URLSearchParams(window.location.search).get('qa') === 'battle') {
+    return <div id="app-root"><BattleQAScene onBack={() => window.history.back()} /></div>;
+  }
 
   const renderScene = () => {
     switch (scene) {
