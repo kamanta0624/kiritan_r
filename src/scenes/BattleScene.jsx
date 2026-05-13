@@ -1,6 +1,22 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { PK, PK2, AC, AC2, TEAL, TX, TXD, TXF, BR, glass, GAME_STATE, ROLES, CHARS } from '../shared/tokens.js';
 import { TopBar } from '../shared/SharedUI.jsx';
+import { BattleEngineV3 } from '../game/systems/BattleEngineV3.js';
+import { BattleAI }       from '../game/systems/BattleAI.js';
+
+const ROLE_LABEL = {attacker:'前衛',guardian:'前衛',commander:'後衛',song:'後衛',front:'前衛',ranged:'間接',rear:'後衛',support:'後衛'};
+function normalizeChar(c, idx) {
+  return { id:c.id, name:c.name, role:ROLE_LABEL[c.role]??'前衛',
+    atk:c.charAttack??c.soldierAtk??10, def:c.soldierDef??8,
+    meme:c.soldiers??500, max:c.maxSoldiers??c.soldiers??500, memeMax:c.maxSoldiers??c.soldiers??500,
+    hp:c.charHp??200, hpMax:c.charMaxHp??200, portrait:c.portrait??null, _raw:c, status:idx===0?'active':'pending' };
+}
+const FALLBACK_ENEMIES = [
+  {id:'e1',name:'北海道めろん',role:'前衛',atk:10,def:8,meme:500,max:500,portrait:'assets/portrait_meron.png'},
+  {id:'e2',name:'ベルン',role:'後衛',atk:8,def:10,meme:518,max:518,portrait:'assets/portrait_bern_fog.png'},
+  {id:'e3',name:'沖縄あわも',role:'前衛',atk:10,def:8,meme:500,max:500,portrait:'assets/portrait_awamo.png'},
+  {id:'e4',name:'フォーグ',role:'後衛',atk:8,def:9,meme:478,max:478,portrait:'assets/portrait_bern_fog.png'},
+];
 
 // BattleScene-local palette (prefix B_ to avoid collision)
 const B_AP = {
@@ -156,27 +172,9 @@ function BActionPanel({active,phase,action,targetId,enemies,onAction,onConfirm,o
 }
 
 // ActionScene — uses formation passed in
-function BActionScene({round, formation, targetNode, onComplete}){
-  const enemies = [
-    {id:'e1',name:'北海道めろん',role:'前衛',atk:10,def:8,meme:500,max:500,portrait:'assets/portrait_meron.png'},
-    {id:'e2',name:'ベルン',role:'後衛',atk:8,def:10,meme:518,max:518,bonus:'兵守+1',portrait:'assets/portrait_bern_fog.png'},
-    {id:'e3',name:'沖縄あわも',role:'前衛',atk:10,def:8,meme:500,max:500,portrait:'assets/portrait_awamo.png'},
-    {id:'e4',name:'フォーグ',role:'後衛',atk:8,def:9,meme:478,max:478,bonus:'兵守+1',portrait:'assets/portrait_bern_fog.png'},
-  ];
-
-  // Build allies from formation
-  const buildAllies = () => {
-    const slots = ['front1','front2','rear1','rear2'];
-    const chars = slots.map(k => formation[k]).filter(Boolean);
-    return chars.map((c,i) => ({
-      id: c.id, name: c.name,
-      role: ROLES[c.role]?.label || c.role,
-      atk: c.atk, def: c.def,
-      meme: c.meme, max: c.memeMax,
-      status: i===0 ? 'active' : 'pending',
-      portrait: c.portrait,
-    }));
-  };
+function BActionScene({round, formation, targetNode, onComplete, initAllies, initEnemies, onRoundActions}){
+  const enemies = initEnemies ?? FALLBACK_ENEMIES;
+  const buildAllies = () => (initAllies ?? []).map((c,i) => ({...c, status: i===0?'active':'pending'}));
 
   const [allies, setAllies] = useState(buildAllies);
   const [phase, setPhase] = useState('idle');
@@ -200,11 +198,16 @@ function BActionScene({round, formation, targetNode, onComplete}){
 
   const handleAction = key => {
     if(key==='attack'){setAction('attack');setPhase('targeting');}
-    else{setLog(p=>[...p,{txt:`${active.name} → ${key==='defend'?'防御態勢':'撤退'}`}]);setPhase('idle');setAction(null);setTargetId(null);advance();}
+    else{
+      if(onRoundActions&&active) onRoundActions(p=>[...p,{unitId:active.id,action:key,targetId:null}]);
+      setLog(p=>[...p,{txt:`${active.name} → ${key==='defend'?'防御態勢':'撤退'}`}]);
+      setPhase('idle');setAction(null);setTargetId(null);advance();
+    }
   };
   const handleConfirm = () => {
     const tgt = enemies.find(u=>u.id===targetId);
     if(tgt) setLog(p=>[...p,{txt:`${active.name} → ${tgt.name}  攻撃`}]);
+    if(onRoundActions&&active) onRoundActions(p=>[...p,{unitId:active.id,action:'attack',targetId}]);
     setPhase('idle');setAction(null);setTargetId(null);advance();
   };
 
@@ -274,7 +277,9 @@ function BActionScene({round, formation, targetNode, onComplete}){
 }
 
 // ResolveScene
-function BResolveScene({round, formation, targetNode, onComplete}){
+function BResolveScene({round, formation, targetNode, onComplete, v3Result}){
+  // V3エンジン結果があればダメージ値を上書き
+  const out = v3Result ?? {atkTroopDmg:ROUT2.atkTroopDmg, atkHPDmg:ROUT2.atkHPDmg, defTroopDmg:ROUT2.defTroopDmg, defHPDmg:ROUT2.defHPDmg};
   const firstChar = formation && (formation.front1 || formation.front2);
   const RATKER2 = firstChar ? {
     name: firstChar.name,
@@ -318,8 +323,8 @@ function BResolveScene({round, formation, targetNode, onComplete}){
 
   const skipToResult=useCallback(()=>{
     clearT();
-    const fA=Math.max(0,RATKER2.troops-ROUT2.atkTroopDmg),fD=Math.max(0,RDEFDR2.troops-ROUT2.defTroopDmg);
-    const fAH=Math.max(0,RATKER2.hp-ROUT2.atkHPDmg),fDH=Math.max(0,RDEFDR2.hp-ROUT2.defHPDmg);
+    const fA=Math.max(0,RATKER2.troops-out.atkTroopDmg),fD=Math.max(0,RDEFDR2.troops-out.defTroopDmg);
+    const fAH=Math.max(0,RATKER2.hp-out.atkHPDmg),fDH=Math.max(0,RDEFDR2.hp-out.defHPDmg);
     setShowIntro(false);setIntroFading(false);setShowBattle(false);setShowCollision(false);setShowBurst(false);
     setAtkT(fA);setDefT(fD);setAtkHP(fAH);setDefHP(fDH);
     setPhaseIdx(RPH2.indexOf('result'));
@@ -339,8 +344,8 @@ function BResolveScene({round, formation, targetNode, onComplete}){
       T(()=>{setShowCollision(false);setPhaseIdx(RPH2.indexOf('resolve'));},RDUR2.collision);
     } else if(phase==='resolve'){
       setShowBurst(false);
-      const steps=24,atkTF=Math.max(0,RATKER2.troops-ROUT2.atkTroopDmg),defTF=Math.max(0,RDEFDR2.troops-ROUT2.defTroopDmg);
-      const atkHF=Math.max(0,RATKER2.hp-ROUT2.atkHPDmg),defHF=Math.max(0,RDEFDR2.hp-ROUT2.defHPDmg);
+      const steps=24,atkTF=Math.max(0,RATKER2.troops-out.defTroopDmg),defTF=Math.max(0,RDEFDR2.troops-out.atkTroopDmg);
+      const atkHF=Math.max(0,RATKER2.hp-out.defHPDmg),defHF=Math.max(0,RDEFDR2.hp-out.atkHPDmg);
       Array.from({length:steps}).forEach((_,i)=>{
         T(()=>{const p=(i+1)/steps,lerp=(a,b)=>Math.round(a+(b-a)*p);
           setAtkT(lerp(RATKER2.troops,atkTF));setDefT(lerp(RDEFDR2.troops,defTF));
@@ -412,10 +417,10 @@ function BResolveScene({round, formation, targetNode, onComplete}){
         {showBurst&&(
           <div style={{position:'absolute',left:'50%',top:'42%',transform:'translate(-50%,-50%)',zIndex:40,pointerEvents:'none',width:0,height:0}}>
             <div style={{position:'absolute',whiteSpace:'nowrap',animation:'burstRight 1.1s ease forwards'}}>
-              <span style={{fontFamily:'Rajdhani',fontSize:50,fontWeight:900,color:'#ff2222',textShadow:'0 0 24px #ff0000,0 2px 0 rgba(0,0,0,.9)'}}>-{ROUT2.defTroopDmg}</span>
+              <span style={{fontFamily:'Rajdhani',fontSize:50,fontWeight:900,color:'#ff2222',textShadow:'0 0 24px #ff0000,0 2px 0 rgba(0,0,0,.9)'}}>-{out.defTroopDmg}</span>
             </div>
             <div style={{position:'absolute',whiteSpace:'nowrap',animation:'burstLeft 1.1s ease .1s forwards'}}>
-              <span style={{fontFamily:'Rajdhani',fontSize:50,fontWeight:900,color:'#ff5522',textShadow:'0 0 24px #ff3300,0 2px 0 rgba(0,0,0,.9)'}}>-{ROUT2.atkTroopDmg}</span>
+              <span style={{fontFamily:'Rajdhani',fontSize:50,fontWeight:900,color:'#ff5522',textShadow:'0 0 24px #ff3300,0 2px 0 rgba(0,0,0,.9)'}}>-{out.atkTroopDmg}</span>
             </div>
           </div>
         )}
@@ -527,15 +532,108 @@ function BCurtain({stage, label, toResolve}){
   );
 }
 
-// BattleFlow — wraps ActionScene + ResolveScene with curtain
+// ── BattleEngineV3 統合ラッパー ──────────────────────────────────
+// formation: {front1,front2,rear1,rear2} の各スロットに実キャラデータ
+// targetNode: 攻撃対象拠点（name/troops/battleCapacity等）
+// onComplete(result): 戦闘終了時に呼ばれる
 export default function BattleFlow({ formation, targetNode, onComplete }) {
-  const [scene, setBScene] = useState('action');
-  const [round, setRound] = useState(1);
-  const [curtain, setCurtain] = useState('idle');
+  const BATTLE_CAP = targetNode?.battleCapacity ?? 400;
+
+  // ── キャラ正規化 ──
+  const slots   = ['front1','front2','rear1','rear2'];
+  const rawAllies = slots.map(k => formation?.[k]).filter(Boolean);
+  const initAllies  = rawAllies.map(normalizeChar);
+
+  // 敵は targetNode から仮生成（敵キャラデータがあれば置き換え可）
+  const initEnemies = FALLBACK_ENEMIES.map((e,i) => ({
+    ...e,
+    meme: Math.max(50, (targetNode?.troops ?? 500) / 4 | 0),
+    max:  Math.max(50, (targetNode?.troops ?? 500) / 4 | 0),
+  }));
+
+  // ── V3 エンジン ──
+  const engineRef = useRef(null);
+  const [roundActions, setRoundActions] = useState([]);  // プレイヤー行動記録
+  const [v3Result, setV3Result]         = useState(null); // 最新ラウンドダメージ
+  const [battleOver, setBattleOver]     = useState(false);
+  const [attackerWins, setAttackerWins] = useState(false);
+
+  // エンジン初期化（一度だけ）
+  useEffect(() => {
+    const playerUnits = rawAllies.map((c,i) => BattleEngineV3.buildUnit(c, 'attack', i));
+    const enemyUnits  = initEnemies.map((e,i) => ({
+      char: { id:e.id, name:e.name, soldiers:e.meme, maxSoldiers:e.max,
+              charHp:10, charMaxHp:10, charAttack:e.atk, soldierAtk:e.atk,
+              soldierDef:e.def, charDefense:e.def, attackType:'melee', factionId:'enemy' },
+      sideType:'defense', bonus:{soldierAtk:0,soldierDef:0,charAttack:0,charSong:0},
+      position: i < 2 ? 'front' : 'rear',
+      soldiers:e.meme, maxSoldiers:e.max, charHp:10, charMaxHp:10,
+      action:null, retreated:false, charged:false, skillUsed:false,
+      attackCount:8, charDefense:e.def, level:0, targetId:null, _actedThisRound:false,
+    }));
+    engineRef.current = new BattleEngineV3({
+      playerSide:    playerUnits,
+      enemySide:     enemyUnits,
+      mode:          'attack',
+      battleCapacity: BATTLE_CAP,
+      onBattleEnd: (wins) => { setBattleOver(true); setAttackerWins(wins); },
+      onLog:        () => {},
+      onCardUpdate: () => {},
+      onShake:      () => {},
+      onPopup:      () => {},
+      delayedCall:  (ms, fn) => setTimeout(fn, ms),
+    });
+  }, []);
+
+  // ── ラウンド計算（行動確定時） ──
+  const calcRound = useCallback((actions) => {
+    const eng = engineRef.current;
+    if (!eng) return null;
+    eng.startRound();
+
+    const pUnits = eng.playerSide;
+    const eUnits = eng.enemySide;
+
+    // プレイヤー行動を適用
+    actions.forEach(a => {
+      const unit = pUnits.find(u => u.char.id === a.unitId);
+      if (!unit) return;
+      unit.action = a.action;
+      if (a.targetId) {
+        const tgt = eUnits.find(u => u.char.id === a.targetId || u.char.id === a.targetId);
+        unit.targetId = tgt?.char.id ?? null;
+      }
+    });
+
+    // 敵AIの行動
+    eUnits.forEach(u => { if (!eng.isDead(u)) BattleAI.selectAction(u, ['attack','defend']); });
+
+    // 全員実行
+    const allUnits = [...pUnits.map(u=>({u,isP:true})), ...eUnits.map(u=>({u,isP:false}))];
+    allUnits.forEach(({u, isP}) => {
+      if (!eng.isDead(u) && !u.retreated) eng.executeAction(u, isP);
+    });
+
+    // ダメージ集計（アニメ用）
+    const atkTotalDmg = pUnits.reduce((s,u) => s + (u.maxSoldiers - u.soldiers), 0);
+    const defTotalDmg = eUnits.reduce((s,u) => s + (u.maxSoldiers - u.soldiers), 0);
+    const atkHPDmg    = pUnits.reduce((s,u) => s + Math.max(0, (u.charMaxHp ?? 200) - u.charHp), 0);
+    const defHPDmg    = eUnits.reduce((s,u) => s + Math.max(0, 10 - u.charHp), 0);
+    const result = { atkTroopDmg: atkTotalDmg, defTroopDmg: defTotalDmg, atkHPDmg, defHPDmg };
+    setV3Result(result);
+
+    eng.checkGameOver();
+    return result;
+  }, []);
+
+  // ── シーン管理 ──
+  const [scene, setBScene]           = useState('action');
+  const [round, setRound]            = useState(1);
+  const [curtain, setCurtain]        = useState('idle');
   const [curtainLabel, setCurtainLabel] = useState('');
-  const [toResolve, setToResolve] = useState(true);
-  const [actionKey, setActionKey] = useState(0);
-  const [resolveKey, setResolveKey] = useState(0);
+  const [toResolve, setToResolve]    = useState(true);
+  const [actionKey, setActionKey]    = useState(0);
+  const [resolveKey, setResolveKey]  = useState(0);
 
   const transition = (nextScene, label, isToResolve) => {
     setToResolve(isToResolve);
@@ -545,23 +643,42 @@ export default function BattleFlow({ formation, targetNode, onComplete }) {
       setCurtain('closed');
       setBScene(nextScene);
       if(nextScene==='resolve') setResolveKey(k=>k+1);
-      else { setRound(r=>Math.min(r+1,5)); setActionKey(k=>k+1); }
-      setTimeout(()=>{
-        setCurtain('opening');
-        setTimeout(()=>setCurtain('idle'),460);
-      },640);
+      else { setRound(r=>Math.min(r+1,5)); setActionKey(k=>k+1); setRoundActions([]); }
+      setTimeout(()=>{ setCurtain('opening'); setTimeout(()=>setCurtain('idle'),460); },640);
     },450);
   };
 
+  // 行動確定 → V3計算 → 解決シーンへ
+  const handleActionComplete = useCallback(() => {
+    calcRound(roundActions);
+    setRoundActions([]);
+    transition('resolve', '戦闘解決', true);
+  }, [roundActions, calcRound]);
+
+  // 解決完了 → 次ラウンド or 終了
+  const handleResolveComplete = useCallback(() => {
+    if (battleOver || round >= 5) {
+      const eng = engineRef.current;
+      const usedIds  = rawAllies.map(c => c.id);
+      const deadIds  = (eng?.playerSide ?? []).filter(u => u.charHp <= 0).map(u => u.char.id);
+      onComplete({ conquered: attackerWins, usedCharIds: usedIds, deadCharIds: deadIds });
+    } else {
+      transition('action', `ラウンド ${round + 1}`, false);
+    }
+  }, [battleOver, round, attackerWins, onComplete]);
+
   return (
-    <div className="scene-enter" style={{width:'100%', height:'100%', position:'relative', overflow:'hidden'}}>
+    <div className="scene-enter" style={{width:'100%',height:'100%',position:'relative',overflow:'hidden'}}>
       <div style={{position:'absolute',inset:0,opacity:scene==='action'?1:0,pointerEvents:scene==='action'?'all':'none',transition:'opacity .05s'}}>
         <BActionScene key={actionKey} round={round} formation={formation} targetNode={targetNode}
-          onComplete={()=>transition('resolve','戦闘解決',true)}/>
+          initAllies={initAllies} initEnemies={initEnemies}
+          onRoundActions={setRoundActions}
+          onComplete={handleActionComplete}/>
       </div>
       <div style={{position:'absolute',inset:0,opacity:scene==='resolve'?1:0,pointerEvents:scene==='resolve'?'all':'none',transition:'opacity .05s'}}>
         <BResolveScene key={resolveKey} round={round} formation={formation} targetNode={targetNode}
-          onComplete={onComplete}/>
+          v3Result={v3Result}
+          onComplete={handleResolveComplete}/>
       </div>
       <BCurtain stage={curtain} label={curtainLabel} toResolve={toResolve}/>
     </div>

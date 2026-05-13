@@ -111,17 +111,15 @@ export default function App() {
       case 'battle':
         return (
           <div style={{ width:'100vw', height:'100vh', background:'#000' }}>
-            {/* BattleScene UI（BattleEngineV3接続は次フェーズ） */}
             <BattleScene
-              round={1}
               formation={sceneParams.formation}
               targetNode={sceneParams.targetNode}
-              onComplete={() => {
+              onComplete={(result) => {
                 game.actions.battleEnd({
-                  usedCharIds:    Object.values(sceneParams.formation ?? {}).filter(Boolean).map(c => c.id),
-                  deadCharIds:    [],
-                  conquered:      false,
-                  defenderBaseId: sceneParams.targetNode?.baseId,
+                  usedCharIds:     result?.usedCharIds ?? Object.values(sceneParams.formation ?? {}).filter(Boolean).map(c => c.id),
+                  deadCharIds:     result?.deadCharIds ?? [],
+                  conquered:       result?.conquered ?? false,
+                  defenderBaseId:  sceneParams.targetNode?.baseId,
                   winnerFactionId: playerFaction?.id,
                 });
                 navigate('map');
