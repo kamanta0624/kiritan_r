@@ -302,7 +302,7 @@ export class BattleEngineV3 {
     // 将軍へのダメージ
     let charDmg = 0;
     if (toChar > 0 && def.charHp > 0) {
-      const charActive = def.soldiers < this.battleCapacity;
+      const charActive = def.soldiers > 0 && def.soldiers < this.battleCapacity;
       if (charActive) {
         const rate = this._calcRate(p.atkVal, p.defCharVal, false);
         charDmg = Math.floor(this._calcDamage(toChar, rate) * p.damageMult);
@@ -312,7 +312,7 @@ export class BattleEngineV3 {
     // 将軍本人の攻撃
     let charSelfMemeDmg = 0;
     let charSelfCharDmg = 0;
-    const selfActive = atk.soldiers < this.battleCapacity && atk.charHp > 0;
+    const selfActive = atk.soldiers > 0 && atk.soldiers < this.battleCapacity && atk.charHp > 0;
     if (selfActive && def.action !== 'defend') {
       const cp     = this._charParams(atk, def);
       const defSol = Math.min(def.soldiers, this.battleCapacity);

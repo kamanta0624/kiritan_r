@@ -124,10 +124,14 @@ export default function BattleQAScene({ onBack }) {
       engine.markActed(u);
     });
 
-    // ゲームオーバーチェック（ラウンド後1回のみ）
+    // ゲームオーバーチェック（QAでは同期で判定）
+    // delayedCallを一時的に同期化して即時判定
+    const origDelay = engine._delayedCall;
+    engine._delayedCall = (ms, fn) => fn(); // QA用: 即時実行
     if (!engine.checkGameOver()) {
       engine.checkRoundLimit();
     }
+    engine._delayedCall = origDelay; // 元に戻す
     forceUpdate(n => n + 1);
   }, [engine]);
 
