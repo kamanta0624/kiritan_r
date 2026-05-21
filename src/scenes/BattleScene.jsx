@@ -1227,8 +1227,8 @@ export default function BattleFlow({ formation, targetNode, onComplete, enemyCha
           .filter(u => u.charHp <= 0 && u.char._isMobInstance).map(u => u.char.id);
         const unitResults = [...(e?.playerSide ?? []), ...(e?.enemySide ?? [])].map(u => ({
           id:       u.char.id,
-          soldiers: Math.max(0, u.soldiers),
-          charHp:   Math.max(0, u.charHp),
+          soldiers: Math.max(0, u.char.soldiers),
+          charHp:   Math.max(0, u.char.charHp),
         }));
 
         const playerWins = wins;  // mode:'attack'固定なのでそのまま

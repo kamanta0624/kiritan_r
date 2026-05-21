@@ -31,8 +31,27 @@ export class BattleAI {
       unit.action = 'defend';
       return 'defend';
     }
-    unit.action = options[Math.floor(Math.random() * options.length)];
-    return unit.action;
+    // charged → special 優先
+    if (unit.charged && options.includes('special')) {
+      unit.action = 'special';
+      return 'special';
+    }
+    // focus: HP>=90% かつ 20% 確率（charge型スキル持ちかつ未集中）
+    if (unit.char?.skillId && options.includes('focus') && !unit.charged && !unit.skillUsed) {
+      const hp = unit.charHp ?? 0;
+      const maxHp = unit.charMaxHp ?? 1;
+      if (hp >= maxHp * 0.9 && Math.random() < 0.2) {
+        unit.action = 'focus';
+        return 'focus';
+      }
+    }
+    // 攻撃系を優先
+    const attackOpts = options.filter(o => ['attack','ranged','song','special'].includes(o));
+    const chosen = attackOpts.length > 0
+      ? attackOpts[Math.floor(Math.random() * attackOpts.length)]
+      : options[Math.floor(Math.random() * options.length)];
+    unit.action = chosen;
+    return chosen;
   }
 
   /**

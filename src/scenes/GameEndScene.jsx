@@ -1,12 +1,20 @@
 import React from 'react';
-import { PK, PK2, AC, AC2, TEAL, TX, TXD, TXF, BR, glass, GAME_STATE, ROLES, CHARS } from '../shared/tokens.js';
+import { PK, PK2, AC, AC2, TEAL, TX, TXD, TXF, BR, glass } from '../shared/tokens.js';
 import { TopBar } from '../shared/SharedUI.jsx';
 
 // ═══════════════════════════════════════════════════════════
 //   GameEndScene — ゲームエンド (勝利 / 敗北)
 // ═══════════════════════════════════════════════════════════
 
-export default function GameEndScene({ isVictory = true, clearedCount = 3, onNavigate, hasNewGamePlus = true }) {
+export default function GameEndScene({
+  isVictory = true,
+  clearedCount = 3,
+  onNavigate,
+  hasNewGamePlus = true,
+  currentTurn = 1,
+  playerBaseCount = 0,
+  totalBaseCount = 92,
+}) {
   const tone = isVictory
     ? { c1:'#d4a044', c2:AC, label:'VICTORY', jp:'制圧完了', emb:'CONQUEST · COMPLETE',
         text1:'全ての旗印を、東北の名のもとに集めた。',
@@ -80,8 +88,8 @@ export default function GameEndScene({ isVictory = true, clearedCount = 3, onNav
         {/* Stats */}
         <div style={{marginTop:24, display:'flex', gap:14,
           animation:'fadeUp .5s .8s both'}}>
-          <EndStat label="到達ターン" value={GAME_STATE.turn} unit="T" color={tone.c1}/>
-          <EndStat label="制圧拠点" value={GAME_STATE.bases.split('/')[0]} unit={`/${GAME_STATE.bases.split('/')[1]}`} color={TEAL}/>
+          <EndStat label="到達ターン" value={currentTurn}     unit="T"                    color={tone.c1}/>
+          <EndStat label="制圧拠点"   value={playerBaseCount} unit={`/${totalBaseCount}`} color={TEAL}/>
           {isVictory && <EndStat label="キャラクリ" value={clearedCount} unit="人" color={tone.c1}/>}
         </div>
 

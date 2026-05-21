@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Kiritan Editor</title>
+<link rel="stylesheet" href="/editor.css">
+</head>
+<body>
+<header>
+  <h1>🎮 Kiritan Editor</h1>
+  <div class="tab-bar">
+    <button class="tab active" onclick="window.EditorApp.switchTab('characters')">キャラクター</button>
+    <button class="tab" onclick="window.EditorApp.switchTab('items')">アイテム</button>
+    <button class="tab" onclick="window.EditorApp.switchTab('lines')">セリフ</button>
+    <button class="tab" onclick="window.EditorApp.switchTab('factions')">勢力</button>
+    <button class="tab" onclick="window.EditorApp.switchTab('map')">マップ</button>
+    <button class="tab" onclick="window.EditorApp.switchTab('legions')">軍団</button>
+    <button class="tab" onclick="window.EditorApp.switchTab('events')">イベント</button>
+  </div>
+  <div class="bulk-link">
+    <a href="/bulk-input.html" target="_blank">✦ 一括登録</a>
+  </div>
+</header>
+<div class="main" id="mainArea"><div class="loading">読み込み中...</div></div>
+<div id="toast"></div>
+<script type="module" src="/editor-modules/main.js"></script>
+</body>
+</html>

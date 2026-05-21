@@ -76,23 +76,36 @@ function getPortrait(char, expr) {
 function StandingChar({ char, expr, pos, isActive, isSpeaking }) {
   const portrait = getPortrait(char, expr);
   if(!portrait?.primary) {
-    // No portrait fallback — show silhouette
     return (
       <div style={{
         position:'absolute',
-        bottom:0,
-        ...(pos==='left'   ? {left:'4%'}   : {}),
-        ...(pos==='center' ? {left:'50%', transform:'translateX(-50%)'} : {}),
-        ...(pos==='right'  ? {right:'4%'}  : {}),
-        width:'min(28vw, 380px)', height:'88%',
-        background:'rgba(255,255,255,.05)',
-        border:'1px dashed rgba(255,255,255,.15)',
-        borderRadius:8,
-        display:'flex', alignItems:'center', justifyContent:'center',
-        color:'rgba(255,255,255,.3)', fontSize:14,
-        transition:'all .35s cubic-bezier(.16,1,.3,1)',
+        bottom: isSpeaking ? '-2%' : '-6%',
+        left:  pos==='left' ? '6%' : pos==='center' ? '50%' : 'auto',
+        right: pos==='right' ? '6%' : 'auto',
+        transform: pos==='center'
+          ? `translateX(-50%) ${isSpeaking ? 'scale(1.04)' : 'scale(1)'}`
+          : isSpeaking ? 'scale(1.04)' : 'scale(1)',
+        width:'min(28vw, 340px)', height:'76%',
+        display:'flex', flexDirection:'column',
+        alignItems:'center', justifyContent:'flex-end',
+        paddingBottom:20,
+        transition:'all .45s cubic-bezier(.16,1,.3,1)',
+        filter: isSpeaking
+          ? 'drop-shadow(0 12px 30px rgba(0,0,0,.5))'
+          : 'brightness(.4)',
+        zIndex: isSpeaking ? 5 : 2,
+        pointerEvents:'none',
       }}>
-        立ち絵なし
+        <svg viewBox="0 0 120 240" width="60%" style={{opacity: isSpeaking ? .45 : .2}}>
+          <ellipse cx="60" cy="36" rx="28" ry="32" fill="rgba(255,255,255,.9)"/>
+          <path d="M12 240 Q20 140 60 130 Q100 140 108 240Z" fill="rgba(255,255,255,.9)"/>
+        </svg>
+        {char && isSpeaking && (
+          <div style={{
+            fontFamily:"'Noto Sans JP'", fontSize:11, color:'rgba(255,255,255,.5)',
+            letterSpacing:'.2em', marginTop:8,
+          }}>{char.name}</div>
+        )}
       </div>
     );
   }
@@ -213,9 +226,40 @@ function useTypewriter(text, speed=24, paused=false) {
 }
 
 // ── Dialog box (bottom) ─────────────────────────────────
-function DialogBox({ entry, char, color, onAdvance, onFinishType }) {
+function DialogBox({ entry, char, color, onAdvance, onFinishType, transparent }) {
   const [shown, done, finish] = useTypewriter(entry.text, 22);
   useEffect(() => { if(done) onFinishType?.(); }, [done]);
+
+  const textBlock = (
+    <>
+      <div style={{
+        fontFamily:"'Noto Sans JP'",
+        fontSize: char ? 20 : 17,
+        fontStyle: char ? 'normal' : 'italic',
+        fontWeight: char ? 500 : 400,
+        color: char ? '#fff' : 'rgba(220,220,230,.78)',
+        lineHeight: 1.7,
+        letterSpacing:'.04em',
+        textShadow: char ? '0 1px 6px rgba(0,0,0,.6)' : 'none',
+        textAlign: char ? 'left' : 'center',
+        minHeight: char ? '2em' : '1.4em',
+      }}>
+        {shown}
+        {!done && <span style={{
+          display:'inline-block', marginLeft:2,
+          color: color || 'rgba(255,255,255,.7)',
+          animation:'blink 1s steps(2) infinite',
+        }}>▾</span>}
+      </div>
+      {done && (
+        <div style={{
+          position:'absolute', right:16, bottom:8,
+          fontSize:13, color: color || 'rgba(255,255,255,.6)',
+          animation:'bounceY 1.2s ease infinite',
+        }}>▼</div>
+      )}
+    </>
+  );
 
   return (
     <div
@@ -225,81 +269,66 @@ function DialogBox({ entry, char, color, onAdvance, onFinishType }) {
         else onAdvance();
       }}
       style={{
-        position:'absolute', left:0, right:0, bottom:0, zIndex:20,
-        cursor:'pointer',
+        position:'absolute', inset:0, zIndex:20,
+        cursor:'pointer', background:'transparent',
       }}>
-      {/* Speaker tag (only for dialog) */}
-      {char && (
+
+      {transparent ? (
+        /* transparent mode: full-width bar at bottom */
         <div style={{
-          position:'absolute', left:24, top:-16,
-          zIndex:21,
+          position:'absolute', bottom:0, left:0, right:0,
+          background:'rgba(10,5,15,.88)',
+          borderTop:'1px solid rgba(255,255,255,.12)',
+          borderRadius:0,
+          padding:'28px 10vw 32px 10vw',
+          minHeight:140,
+          boxShadow:'0 -8px 32px rgba(0,0,0,.6)',
+          backdropFilter:'blur(12px)',
+          animation:'dialogFadeIn .3s ease both',
         }}>
-          <SpeakerTag char={char} color={color}/>
+          {textBlock}
+        </div>
+      ) : (
+        /* normal mode: speaker tag + box anchored to bottom */
+        <div style={{ position:'absolute', bottom:0, left:0, right:0 }}>
+          {char && (
+            <div style={{ position:'absolute', left:24, top:-16, zIndex:21 }}>
+              <SpeakerTag char={char} color={color}/>
+            </div>
+          )}
+          <div style={{
+            position:'relative',
+            margin:'0 16px 16px 16px',
+            background: char
+              ? `linear-gradient(180deg, rgba(20,12,30,.95), rgba(8,6,18,.97))`
+              : `linear-gradient(180deg, rgba(35,32,40,.92), rgba(20,18,25,.95))`,
+            borderTop: char ? `2px solid ${color}` : '2px solid rgba(255,255,255,.18)',
+            borderLeft: '1px solid rgba(255,255,255,.06)',
+            borderRight: '1px solid rgba(255,255,255,.06)',
+            borderBottom: '1px solid rgba(255,255,255,.06)',
+            borderRadius: 6,
+            padding: char ? '24px 32px 22px 32px' : '20px 32px',
+            minHeight: char ? 140 : 100,
+            boxShadow:'0 -4px 24px rgba(0,0,0,.5)',
+            backdropFilter:'blur(4px)',
+            animation:'dialogFadeIn .3s ease both',
+          }}>
+            {char && [
+              {top:8, left:8}, {top:8, right:8},
+              {bottom:8, left:8}, {bottom:8, right:8},
+            ].map((p,i)=>(
+              <div key={i} style={{
+                position:'absolute', ...p, width:14, height:14,
+                borderColor: color,
+                borderStyle:'solid',
+                borderWidth: `${p.top!==undefined?1:0}px ${p.right!==undefined?1:0}px ${p.bottom!==undefined?1:0}px ${p.left!==undefined?1:0}px`,
+                opacity:.55,
+              }}/>
+            ))}
+            {textBlock}
+          </div>
         </div>
       )}
-
-      {/* Box */}
-      <div style={{
-        position:'relative',
-        margin:'0 16px 16px 16px',
-        background: char
-          ? `linear-gradient(180deg, rgba(20,12,30,.95), rgba(8,6,18,.97))`
-          : `linear-gradient(180deg, rgba(35,32,40,.92), rgba(20,18,25,.95))`,
-        borderTop: char ? `2px solid ${color}` : '2px solid rgba(255,255,255,.18)',
-        borderLeft: '1px solid rgba(255,255,255,.06)',
-        borderRight: '1px solid rgba(255,255,255,.06)',
-        borderBottom: '1px solid rgba(255,255,255,.06)',
-        borderRadius: 6,
-        padding: char ? '24px 32px 22px 32px' : '20px 32px',
-        minHeight: char ? 110 : 80,
-        boxShadow:'0 -4px 24px rgba(0,0,0,.5)',
-        backdropFilter:'blur(4px)',
-        animation:'dialogFadeIn .3s ease both',
-      }}>
-        {/* corner accents */}
-        {char && [
-          {top:8, left:8}, {top:8, right:8},
-          {bottom:8, left:8}, {bottom:8, right:8},
-        ].map((p,i)=>(
-          <div key={i} style={{
-            position:'absolute', ...p, width:14, height:14,
-            borderColor: color,
-            borderStyle:'solid',
-            borderWidth: `${p.top!==undefined?1:0}px ${p.right!==undefined?1:0}px ${p.bottom!==undefined?1:0}px ${p.left!==undefined?1:0}px`,
-            opacity:.55,
-          }}/>
-        ))}
-
-        <div style={{
-          fontFamily:"'Noto Sans JP'",
-          fontSize: char ? 19 : 16,
-          fontStyle: char ? 'normal' : 'italic',
-          fontWeight: char ? 500 : 400,
-          color: char ? '#fff' : 'rgba(220,220,230,.78)',
-          lineHeight: 1.7,
-          letterSpacing:'.04em',
-          textShadow: char ? '0 1px 6px rgba(0,0,0,.6)' : 'none',
-          textAlign: char ? 'left' : 'center',
-          minHeight: char ? '2em' : '1.4em',
-        }}>
-          {shown}
-          {/* blinking cursor while typing */}
-          {!done && <span style={{
-            display:'inline-block', marginLeft:2,
-            color: color || 'rgba(255,255,255,.7)',
-            animation:'blink 1s steps(2) infinite',
-          }}>▾</span>}
-        </div>
-
-        {/* advance prompt */}
-        {done && (
-          <div style={{
-            position:'absolute', right:16, bottom:8,
-            fontSize:13, color: color || 'rgba(255,255,255,.6)',
-            animation:'bounceY 1.2s ease infinite',
-          }}>▼</div>
-        )}
-      </div>
     </div>
   );
 }
@@ -545,8 +574,92 @@ function ADVTopBar({ location, onAuto, isAuto, onSkip, onLog, onExit }) {
   );
 }
 
+// ── EventEngineスクリプト → ADVScene scenario 変換 ──────
+/**
+ * EventEngine._expandConversation で展開済みの script を ADVScene scenario に変換する。
+ * conversation はすでに text ステップに展開されている前提。
+ */
+export function convertEventScript(script, { bg = null, location = '' } = {}) {
+  const castMap = new Map(); // position → characterId（先着順）
+  script.forEach(step => {
+    if (step.type === 'text' && step.characterId && step.position) {
+      if (!castMap.has(step.position)) {
+        castMap.set(step.position, step.characterId);
+      }
+    }
+  });
+
+  const cast = Array.from(castMap.entries()).map(([pos, id]) => ({ id, pos }));
+  const scenario = [];
+
+  scenario.push({ type: 'setup', cast, bg, location });
+
+  script.forEach(step => {
+    if (step.type === 'text') {
+      scenario.push({
+        type:    'dialog',
+        speaker: step.characterId,
+        expr:    'normal',
+        text:    step.text,
+      });
+    } else if (step.type === 'narration') {
+      scenario.push({ type: 'narration', text: step.text });
+    } else if (step.type === 'end') {
+      scenario.push({ type: 'end' });
+    }
+    // choice ステップは ADVScene.jsx の ChoiceUI で処理（EventEngine 経由では未使用）
+  });
+
+  if (!scenario.some(s => s.type === 'end')) {
+    scenario.push({ type: 'end' });
+  }
+
+  return scenario;
+}
+
+// ── Choice UI ────────────────────────────────────────────
+function ChoiceUI({ entry, onSelect }) {
+  return (
+    <div style={{
+      position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 20,
+      padding: '0 16px 24px 16px',
+      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
+    }}>
+      <div style={{
+        fontFamily: "'Noto Sans JP'", fontSize: 18, fontWeight: 700,
+        color: 'rgba(255,255,255,.9)',
+        textShadow: '0 2px 8px rgba(0,0,0,.8)',
+        marginBottom: 4,
+      }}>{entry.text}</div>
+      {(entry.choices ?? []).map(c => (
+        <button
+          key={c.value}
+          onClick={() => onSelect(c.value)}
+          style={{
+            width: '100%', maxWidth: 400,
+            padding: '16px 32px',
+            background: 'linear-gradient(180deg, rgba(40,24,60,.95), rgba(20,12,36,.97))',
+            border: `2px solid ${PK}`,
+            borderRadius: 6,
+            color: '#fff',
+            fontFamily: "'Noto Sans JP'", fontSize: 16, fontWeight: 700,
+            letterSpacing: '.08em',
+            cursor: 'pointer',
+            boxShadow: `0 4px 20px ${PK}55`,
+            transition: 'all .15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = `linear-gradient(180deg, ${PK}88, ${PK}55)`; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'linear-gradient(180deg, rgba(40,24,60,.95), rgba(20,12,36,.97))'; }}
+        >
+          {c.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 // ── Main ADVScene ───────────────────────────────────────
-export default function ADVScene({ scenario, onExit }) {
+export default function ADVScene({ scenario, onExit, onChoice, transparent }) {
   const [idx, setIdx] = useState(0);
   const [cast, setCast] = useState([]); // [{id, pos}]
   const [bg, setBg] = useState(null);
@@ -567,7 +680,7 @@ export default function ADVScene({ scenario, onExit }) {
       if(e.location) setLocation(e.location);
       setIdx(i => i + 1);
     } else if(e.type === 'end') {
-      // hold — exit on advance
+      onExit();
     }
   }, [idx, scenario]);
 
@@ -653,13 +766,13 @@ export default function ADVScene({ scenario, onExit }) {
       style={{
         width:'100vw', height:'100vh',
         position:'relative', overflow:'hidden',
-        background:'#0a0610',
+        background: transparent ? 'transparent' : '#0a0610',
         fontFamily:"'Noto Sans JP'",
         userSelect:'none',
       }}>
 
       {/* BG */}
-      {bg && (
+      {bg && !transparent && (
         <div style={{
           position:'absolute', inset:0,
           backgroundImage:`url(${bg})`,
@@ -668,10 +781,10 @@ export default function ADVScene({ scenario, onExit }) {
         }}/>
       )}
       {/* BG dim overlay */}
-      <div style={{
+      {!transparent && <div style={{
         position:'absolute', inset:0,
         background:'linear-gradient(180deg, rgba(8,4,16,.4) 0%, rgba(8,4,16,.75) 100%)',
-      }}/>
+      }}/>}
 
       {/* Standing characters */}
       {cast.map(c => {
@@ -712,31 +825,16 @@ export default function ADVScene({ scenario, onExit }) {
           color={speakerColor}
           onAdvance={() => { setAutoReadyToAdvance(true); advance(); }}
           onFinishType={() => setAutoReadyToAdvance(true)}
+          transparent={transparent}
         />
       )}
 
-      {/* End screen */}
-      {current.type === 'end' && (
-        <div style={{
-          position:'absolute', inset:0, zIndex:40,
-          background:'rgba(8,4,16,.85)',
-          display:'flex', alignItems:'center', justifyContent:'center',
-          flexDirection:'column', gap:24,
-          animation:'fadeIn .4s both',
-        }}>
-          <div style={{
-            fontFamily:'Rajdhani', fontSize:14, fontWeight:700, letterSpacing:'.5em',
-            color:'rgba(255,255,255,.5)',
-          }}>END OF SCENE</div>
-          <button onClick={onExit} style={{
-            padding:'14px 40px', borderRadius:6,
-            background:`linear-gradient(135deg, ${PK}, ${PK2})`,
-            border:'none', color:'#fff',
-            fontFamily:"'Noto Sans JP'", fontSize:14, fontWeight:700, letterSpacing:'.16em',
-            cursor:'pointer',
-            boxShadow:`0 4px 24px ${PK}66`,
-          }}>続ける →</button>
-        </div>
+      {/* Choice */}
+      {current.type === 'choice' && (
+        <ChoiceUI
+          entry={current}
+          onSelect={(value) => onChoice?.(value)}
+        />
       )}
 
       {/* Top bar */}

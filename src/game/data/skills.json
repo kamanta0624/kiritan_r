@@ -4,25 +4,45 @@
       "id": "rally",
       "name": "鼓舞",
       "description": "味方全体の攻撃力を1ターン +20%",
+      "trigger": "instant",
       "assignTo": "leader"
     },
     {
       "id": "pierce",
       "name": "看破",
       "description": "相手の防御を無視して攻撃",
+      "trigger": "instant",
       "assignTo": "attacker"
     },
     {
       "id": "fortress",
       "name": "鉄壁",
-      "description": "このターンの被ダメージを0にする",
+      "description": "このターンの被SP/HPダメージを無効化",
+      "trigger": "instant",
       "assignTo": "guardian"
     },
     {
       "id": "volley",
       "name": "乱撃",
-      "description": "相手全体に通常の50%のダメージ",
+      "description": "相手全体に通常の50%ダメージ（反撃なし）",
+      "trigger": "instant",
       "assignTo": "commander"
+    },
+    {
+      "id": "special_sp",
+      "name": "必殺（SP撃）",
+      "description": "集中後に発動。相手の残存SP数分の攻撃（反撃なし）",
+      "trigger": "charge",
+      "specialType": "sp_strike",
+      "assignTo": "attacker"
+    },
+    {
+      "id": "special_char",
+      "name": "必殺（本体撃）",
+      "description": "集中後に発動。ミームを無視して相手本体にattackCount回攻撃（反撃なし）",
+      "trigger": "charge",
+      "specialType": "char_strike",
+      "assignTo": "attacker"
     }
   ]
 }

@@ -55,7 +55,9 @@
           "charSong": 0
         }
       },
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "mob_002",
@@ -112,7 +114,9 @@
           "charSong": 0
         }
       },
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 25,
+      "kana": null
     },
     {
       "id": "mob_003",
@@ -169,7 +173,9 @@
           "charSong": 0
         }
       },
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 15,
+      "kana": null
     },
     {
       "id": "char_004",
@@ -180,8 +186,8 @@
       "isTemplate": false,
       "attack": 22,
       "defense": 70,
-      "soldiers": 5,
-      "maxSoldiers": 5,
+      "soldiers": 5000,
+      "maxSoldiers": 5000,
       "isLeader": true,
       "usedThisTurn": false,
       "role": "attacker",
@@ -219,7 +225,13 @@
         }
       },
       "charDefense": 8,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 40,
+      "kana": "とうほくきりたん",
+      "attackCount": 8,
+      "specialType": null,
+      "recoveryRate": null,
+      "talkEventId": null
     },
     {
       "id": "char_005",
@@ -269,7 +281,9 @@
         }
       },
       "charDefense": 4,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 55,
+      "kana": "おとまちうな"
     },
     {
       "id": "char_006",
@@ -319,7 +333,9 @@
         }
       },
       "charDefense": 4,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 35,
+      "kana": "あやすみしゅお"
     },
     {
       "id": "char_008",
@@ -368,7 +384,9 @@
           "charSong": 0
         }
       },
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 50,
+      "kana": null
     },
     {
       "id": "char_009",
@@ -417,7 +435,9 @@
           "charSong": 0
         }
       },
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 48,
+      "kana": null
     },
     {
       "id": "char_010",
@@ -466,7 +486,9 @@
           "charSong": 0
         }
       },
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_011",
@@ -516,7 +538,9 @@
         }
       },
       "charDefense": 0,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 60,
+      "kana": null
     },
     {
       "id": "char_012",
@@ -566,7 +590,9 @@
         }
       },
       "charDefense": 0,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 45,
+      "kana": null
     },
     {
       "id": "char_013",
@@ -612,7 +638,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_014",
@@ -658,7 +686,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_015",
@@ -704,7 +734,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_016",
@@ -750,7 +782,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 30,
+      "kana": "ずんだもん"
     },
     {
       "id": "char_017",
@@ -796,7 +830,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": "しこくめたん"
     },
     {
       "id": "char_018",
@@ -842,7 +878,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": "きゅうしゅうそら"
     },
     {
       "id": "char_019",
@@ -888,7 +926,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": "ちゅうごくうさぎ"
     },
     {
       "id": "char_020",
@@ -934,7 +974,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_021",
@@ -980,7 +1022,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_022",
@@ -1026,7 +1070,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_023",
@@ -1072,7 +1118,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_024",
@@ -1118,7 +1166,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_025",
@@ -1164,7 +1214,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_026",
@@ -1210,7 +1262,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_027",
@@ -1256,7 +1310,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_028",
@@ -1302,7 +1358,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_029",
@@ -1348,7 +1406,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_030",
@@ -1394,7 +1454,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_031",
@@ -1440,7 +1502,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_032",
@@ -1486,7 +1550,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_033",
@@ -1532,7 +1598,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_034",
@@ -1578,7 +1646,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_035",
@@ -1624,7 +1694,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_036",
@@ -1670,7 +1742,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_037",
@@ -1716,7 +1790,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_038",
@@ -1762,7 +1838,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_039",
@@ -1812,7 +1890,9 @@
       },
       "charSong": 20,
       "skillId": null,
-      "charDefense": 0
+      "charDefense": 0,
+      "strategyRate": 20,
+      "kana": "かさねてと"
     },
     {
       "id": "char_040",
@@ -1858,7 +1938,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_041",
@@ -1904,7 +1986,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_042",
@@ -1950,7 +2034,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_043",
@@ -1996,7 +2082,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_044",
@@ -2042,7 +2130,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_045",
@@ -2088,7 +2178,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_046",
@@ -2134,7 +2226,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_047",
@@ -2180,7 +2274,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_048",
@@ -2226,7 +2322,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_049",
@@ -2272,7 +2370,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_050",
@@ -2318,7 +2418,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_051",
@@ -2364,7 +2466,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_052",
@@ -2410,7 +2514,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_053",
@@ -2456,7 +2562,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_054",
@@ -2502,7 +2610,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_055",
@@ -2548,7 +2658,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_056",
@@ -2594,7 +2706,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_057",
@@ -2640,7 +2754,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_058",
@@ -2686,7 +2802,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_059",
@@ -2732,7 +2850,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_060",
@@ -2778,7 +2898,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_061",
@@ -2824,7 +2946,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_062",
@@ -2870,7 +2994,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_063",
@@ -2916,7 +3042,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_064",
@@ -2962,7 +3090,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_065",
@@ -3008,7 +3138,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_066",
@@ -3054,7 +3186,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_067",
@@ -3100,7 +3234,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_068",
@@ -3146,7 +3282,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_069",
@@ -3192,7 +3330,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_070",
@@ -3238,7 +3378,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_071",
@@ -3284,7 +3426,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_072",
@@ -3330,7 +3474,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_073",
@@ -3376,7 +3522,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_074",
@@ -3422,7 +3570,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_075",
@@ -3468,7 +3618,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_076",
@@ -3514,7 +3666,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_077",
@@ -3560,7 +3714,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_078",
@@ -3606,7 +3762,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_079",
@@ -3652,7 +3810,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_080",
@@ -3698,7 +3858,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_081",
@@ -3744,7 +3906,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_082",
@@ -3790,7 +3954,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_083",
@@ -3836,7 +4002,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_084",
@@ -3882,7 +4050,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_085",
@@ -3928,7 +4098,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_086",
@@ -3974,7 +4146,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_087",
@@ -4020,7 +4194,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_088",
@@ -4066,7 +4242,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_089",
@@ -4112,7 +4290,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_090",
@@ -4158,7 +4338,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_091",
@@ -4204,7 +4386,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_092",
@@ -4250,7 +4434,9 @@
         }
       },
       "charSong": 20,
-      "skillId": null
+      "skillId": null,
+      "strategyRate": 20,
+      "kana": null
     },
     {
       "id": "char_093",
@@ -4300,7 +4486,9 @@
           "charAttack": 0,
           "charSong": 0
         }
-      }
+      },
+      "strategyRate": 20,
+      "kana": null
     }
   ]
 }

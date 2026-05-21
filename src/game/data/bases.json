@@ -14,7 +14,8 @@
         "base_010"
       ],
       "battleCapacity": 800,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "tohoku"
     },
     {
       "id": "base_002",
@@ -30,7 +31,8 @@
         "base_069"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "tohoku"
     },
     {
       "id": "base_003",
@@ -46,7 +48,8 @@
         "base_021"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "tohoku"
     },
     {
       "id": "base_004",
@@ -63,7 +66,8 @@
         "base_054"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "hokkaido"
     },
     {
       "id": "base_005",
@@ -79,7 +83,8 @@
         "base_024"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kanto"
     },
     {
       "id": "base_006",
@@ -95,7 +100,8 @@
         "base_054"
       ],
       "battleCapacity": 800,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "hokkaido"
     },
     {
       "id": "base_007",
@@ -111,7 +117,8 @@
         "base_073"
       ],
       "battleCapacity": 800,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kanto"
     },
     {
       "id": "base_008",
@@ -126,7 +133,8 @@
         "base_080"
       ],
       "battleCapacity": 500,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "chushikoku"
     },
     {
       "id": "base_009",
@@ -143,7 +151,8 @@
         "base_077"
       ],
       "battleCapacity": 800,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kansai"
     },
     {
       "id": "base_010",
@@ -159,7 +168,8 @@
         "base_014"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "tohoku"
     },
     {
       "id": "base_011",
@@ -175,7 +185,8 @@
         "base_050"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "tohoku"
     },
     {
       "id": "base_012",
@@ -192,7 +203,8 @@
         "base_013"
       ],
       "battleCapacity": 400,
-      "dungeonId": "dungeon_001"
+      "dungeonId": "dungeon_001",
+      "area": "tohoku"
     },
     {
       "id": "base_013",
@@ -210,7 +222,8 @@
         "base_002"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "tohoku"
     },
     {
       "id": "base_014",
@@ -226,7 +239,8 @@
         "base_005"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "tohoku"
     },
     {
       "id": "base_015",
@@ -242,7 +256,8 @@
         "base_056"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "hokkaido"
     },
     {
       "id": "base_016",
@@ -260,7 +275,8 @@
         "base_017"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "hokkaido"
     },
     {
       "id": "base_017",
@@ -276,7 +292,8 @@
         "base_066"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "hokkaido"
     },
     {
       "id": "base_018",
@@ -291,7 +308,8 @@
         "base_067"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "hokkaido"
     },
     {
       "id": "base_019",
@@ -306,7 +324,8 @@
         "base_055"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "hokkaido"
     },
     {
       "id": "base_020",
@@ -321,7 +340,8 @@
         "base_045"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kanto"
     },
     {
       "id": "base_021",
@@ -337,7 +357,8 @@
         "base_046"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "tohoku"
     },
     {
       "id": "base_022",
@@ -354,7 +375,8 @@
         "base_028"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kanto"
     },
     {
       "id": "base_023",
@@ -368,7 +390,8 @@
         "base_072"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kanto"
     },
     {
       "id": "base_024",
@@ -385,7 +408,8 @@
         "base_005"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kanto"
     },
     {
       "id": "base_025",
@@ -400,7 +424,8 @@
         "base_098"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kanto"
     },
     {
       "id": "base_026",
@@ -414,7 +439,8 @@
         "base_022"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kanto"
     },
     {
       "id": "base_027",
@@ -429,7 +455,8 @@
         "base_073"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kanto"
     },
     {
       "id": "base_028",
@@ -446,7 +473,8 @@
         "base_031"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kanto"
     },
     {
       "id": "base_029",
@@ -460,7 +488,8 @@
         "base_028"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kanto"
     },
     {
       "id": "base_030",
@@ -475,7 +504,8 @@
         "base_032"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kanto"
     },
     {
       "id": "base_031",
@@ -490,7 +520,8 @@
         "base_030"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kanto"
     },
     {
       "id": "base_032",
@@ -504,7 +535,8 @@
         "base_030"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kanto"
     },
     {
       "id": "base_035",
@@ -519,7 +551,8 @@
         "base_039"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kansai"
     },
     {
       "id": "base_037",
@@ -535,7 +568,8 @@
         "base_041"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kansai"
     },
     {
       "id": "base_039",
@@ -551,7 +585,8 @@
         "base_098"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kansai"
     },
     {
       "id": "base_041",
@@ -566,7 +601,8 @@
         "base_074"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kansai"
     },
     {
       "id": "base_042",
@@ -583,7 +619,8 @@
         "base_082"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kansai"
     },
     {
       "id": "base_043",
@@ -597,7 +634,8 @@
         "base_078"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kansai"
     },
     {
       "id": "base_045",
@@ -612,7 +650,8 @@
         "base_021"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kanto"
     },
     {
       "id": "base_046",
@@ -627,7 +666,8 @@
         "base_047"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "tohoku"
     },
     {
       "id": "base_047",
@@ -642,7 +682,8 @@
         "base_049"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "tohoku"
     },
     {
       "id": "base_048",
@@ -656,7 +697,8 @@
         "base_012"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "tohoku"
     },
     {
       "id": "base_049",
@@ -672,7 +714,8 @@
         "base_012"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "tohoku"
     },
     {
       "id": "base_050",
@@ -687,7 +730,8 @@
         "base_012"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "tohoku"
     },
     {
       "id": "base_051",
@@ -702,7 +746,8 @@
         "base_071"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "tohoku"
     },
     {
       "id": "base_052",
@@ -719,7 +764,8 @@
         "base_053"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "hokkaido"
     },
     {
       "id": "base_053",
@@ -733,7 +779,8 @@
         "base_052"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "hokkaido"
     },
     {
       "id": "base_054",
@@ -748,7 +795,8 @@
         "base_006"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "hokkaido"
     },
     {
       "id": "base_055",
@@ -764,7 +812,8 @@
         "base_057"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "hokkaido"
     },
     {
       "id": "base_056",
@@ -778,7 +827,8 @@
         "base_015"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "hokkaido"
     },
     {
       "id": "base_057",
@@ -794,7 +844,8 @@
         "base_067"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "hokkaido"
     },
     {
       "id": "base_058",
@@ -809,7 +860,8 @@
         "base_062"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "okinawa"
     },
     {
       "id": "base_059",
@@ -823,7 +875,8 @@
         "base_016"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "okinawa"
     },
     {
       "id": "base_060",
@@ -837,7 +890,8 @@
         "base_057"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "hokkaido"
     },
     {
       "id": "base_061",
@@ -852,7 +906,8 @@
         "base_086"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "okinawa"
     },
     {
       "id": "base_062",
@@ -867,7 +922,8 @@
         "base_084"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "okinawa"
     },
     {
       "id": "base_063",
@@ -882,7 +938,8 @@
         "base_064"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "hokkaido"
     },
     {
       "id": "base_064",
@@ -897,7 +954,8 @@
         "base_065"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "hokkaido"
     },
     {
       "id": "base_065",
@@ -911,7 +969,8 @@
         "base_064"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "okinawa"
     },
     {
       "id": "base_066",
@@ -927,7 +986,8 @@
         "base_068"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "hokkaido"
     },
     {
       "id": "base_067",
@@ -943,7 +1003,8 @@
         "base_066"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "hokkaido"
     },
     {
       "id": "base_068",
@@ -957,7 +1018,8 @@
         "base_066"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "hokkaido"
     },
     {
       "id": "base_069",
@@ -972,7 +1034,8 @@
         "base_070"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "koshinetsu"
     },
     {
       "id": "base_070",
@@ -987,7 +1050,8 @@
         "base_037"
       ],
       "battleCapacity": 5,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "koshinetsu"
     },
     {
       "id": "base_071",
@@ -1002,7 +1066,8 @@
         "base_072"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kanto"
     },
     {
       "id": "base_072",
@@ -1018,7 +1083,8 @@
         "base_073"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kanto"
     },
     {
       "id": "base_073",
@@ -1034,7 +1100,8 @@
         "base_072"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kanto"
     },
     {
       "id": "base_074",
@@ -1049,7 +1116,8 @@
         "base_041"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kansai"
     },
     {
       "id": "base_075",
@@ -1064,7 +1132,8 @@
         "base_009"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kansai"
     },
     {
       "id": "base_076",
@@ -1079,7 +1148,8 @@
         "base_042"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kansai"
     },
     {
       "id": "base_077",
@@ -1094,7 +1164,8 @@
         "base_078"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kansai"
     },
     {
       "id": "base_078",
@@ -1111,7 +1182,8 @@
         "base_079"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kansai"
     },
     {
       "id": "base_079",
@@ -1126,7 +1198,8 @@
         "base_078"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kansai"
     },
     {
       "id": "base_080",
@@ -1141,7 +1214,8 @@
         "base_095"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "chushikoku"
     },
     {
       "id": "base_081",
@@ -1155,7 +1229,8 @@
         "base_042"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "chushikoku"
     },
     {
       "id": "base_082",
@@ -1170,7 +1245,8 @@
         "base_094"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "chushikoku"
     },
     {
       "id": "base_083",
@@ -1182,7 +1258,8 @@
       "isCapital": true,
       "adjacentBases": [],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "tohoku"
     },
     {
       "id": "base_084",
@@ -1197,7 +1274,8 @@
         "base_085"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kyushu"
     },
     {
       "id": "base_085",
@@ -1213,7 +1291,8 @@
         "base_087"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kyushu"
     },
     {
       "id": "base_086",
@@ -1228,7 +1307,8 @@
         "base_085"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kyushu"
     },
     {
       "id": "base_087",
@@ -1243,7 +1323,8 @@
         "base_088"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kyushu"
     },
     {
       "id": "base_088",
@@ -1259,7 +1340,8 @@
         "base_090"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kyushu"
     },
     {
       "id": "base_089",
@@ -1274,7 +1356,8 @@
         "base_092"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kyushu"
     },
     {
       "id": "base_090",
@@ -1289,7 +1372,8 @@
         "base_091"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kyushu"
     },
     {
       "id": "base_091",
@@ -1305,7 +1389,8 @@
         "base_097"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "chushikoku"
     },
     {
       "id": "base_092",
@@ -1321,7 +1406,8 @@
         "base_097"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "kyushu"
     },
     {
       "id": "base_093",
@@ -1336,7 +1422,8 @@
         "base_096"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "chushikoku"
     },
     {
       "id": "base_094",
@@ -1351,7 +1438,8 @@
         "base_093"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "chushikoku"
     },
     {
       "id": "base_095",
@@ -1366,7 +1454,8 @@
         "base_091"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "chushikoku"
     },
     {
       "id": "base_096",
@@ -1381,7 +1470,8 @@
         "base_093"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "chushikoku"
     },
     {
       "id": "base_097",
@@ -1396,7 +1486,8 @@
         "base_092"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "chushikoku"
     },
     {
       "id": "base_098",
@@ -1411,7 +1502,8 @@
         "base_039"
       ],
       "battleCapacity": 400,
-      "dungeonId": null
+      "dungeonId": null,
+      "area": "koshinetsu"
     }
   ]
 }

@@ -1,37 +1,36 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { PK, PK2, AC, AC2, TEAL, TX, TXD, TXF, BR, glass, GAME_STATE, ROLES, CHARS } from '../shared/tokens.js';
-import { TopBar } from '../shared/SharedUI.jsx';
+import { PK, PK2, AC, AC2, TX, TXD, TXF, BR, glass } from '../shared/tokens.js';
+import { TopBar, BottomBar } from '../shared/SharedUI.jsx';
 
 // ── Map constants ──────────────────────────────────────────
-const MAP_W = 2800, MAP_H = 1600, BOUNDARY_X = 1400;
+const MAP_W = 4200, MAP_H = 3200, BOUNDARY_X = 2400;
 
-const OWN = {
-  player:  {c:TEAL,      fill:'rgba(26,138,150,.18)',  label:'自拠点'},
-  enemy:   {c:PK,        fill:'rgba(196,66,122,.18)',  label:'敵拠点'},
-  ally:    {c:'#2a9a58', fill:'rgba(42,154,88,.18)',   label:'友軍'},
-  neutral: {c:'#8a8e96', fill:'rgba(138,142,150,.18)', label:'中立'},
+const AREA_META = {
+  tohoku:     { name:'東北',   en:'TOHOKU' },
+  hokkaido:   { name:'北海道', en:'HOKKAIDO' },
+  kanto:      { name:'関東',   en:'KANTO' },
+  koshinetsu: { name:'甲信越', en:'KOSHINETSU' },
+  kansai:     { name:'関西',   en:'KANSAI' },
+  chushikoku: { name:'中四国', en:'CHUSHIKOKU' },
+  kyushu:     { name:'九州',   en:'KYUSHU' },
+  okinawa:    { name:'沖縄',   en:'OKINAWA' },
 };
 
-const NODES = [
-  {id:'n1', name:'仙台',     px:1900, py:680,  type:'city',    owner:'player', troops:600, income:200, canAttack:false},
-  {id:'n2', name:'福島',     px:2060, py:890,  type:'town',    owner:'enemy',  troops:150, income:76,  canAttack:true},
-  {id:'n3', name:'郡山',     px:2280, py:620,  type:'town',    owner:'enemy',  troops:200, income:90,  canAttack:true},
-  {id:'n4', name:'会津若松', px:1700, py:480,  type:'village', owner:'ally',   troops:100, income:60},
-  {id:'n5', name:'白河',     px:2400, py:990,  type:'fort',    owner:'enemy',  troops:180, income:80},
-  {id:'n6', name:'いわき',   px:2570, py:660,  type:'fort',    owner:'enemy',  troops:220, income:100},
-  {id:'n7', name:'山形',     px:1640, py:340,  type:'village', owner:'ally',   troops:80,  income:70},
-  {id:'n8', name:'宇都宮',   px:2500, py:1140, type:'city',    owner:'enemy',  troops:300, income:110},
-  {id:'n9',  name:'札幌',   px:680,  py:700,  type:'city',    owner:'enemy',  troops:500, income:180},
-  {id:'n10', name:'函館',   px:880,  py:1080, type:'town',    owner:'enemy',  troops:160, income:80},
-  {id:'n11', name:'旭川',   px:520,  py:400,  type:'village', owner:'neutral',troops:60,  income:50},
-  {id:'n12', name:'帯広',   px:980,  py:580,  type:'fort',    owner:'enemy',  troops:140, income:70},
-  {id:'n13', name:'釧路',   px:1180, py:790,  type:'village', owner:'enemy',  troops:100, income:60},
-];
-const EDGES = [
-  ['n1','n2'],['n1','n4'],['n2','n3'],['n2','n5'],['n3','n6'],
-  ['n4','n7'],['n5','n8'],['n3','n5'],['n1','n7'],['n1','n3'],
-  ['n9','n10'],['n9','n11'],['n9','n12'],['n10','n13'],['n12','n13'],['n11','n12'],
-];
+function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function fmtN(n){ return n >= 1000 ? n.toLocaleString() : String(n); }
+
+function deriveType(b) {
+  if (b.isCapital) return 'city';
+  if (b.income >= 80) return 'town';
+  if (b.battleCapacity >= 600) return 'fort';
+  return 'village';
+}
 
 // ── Background SVGs ────────────────────────────────────────
 function TohokuBg({w, h}) {
@@ -154,13 +153,13 @@ function NodeShape({type, color, selected, canAttack}) {
 }
 
 // ── Map SVG ────────────────────────────────────────────────
-function MapLayer({selNode, onNodeClick, nodes=NODES}) {
+function MapLayer({selNode, onNodeClick, nodes=[], edges=[]}) {
   return (
     <svg width={MAP_W} height={MAP_H}
       style={{position:'absolute', top:0, left:0, overflow:'visible', display:'block'}}>
       <line x1={BOUNDARY_X} y1={0} x2={BOUNDARY_X} y2={MAP_H}
         stroke="rgba(255,255,255,.2)" strokeWidth="2" strokeDasharray="8 10"/>
-      {EDGES.map(([a,b],i)=>{
+      {edges.map(([a,b],i)=>{
         const na=nodes.find(n=>n.id===a), nb=nodes.find(n=>n.id===b);
         if(!na||!nb) return null;
         return (
@@ -171,28 +170,29 @@ function MapLayer({selNode, onNodeClick, nodes=NODES}) {
         );
       })}
       {nodes.map(n=>{
-        const ow=OWN[n.owner]||OWN.neutral, sel=selNode?.id===n.id;
+        const fc=n.factionColor, sel=selNode?.id===n.id;
+        const fillColor=hexToRgba(fc, 0.18);
         return (
           <g key={n.id} transform={`translate(${n.px},${n.py})`}
             style={{cursor:'pointer'}} onClick={()=>onNodeClick(n)}>
-            {sel && <circle r={22} fill={ow.fill} stroke={ow.c} strokeWidth="1.5" opacity=".8"/>}
+            {sel && <circle r={22} fill={fillColor} stroke={fc} strokeWidth="1.5" opacity=".8"/>}
             {n.canAttack && !sel && (
-              <circle r={20} fill="none" stroke={PK} strokeWidth="1.5" opacity=".6"
+              <circle r={20} fill="none" stroke={fc} strokeWidth="1.5" opacity=".6"
                 style={{animation:'pulse 1.3s ease-in-out infinite'}}/>
             )}
-            <NodeShape type={n.type} color={ow.c} selected={sel} canAttack={n.canAttack}/>
+            <NodeShape type={n.type} color={fc} selected={sel} canAttack={n.canAttack}/>
             <g transform="translate(0,20)">
               <rect x={-30} y={-1} width={60} height={16} rx={4}
-                fill="rgba(255,253,251,.9)" stroke={ow.c} strokeWidth=".8"/>
+                fill="rgba(255,253,251,.9)" stroke={fc} strokeWidth=".8"/>
               <text x={0} y={11} textAnchor="middle"
                 style={{fontSize:9, fontFamily:'Noto Sans JP',
                   fontWeight:sel||n.canAttack?700:500,
-                  fill:n.canAttack?PK:TX}}>
+                  fill:n.canAttack?fc:TX}}>
                 {n.name}
               </text>
             </g>
             <g transform="translate(16,-16)">
-              <rect x={-10} y={-7} width={20} height={12} rx={3} fill={ow.c}/>
+              <rect x={-10} y={-7} width={20} height={12} rx={3} fill={fc}/>
               <text x={0} y={2} textAnchor="middle"
                 style={{fontSize:7, fontFamily:'Noto Sans JP', fontWeight:700, fill:'#fff'}}>
                 {n.type==='city'?'都市':n.type==='town'?'街':n.type==='village'?'村':'砦'}
@@ -206,7 +206,7 @@ function MapLayer({selNode, onNodeClick, nodes=NODES}) {
 }
 
 // ── Area name overlay ──────────────────────────────────────
-function AreaNameOverlay({areaName, triggerKey}) {
+function AreaNameOverlay({areaName, areaEn, triggerKey}) {
   const [visible, setVisible] = useState(false);
   const timerRef = useRef(null);
   useEffect(()=>{
@@ -217,12 +217,11 @@ function AreaNameOverlay({areaName, triggerKey}) {
     return()=>clearTimeout(timerRef.current);
   },[triggerKey]);
   if(!visible || !areaName) return null;
-  const isHokkaido = areaName==='北海道';
   return (
     <div style={{position:'absolute', top:24, right:24, pointerEvents:'none', zIndex:30,
       display:'flex', flexDirection:'column', alignItems:'flex-end',
       animation:'areaNameShow 2.4s ease forwards'}}>
-      <div style={{width:40, height:1.5, background:isHokkaido?'rgba(180,205,228,.9)':'rgba(160,195,155,.9)', marginBottom:6}}/>
+      <div style={{width:40, height:1.5, background:'rgba(160,195,155,.9)', marginBottom:6}}/>
       <div style={{fontFamily:"'Zen Maru Gothic'", fontSize:36, fontWeight:900,
         letterSpacing:'.18em', color:'rgba(255,255,255,.95)',
         textShadow:'0 2px 20px rgba(0,0,0,.5), 0 0 40px rgba(0,0,0,.3)', lineHeight:1}}>
@@ -230,39 +229,39 @@ function AreaNameOverlay({areaName, triggerKey}) {
       </div>
       <div style={{fontFamily:'Rajdhani', fontSize:12, fontWeight:600, letterSpacing:'.28em',
         color:'rgba(255,255,255,.65)', textTransform:'uppercase', marginTop:4}}>
-        {isHokkaido?'HOKKAIDO':'TOHOKU'}
+        {areaEn}
       </div>
-      <div style={{width:40, height:1.5, background:isHokkaido?'rgba(180,205,228,.9)':'rgba(160,195,155,.9)', marginTop:6}}/>
+      <div style={{width:40, height:1.5, background:'rgba(160,195,155,.9)', marginTop:6}}/>
     </div>
   );
 }
 
 // ── Node popup ─────────────────────────────────────────────
 function NodePopup({node, onClose, onAttack}) {
-  const ow = OWN[node.owner] || OWN.neutral;
+  const fc = node.factionColor;
   const typeLabel = {city:'都市',town:'街',village:'村',fort:'砦'}[node.type]||node.type;
   return (
     <div className="pop-in" style={{
       ...glass({borderRadius:10, padding:'13px 14px 12px',
-        border:`1.5px solid ${ow.c}66`,
-        boxShadow:`0 0 0 1px ${ow.c}22, 0 6px 28px rgba(0,0,0,.2)`,
+        border:`1.5px solid ${fc}66`,
+        boxShadow:`0 0 0 1px ${fc}22, 0 6px 28px rgba(0,0,0,.2)`,
         minWidth:195}),
       position:'relative',
     }}>
       <button onClick={onClose} style={{position:'absolute', top:8, right:8,
         background:'transparent', border:'none', color:TXD, cursor:'pointer', fontSize:14, lineHeight:1}}>✕</button>
       <div style={{display:'flex', alignItems:'center', gap:7, marginBottom:10}}>
-        <div style={{width:9, height:9, borderRadius:'50%', background:ow.c, flexShrink:0}}/>
+        <div style={{width:9, height:9, borderRadius:'50%', background:fc, flexShrink:0}}/>
         <div style={{fontFamily:"'Zen Maru Gothic'", fontSize:16, fontWeight:900, color:TX}}>{node.name}</div>
         <span style={{marginLeft:'auto', fontSize:8, padding:'2px 6px', borderRadius:10, fontWeight:700,
-          background:`${ow.c}22`, color:ow.c, border:`1px solid ${ow.c}44`}}>{typeLabel}</span>
+          background:`${fc}22`, color:fc, border:`1px solid ${fc}44`}}>{typeLabel}</span>
       </div>
       <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:5,
         marginBottom:node.canAttack?10:0}}>
         {[
           ['収入', `${node.income} M/T`, AC2],
           ['防御部隊', `${fmtN(node.troops)} 兵`, TXD],
-          ['勢力', ow.label, ow.c],
+          ['勢力', node.factionName, fc],
           ['種別', typeLabel, TX],
         ].map(([k,v,c])=>(
           <div key={k} style={{background:'rgba(0,0,0,.04)', borderRadius:6, padding:'5px 7px'}}>
@@ -287,7 +286,7 @@ function NodePopup({node, onClose, onAttack}) {
 }
 
 // ── Mini-map ───────────────────────────────────────────────
-function MiniMap({offsetX, offsetY, vpW, vpH, nodes=NODES}) {
+function MiniMap({offsetX, offsetY, vpW, vpH, nodes=[]}) {
   const mmW=140, mmH=80;
   const scaleX=mmW/MAP_W, scaleY=mmH/MAP_H;
   return (
@@ -298,10 +297,9 @@ function MiniMap({offsetX, offsetY, vpW, vpH, nodes=NODES}) {
         <rect x={0}     y={0} width={mmW/2} height={mmH} fill="rgba(190,210,225,.6)"/>
         <rect x={mmW/2} y={0} width={mmW/2} height={mmH} fill="rgba(175,200,170,.6)"/>
         <line x1={mmW/2} y1={0} x2={mmW/2} y2={mmH} stroke="rgba(255,255,255,.4)" strokeWidth="1"/>
-        {nodes.map(n=>{
-          const ow=OWN[n.owner]||OWN.neutral;
-          return <circle key={n.id} cx={n.px*scaleX} cy={n.py*scaleY} r={2.5} fill={ow.c} opacity=".8"/>;
-        })}
+        {nodes.map(n=>(
+          <circle key={n.id} cx={n.px*scaleX} cy={n.py*scaleY} r={2.5} fill={n.factionColor} opacity=".8"/>
+        ))}
         <rect x={offsetX*scaleX} y={offsetY*scaleY}
           width={vpW*scaleX} height={vpH*scaleY}
           fill="rgba(255,255,255,.15)" stroke="rgba(255,255,255,.7)" strokeWidth="1.2" rx={1}/>
@@ -314,15 +312,15 @@ function MiniMap({offsetX, offsetY, vpW, vpH, nodes=NODES}) {
 }
 
 // ── Legend ─────────────────────────────────────────────────
-function Legend() {
+function Legend({ factionsData }) {
   return (
     <div style={{...glass({borderRadius:8, padding:'8px 10px', boxShadow:'0 2px 12px rgba(0,0,0,.15)'}),
       position:'absolute', top:16, left:16, zIndex:20, minWidth:110}}>
       <div style={{fontSize:8, fontFamily:'Rajdhani', fontWeight:700, color:TXD, letterSpacing:'.12em', marginBottom:6}}>LEGEND</div>
-      {[{color:TEAL,label:'自拠点'},{color:PK,label:'敵拠点'},{color:'#2a9a58',label:'友軍'},{color:'#8a8e96',label:'中立'}].map(f=>(
-        <div key={f.label} style={{display:'flex', alignItems:'center', gap:5, marginBottom:3}}>
+      {(factionsData ?? []).map(f=>(
+        <div key={f.id} style={{display:'flex', alignItems:'center', gap:5, marginBottom:3}}>
           <div style={{width:8, height:8, borderRadius:'50%', background:f.color, flexShrink:0}}/>
-          <span style={{fontSize:9, color:TX}}>{f.label}</span>
+          <span style={{fontSize:9, color:TX}}>{f.name}</span>
         </div>
       ))}
     </div>
@@ -330,36 +328,130 @@ function Legend() {
 }
 
 // ── Map Scene ──────────────────────────────────────────────
-export default function MapScene({ onNavigate, onAttackNode, onNodeClick, gameState, basesData, factionsData, onNextTurn }) {
-  // 実データからownerをマージ
+export default function MapScene({ onNavigate, onAttackNode, onNodeClick, gameState, basesData, factionsData, onNextTurn, focusBaseId, focusKey, onReady }) {
+  // bases.json 実データから NODES を動的生成
   const liveNodes = React.useMemo(() => {
-    if (!basesData || !factionsData) return NODES;
-    const factionMap = Object.fromEntries(factionsData.map(f => [f.id, f]));
-    return NODES.map(n => {
-      const base = basesData.find(b => b.name === n.name);
-      if (!base) return n;
-      const faction = factionMap[base.factionId];
+    if (!basesData || !factionsData) return [];
+    const factionMap      = Object.fromEntries(factionsData.map(f => [f.id, f]));
+    const playerFaction   = factionsData.find(f => f.isPlayer);
+    const playerFactionId = playerFaction?.id;
+
+    // プレイヤー拠点IDセット
+    const playerBaseIds = new Set(
+      basesData.filter(b => b.factionId === playerFactionId).map(b => b.id)
+    );
+    // プレイヤー隣接の敵拠点ID（攻撃可能）
+    const attackableIds = new Set();
+    basesData.forEach(b => {
+      if (playerBaseIds.has(b.id)) {
+        (b.adjacentBases ?? []).forEach(adjId => {
+          if (!playerBaseIds.has(adjId)) attackableIds.add(adjId);
+        });
+      }
+    });
+
+    return basesData.map(b => {
+      const faction = factionMap[b.factionId];
       const isPlayer = faction?.isPlayer ?? false;
-      const owner = isPlayer ? 'player' : 'enemy';
-      return { ...n, baseId: base.id, factionId: base.factionId, owner, troops: base.soldiers ?? n.troops, income: base.income ?? n.income };
+      const isAtWar  = !isPlayer && (
+        (playerFaction?.atWarWith ?? []).includes(faction?.id) ||
+        (faction?.atWarWith ?? []).includes(playerFactionId)
+      );
+      const factionColor = faction?.color ?? '#8a8e96';
+      const factionName  = faction?.name  ?? '不明';
+      return {
+        id:          b.id,
+        name:        b.name,
+        px:          b.x,
+        py:          b.y,
+        type:        deriveType(b),
+        factionId:   b.factionId,
+        factionColor,
+        factionName,
+        troops:      b.soldiers ?? b.battleCapacity ?? 400,
+        income:      b.income ?? 0,
+        canAttack:   !isPlayer && isAtWar && attackableIds.has(b.id),
+        baseId:      b.id,
+        dungeonId:   b.dungeonId ?? null,
+        isCapital:   b.isCapital ?? false,
+        area:        b.area ?? 'tohoku',
+      };
     });
   }, [basesData, factionsData]);
+
+  // adjacentBases から EDGES を動的生成（重複除去）
+  const liveEdges = React.useMemo(() => {
+    if (!basesData) return [];
+    const seen = new Set();
+    const edges = [];
+    basesData.forEach(b => {
+      (b.adjacentBases ?? []).forEach(adjId => {
+        const key = [b.id, adjId].sort().join('|');
+        if (!seen.has(key)) { seen.add(key); edges.push([b.id, adjId]); }
+      });
+    });
+    return edges;
+  }, [basesData]);
+
   const vpRef = useRef(null);
   const [vpSize, setVpSize] = useState({w: window.innerWidth, h: window.innerHeight - 104});
-  const initOffsetX = Math.max(0, Math.min(1900 - window.innerWidth/2, MAP_W - window.innerWidth));
-  const initOffsetY = Math.max(0, Math.min(680  - (window.innerHeight-104)/2, MAP_H - (window.innerHeight-104)));
+  // 仙台（x:3256, y:1019）を初期表示中央に
+  const initOffsetX = Math.max(0, Math.min(3256 - window.innerWidth/2, MAP_W - window.innerWidth));
+  const initOffsetY = Math.max(0, Math.min(1019 - (window.innerHeight-104)/2, MAP_H - (window.innerHeight-104)));
   const [offset, setOffset] = useState({x: initOffsetX, y: initOffsetY});
   const dragRef = useRef(null);
 
-  const currentArea = (offset.x + vpSize.w/2) < BOUNDARY_X ? 'hokkaido' : 'tohoku';
-  const AREA_NAMES = {hokkaido:'北海道', tohoku:'東北'};
-  const [areaNameInfo, setAreaNameInfo] = useState({name:AREA_NAMES[currentArea], key:0});
+  // focusBaseId が指定されたらその拠点を中央にカメラ移動し、500ms後に onReady を呼ぶ
+  const onReadyCalledRef = useRef(false);
+
+  useEffect(() => {
+    onReadyCalledRef.current = false;
+  }, [focusBaseId, focusKey]);
+
+  useEffect(() => {
+    if (!focusBaseId || !liveNodes.length) return;
+    const target = liveNodes.find(n => n.id === focusBaseId || n.baseId === focusBaseId);
+    if (!target) {
+      if (!onReadyCalledRef.current) { onReadyCalledRef.current = true; onReady?.(); }
+      return;
+    }
+    const tx = Math.max(0, Math.min(target.px - vpSize.w / 2, MAP_W - vpSize.w));
+    const ty = Math.max(0, Math.min(target.py - vpSize.h / 2, MAP_H - vpSize.h));
+    setOffset({ x: tx, y: ty });
+    const t = setTimeout(() => {
+      if (!onReadyCalledRef.current) { onReadyCalledRef.current = true; onReady?.(); }
+    }, 500);
+    return () => clearTimeout(t);
+  }, [focusBaseId, focusKey]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const currentArea = React.useMemo(() => {
+    if (!liveNodes.length) return 'tohoku';
+    const cx = offset.x + vpSize.w / 2;
+    const cy = offset.y + vpSize.h / 2;
+    let nearest = liveNodes[0];
+    let minDist = Infinity;
+    liveNodes.forEach(n => {
+      const d = Math.hypot(n.px - cx, n.py - cy);
+      if (d < minDist) { minDist = d; nearest = n; }
+    });
+    return nearest.area ?? 'tohoku';
+  }, [liveNodes, offset, vpSize]);
+
+  const [areaNameInfo, setAreaNameInfo] = useState({
+    name: AREA_META[currentArea]?.name ?? '東北',
+    en:   AREA_META[currentArea]?.en   ?? 'TOHOKU',
+    key:  0,
+  });
   const prevAreaRef = useRef(currentArea);
 
   useEffect(()=>{
     if(prevAreaRef.current !== currentArea){
       prevAreaRef.current = currentArea;
-      setAreaNameInfo(p=>({name:AREA_NAMES[currentArea], key:p.key+1}));
+      setAreaNameInfo(p=>({
+        name: AREA_META[currentArea]?.name ?? currentArea,
+        en:   AREA_META[currentArea]?.en   ?? '',
+        key:  p.key + 1,
+      }));
     }
   },[currentArea]);
 
@@ -406,8 +498,9 @@ export default function MapScene({ onNavigate, onAttackNode, onNodeClick, gameSt
     return {left, top};
   },[offset, vpSize]);
 
-  const tohokuOpacity  = currentArea==='tohoku'  ? 1 : 0;
-  const hokkaidoOpacity = currentArea==='hokkaido' ? 1 : 0;
+  const bgType = currentArea === 'hokkaido' ? 'hokkaido' : 'tohoku';
+  const tohokuOpacity   = bgType === 'tohoku'   ? 1 : 0;
+  const hokkaidoOpacity = bgType === 'hokkaido' ? 1 : 0;
 
   return (
     <div className="scene-enter" style={{width:'100vw', height:'100vh',
@@ -416,19 +509,20 @@ export default function MapScene({ onNavigate, onAttackNode, onNodeClick, gameSt
 
       {/* TOP BAR */}
       <TopBar scene="map" currentArea={currentArea}
+        turn={gameState?.turn}
+        meme={gameState?.meme}
+        income={gameState?.income}
+        bases={gameState?.bases}
         rightSlot={
           <div style={{
             padding:'4px 12px', borderRadius:20,
-            background:currentArea==='tohoku'?'rgba(160,195,155,.25)':'rgba(180,205,225,.25)',
-            border:`1px solid ${currentArea==='tohoku'?'rgba(145,185,135,.5)':'rgba(160,190,215,.5)'}`,
+            background:'rgba(160,195,155,.25)',
+            border:'1px solid rgba(145,185,135,.5)',
             display:'flex', alignItems:'center', gap:6,
-            transition:'background .6s, border-color .6s',
           }}>
-            <div style={{width:6, height:6, borderRadius:'50%',
-              background:currentArea==='tohoku'?'#2a9a58':'#4488bb',
-              transition:'background .6s'}}/>
+            <div style={{width:6, height:6, borderRadius:'50%', background:'#2a9a58'}}/>
             <span style={{fontFamily:"'Zen Maru Gothic'", fontSize:11, fontWeight:900, color:TX}}>
-              {AREA_NAMES[currentArea]}
+              {AREA_META[currentArea]?.name ?? currentArea}
             </span>
           </div>
         }
@@ -457,10 +551,10 @@ export default function MapScene({ onNavigate, onAttackNode, onNodeClick, gameSt
         <div style={{position:'absolute',
           transform:`translate(${-offset.x}px,${-offset.y}px)`,
           width:MAP_W, height:MAP_H, zIndex:1}}>
-          <MapLayer selNode={selNode} onNodeClick={handleNodeClick} nodes={liveNodes}/>
+          <MapLayer selNode={selNode} onNodeClick={handleNodeClick} nodes={liveNodes} edges={liveEdges}/>
         </div>
 
-        <AreaNameOverlay areaName={areaNameInfo.name} triggerKey={areaNameInfo.key}/>
+        <AreaNameOverlay areaName={areaNameInfo.name} areaEn={areaNameInfo.en} triggerKey={areaNameInfo.key}/>
 
         {/* Node popup */}
         {selNode && (()=>{
@@ -476,8 +570,8 @@ export default function MapScene({ onNavigate, onAttackNode, onNodeClick, gameSt
           );
         })()}
 
-        <MiniMap offsetX={offset.x} offsetY={offset.y} vpW={vpSize.w} vpH={vpSize.h} nodes={liveNodes}/>
-        <Legend/>
+        <MiniMap offsetX={offset.x} offsetY={offset.y} vpW={vpSize.w} vpH={vpSize.h} nodes={liveNodes} />
+        <Legend factionsData={factionsData ?? []} />
 
         {/* boundary glow */}
         {(()=>{

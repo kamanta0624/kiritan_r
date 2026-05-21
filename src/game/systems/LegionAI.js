@@ -106,6 +106,15 @@ export class LegionAI {
   }
 
   // ----------------------------------------------------------------
+  // 勢力別攻撃キュー構築（buildAttackQueue のフィルタ版）
+  // NOTE: 呼び出し前に buildAttackQueue で副作用を済ませること
+  // ----------------------------------------------------------------
+  buildAttackQueueForFaction(factionId, playerFactionId) {
+    return this.buildAttackQueue(playerFactionId)
+      .filter(item => item.attackerFactionId === factionId);
+  }
+
+  // ----------------------------------------------------------------
   // 強制攻撃指示
   // ----------------------------------------------------------------
   forceAttack(factionId, targetFactionId) {

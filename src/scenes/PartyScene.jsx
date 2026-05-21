@@ -29,7 +29,7 @@ function MemeBar({val, max, color}) {
           transition:'width .5s ease'}}/>
       </div>
       <div style={{width:44, textAlign:'right', fontFamily:'Rajdhani', fontWeight:700,
-        fontSize:10, color:TXD, flexShrink:0}}>{val.toLocaleString()}</div>
+        fontSize:10, color:TXD, flexShrink:0}}>{(val ?? 0).toLocaleString()}</div>
     </div>
   );
 }
@@ -299,6 +299,8 @@ export default function PartyScene({ onNavigate, characters }) {
     hp:      c.hp   ?? c.charHp ?? 100,
     maxHp:   c.maxHp ?? c.charMaxHp ?? 100,
     troops:  c.troops ?? c.soldiers ?? 0,
+    meme:    c.meme ?? c.soldiers ?? 0,
+    memeMax: c.memeMax ?? c.maxSoldiers ?? c.soldiers ?? 0,
     joined:  c.joined ?? (c.status === 'active'),
     portrait: c.portrait ?? null,
   }));

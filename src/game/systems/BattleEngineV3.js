@@ -1,72 +1,83 @@
 /**
- * BattleEngineV3.js — 戦闘システム完全再設計版
+ * BattleEngineV3.js — 戦闘エンジン（V3）
  *
  * 設計思想:
- * - N体（min(soldiers, battleCapacity)）が突撃し、N回分の攻撃判定が発生
- * - ミームへの命中数 + 将軍への命中数 = N（常に成立）
- * - 攻撃と反撃は同時処理（相手が死んでも反撃ダメージは成立）
- * - 同時にcharHp<=0になる場合はプレイヤー側を1に補正
- * - 部隊消滅条件: charHp <= 0 のみ
- * - 攻撃種別はaction（attack/ranged/song）で決定。attackTypeは初期値の参照のみ
+ *   N = min(soldiers, battleCapacity) 体が突撃し N 回の攻撃判定が発生。
+ *   SP への命中数 + 将軍への命中数 = N（常に成立）。
+ *   攻撃と反撃を同時算出・同時適用。同時HP0はプレイヤー側を1に補正。
+ *   部隊消滅条件: charHp <= 0 のみ（死亡廃止・ペナルティ制）。
+ *
+ * 主要機能:
+ *   - 戦闘モード (normal / dungeon / duel / event)
+ *   - 作戦システム (strategyRate差分でSPダメージ±10/50%補正)
+ *   - 特技システム (skills.json 定義: instant / charge)
  */
 
 import { resolveBonus } from '../utils/BattleBonus.js';
+import skillsData from '../data/skills.json';
 
-const MAX_ROUNDS = 5;
+const MAX_ROUNDS_NORMAL = 5;
 
 // ────────────────────────────────────────────────
-// 内部ユーティリティ
+// モジュールユーティリティ
 // ────────────────────────────────────────────────
 
-/** rand(0.8~1.2) のブレ係数 */
-const _jitter = () => 0.8 + Math.random() * 0.4;
-
-/**
- * 攻撃N回分をミーム命中・将軍命中に振り分ける（一括計算）
- * @returns {{ toMeme: number, toChar: number }}
- */
-function _split(N, vicSol, atkSol) {
+/** SP命中の振り分け: N体のうち何体が将軍に届くか */
+function _splitHits(N, vicSol, atkSol) {
   if (N <= 0) return { toMeme: 0, toChar: 0 };
-
-  const isExtreme = vicSol < 50 || (vicSol > 0 && atkSol / vicSol >= 10) || vicSol === 0;
-  let p_char;
-
-  if (isExtreme) {
-    p_char = 1 / (vicSol + 1); // 100/(残存+1)%
+  const extreme = vicSol < 50 || vicSol === 0 || (vicSol > 0 && atkSol / vicSol >= 10);
+  let p;
+  if (extreme) {
+    p = 1 / (vicSol + 1);
   } else {
-    const deficit_ratio = 1 - vicSol / atkSol;
-    p_char = deficit_ratio <= 0.3
-      ? 0
-      : Math.pow(deficit_ratio - 0.3, 2) * 0.5;
+    const dr = 1 - vicSol / atkSol;
+    p = dr <= 0.3 ? 0 : (dr - 0.3) ** 2 * 0.5;
   }
-
-  const toChar = Math.min(N, Math.max(0, Math.round(N * p_char * _jitter())));
+  const toChar = Math.min(N, Math.max(0, Math.round(N * p * (0.8 + Math.random() * 0.4))));
   return { toMeme: N - toChar, toChar };
 }
 
 // ────────────────────────────────────────────────
 export class BattleEngineV3 {
+  /**
+   * @param {object}   opts
+   * @param {object[]} opts.playerSide
+   * @param {object[]} opts.enemySide
+   * @param {string}   opts.mode           'attack' | 'defense'
+   * @param {number}   opts.battleCapacity
+   * @param {string}   [opts.battleMode]   'normal' | 'dungeon' | 'duel' | 'event'
+   * @param {number}   [opts.maxRounds]    省略時: normal=5、それ以外=無制限
+   * @param {boolean}  [opts.allowRetreat] 省略時: dungeon/duel以外=true
+   */
   constructor(opts) {
     this.playerSide     = opts.playerSide;
     this.enemySide      = opts.enemySide;
     this.mode           = opts.mode;
     this.battleCapacity = opts.battleCapacity;
+    this.battleMode     = opts.battleMode   ?? 'normal';
+    this.maxRounds      = opts.maxRounds    ?? (this.battleMode === 'normal' ? MAX_ROUNDS_NORMAL : Infinity);
+    this.allowRetreat   = opts.allowRetreat ?? (this.battleMode !== 'dungeon' && this.battleMode !== 'duel');
 
-    this._onLog        = opts.onLog        ?? (() => {});
-    this._onCardUpdate = opts.onCardUpdate ?? (() => {});
-    this._onShake      = opts.onShake      ?? (() => {});
-    this._onPopup      = opts.onPopup      ?? (() => {});
-    this._onRoundEnd   = opts.onRoundEnd   ?? (() => {});
-    this._onBattleEnd  = opts.onBattleEnd  ?? (() => {});
-    this._delayedCall  = opts.delayedCall  ?? ((ms, fn) => setTimeout(fn, ms));
+    this._onLog              = opts.onLog             ?? (() => {});
+    this._onCardUpdate       = opts.onCardUpdate      ?? (() => {});
+    this._onShake            = opts.onShake           ?? (() => {});
+    this._onPopup            = opts.onPopup           ?? (() => {});
+    this._onBattleEnd        = opts.onBattleEnd       ?? (() => {});
+    this._onExchangeResult   = opts.onExchangeResult  ?? (() => {});
+    this._delayedCall        = opts.delayedCall       ?? ((ms, fn) => setTimeout(fn, ms));
 
-    this.round    = 0;
-    this.gameOver = false;
-    this._initStats = new Map();
+    this.round         = 0;
+    this.gameOver      = false;
+    this._initStats    = new Map();
+    this._skills       = Object.fromEntries((skillsData.skills ?? []).map(s => [s.id, s]));
+
+    // 作戦補正（コンストラクタで1回だけ決定）
+    this.strategyMult  = { give: 1.0, take: 1.0, side: null, bonus: 0, winnerChar: null };
+    this._initStrategy();
   }
 
   // ────────────────────────────────────────────────
-  // 公開 API（BattleSceneと互換）
+  // 公開 API
   // ────────────────────────────────────────────────
 
   startRound() {
@@ -79,56 +90,44 @@ export class BattleEngineV3 {
         this._initStats.set(u.char.id, { soldiers: u.soldiers, charHp: u.charHp });
       }
     });
-    return { round: this.round, maxRounds: MAX_ROUNDS };
+    return { round: this.round, maxRounds: this.maxRounds === Infinity ? '∞' : this.maxRounds };
   }
 
+  /** SP最小の未行動・生存・未撤退ユニットを返す */
   nextActor() {
-    const candidates = [
+    const all = [
       ...this.playerSide.map(u => ({ u, isPlayer: true  })),
       ...this.enemySide .map(u => ({ u, isPlayer: false })),
     ].filter(({ u }) => !this.isDead(u) && !u.retreated && !u._actedThisRound);
-    if (candidates.length === 0) return null;
-    candidates.sort((a, b) => a.u.soldiers - b.u.soldiers);
-    return candidates[0];
+    if (!all.length) return null;
+    all.sort((a, b) => a.u.soldiers - b.u.soldiers);
+    return all[0];
   }
 
   markActed(unit) { unit._actedThisRound = true; }
 
-  executeAction(unit, isPlayer) {
-    const defenders = isPlayer ? this.enemySide : this.playerSide;
-
-    if (unit.action === 'retreat') {
-      unit.retreated = true;
-      this._onLog(`${unit.char.name} が撤退`);
-      this._onCardUpdate(unit);
-      const attackSide     = this.mode === 'attack' ? this.playerSide : this.enemySide;
-      const retreaterIsAtk = attackSide.includes(unit);
-      this._delayedCall(300, () => this._finishBattle(!retreaterIsAtk));
-      return { hasCounter: false };
-    }
-
-    if (unit.action === 'defend') {
-      this._onLog(`${unit.char.name} が防御`);
-      return { hasCounter: false };
-    }
-
-    const alive = defenders.filter(d => this._isAlive(d));
-    if (alive.length === 0) return { hasCounter: false };
-
-    // targetIdはBattleScene側で確定済み。未セットの場合はフォールバックでランダム選択
-    let target = alive[Math.floor(Math.random() * alive.length)];
-    if (unit.targetId) {
-      target = alive.find(d => d.char.id === unit.targetId) ?? target;
-      unit.targetId = null;
-    }
-
-    this._resolveExchange(unit, target, isPlayer);
-    this._updateAllCards();
-    return { hasCounter: false }; // 反撃は _resolveExchange 内で同時処理済み
+  _delay(ms) {
+    return new Promise(resolve => this._delayedCall(ms, resolve));
   }
 
-  advance() {}
-  isRoundOver() { return false; } // nextActor()で管理
+  async executeAction(unit, isPlayer) {
+    const defenders = isPlayer ? this.enemySide : this.playerSide;
+    const allies    = isPlayer ? this.playerSide : this.enemySide;
+
+    switch (unit.action) {
+      case 'retreat': return this._doRetreat(unit, isPlayer);
+      case 'defend':  this._onLog(`${unit.char.name} が防御`); return { hasCounter: false };
+      case 'skill':   return this._doSkill(unit, defenders, allies, isPlayer);
+      case 'focus':   return this._doFocus(unit);
+      case 'special': return this._doSpecialFire(unit, defenders, isPlayer);
+      default:        return this._doAttack(unit, defenders, isPlayer);
+    }
+  }
+
+  advance()      {}
+  isRoundOver()  { return false; }
+
+  isDead(unit)   { return unit.charHp <= 0; }
 
   checkGameOver() {
     const pAlive   = this.playerSide.some(u => this._isAlive(u));
@@ -136,54 +135,41 @@ export class BattleEngineV3 {
     const atkAlive = this.mode === 'attack' ? pAlive : eAlive;
     const defAlive = this.mode === 'attack' ? eAlive : pAlive;
     if (!defAlive || !atkAlive) {
-      this._delayedCall(300, () => this._finishBattle(!defAlive && atkAlive));
+      this._delayedCall(300, () => this._finish(!defAlive && atkAlive));
       return true;
     }
     return false;
   }
 
   checkRoundLimit() {
-    if (this.round >= MAX_ROUNDS) {
-      this._delayedCall(300, () => this._finishBattle(false));
+    if (this.maxRounds !== Infinity && this.round >= this.maxRounds) {
+      this._delayedCall(300, () => this._finish(false));
       return true;
     }
     return false;
   }
 
-  isDead(unit) { return unit.charHp <= 0; }
-
   applyRetreatRule(rule, side) {
     if (!rule || rule === 'never') return;
     const alive = side.filter(u => this._isAlive(u));
-    if (alive.length === 0) return;
-    let shouldRetreat = false;
-    switch (rule) {
-      case 'loss_25':
-        shouldRetreat = alive.some(u => {
-          const init = this._initStats.get(u.char.id);
-          return init && init.soldiers > 0 && (1 - u.soldiers / init.soldiers) > 0.25;
-        }); break;
-      case 'loss_50':
-        shouldRetreat = alive.some(u => {
-          const init = this._initStats.get(u.char.id);
-          return init && init.soldiers > 0 && (1 - u.soldiers / init.soldiers) > 0.50;
-        }); break;
-      case 'hp_any':
-        shouldRetreat = alive.some(u => {
-          const init = this._initStats.get(u.char.id);
-          return init && u.charHp < init.charHp;
-        }); break;
-      case 'char_dead':
-        shouldRetreat = side.some(u => u.charHp <= 0); break;
-    }
-    if (shouldRetreat) {
-      alive.forEach(u => {
-        u.soldiers  = Math.floor(u.soldiers * 0.5);
-        u.retreated = true;
-        this._onLog(`${u.char.name} が撤退（撤退ルール: ${rule}）`);
-        this._onCardUpdate(u);
-      });
-    }
+    if (!alive.length) return;
+
+    const check = {
+      loss_25:   u => this._lossRatio(u) > 0.25,
+      loss_50:   u => this._lossRatio(u) > 0.50,
+      hp_any:    u => { const i = this._initStats.get(u.char.id); return i && u.charHp < i.charHp; },
+      char_dead: () => side.some(u => u.charHp <= 0),
+    }[rule];
+
+    if (!check || !alive.some(check)) return;
+
+    alive.forEach(u => {
+      u.soldiers       = Math.floor(u.soldiers * 0.5);
+      u.char.soldiers  = u.soldiers;
+      u.retreated = true;
+      this._onLog(`${u.char.name} が撤退（${rule}）`);
+      this._onCardUpdate(u);
+    });
   }
 
   static buildUnit(char, sideType, index) {
@@ -199,6 +185,8 @@ export class BattleEngineV3 {
       charActive:  false,
       action:      null,
       retreated:   false,
+      charged:     false,   // 集中フラグ（特技: charge型）
+      skillUsed:   false,   // 特技使用済み
       attackCount: char.attackCount ?? 8,
       charDefense: char.charDefense ?? 10,
       level:       char.level       ?? 0,
@@ -207,223 +195,371 @@ export class BattleEngineV3 {
   }
 
   // ────────────────────────────────────────────────
-  // 内部: パラメータ解決
+  // アクション実行
   // ────────────────────────────────────────────────
 
-  /** action に応じた攻撃/防御パラメータを返す */
-  _params(atk, def) {
+  _doRetreat(unit, isPlayer) {
+    if (!this.allowRetreat) {
+      this._onLog(`${unit.char.name}: この戦闘では撤退できない`);
+      return { hasCounter: false };
+    }
+    unit.retreated = true;
+    this._onLog(`${unit.char.name} が撤退`);
+    this._onCardUpdate(unit);
+    const isAtk = (this.mode === 'attack') === isPlayer;
+    this._delayedCall(300, () => this._finish(!isAtk));
+    return { hasCounter: false };
+  }
+
+  /** 集中（charge型の1ターン目）*/
+  _doFocus(unit) {
+    const skill = this._skills[unit.char.skillId ?? ''];
+    unit.charged = true;
+    this._onLog(`${unit.char.name} が集中（次ターン「${skill?.name ?? '必殺技'}」発動可能）`);
+    this._onCardUpdate(unit);
+    return { hasCounter: false };
+  }
+
+  /** 必殺技発動（charge型の2ターン目）*/
+  _doSpecialFire(unit, defenders, isPlayer) {
+    const skill = this._skills[unit.char.skillId ?? ''];
+    this._execSpecial(unit, defenders, skill);
+    unit.charged   = false;
+    unit.skillUsed = true;
+    this._updateAllCards();
+    return { hasCounter: false };
+  }
+
+  /** 特技（instant型のみ）*/
+  _doSkill(unit, defenders, allies, isPlayer) {
+    const skill = this._skills[unit.char.skillId ?? ''];
+    if (!skill || skill.trigger === 'charge') {
+      this._onLog(`${unit.char.name}: 特技使用不可`);
+      return { hasCounter: false };
+    }
+    if (unit.skillUsed) {
+      this._onLog(`${unit.char.name}: 特技は使用済み`);
+      return { hasCounter: false };
+    }
+    this._execInstant(unit, allies, defenders, skill);
+    unit.skillUsed = true;
+    this._updateAllCards();
+    return { hasCounter: false };
+  }
+
+  _doAttack(unit, defenders, isPlayer) {
+    const alive = defenders.filter(d => this._isAlive(d));
+    if (!alive.length) return { hasCounter: false };
+
+    const target = unit.targetId
+      ? (alive.find(d => d.char.id === unit.targetId) ?? alive[Math.floor(Math.random() * alive.length)])
+      : alive[Math.floor(Math.random() * alive.length)];
+    unit.targetId = null;
+
+    this._resolveExchange(unit, target, isPlayer);
+    this._updateAllCards();
+    return { hasCounter: false };
+  }
+
+  // ────────────────────────────────────────────────
+  // 特技効果
+  // ────────────────────────────────────────────────
+
+  /** charge型: 必殺技発動 */
+  _execSpecial(unit, defenders, skill) {
+    const alive = defenders.filter(d => this._isAlive(d));
+    if (!alive.length) return;
+
+    const target = unit.targetId
+      ? (alive.find(d => d.char.id === unit.targetId) ?? alive[0])
+      : alive[Math.floor(Math.random() * alive.length)];
+    unit.targetId = null;
+
+    const cp   = this._charParams(unit, target);
+    const type = skill?.specialType ?? unit.char.specialType ?? 'char_strike';
+
+    if (type === 'sp_strike') {
+      const count = Math.max(1, target.soldiers);
+      const dmg   = this._calcDamage(count, this._calcRate(cp.charAtk, cp.defMemeVal));
+      target.soldiers      = Math.max(0, target.soldiers - dmg);
+      target.char.soldiers = target.soldiers;
+      this._onLog(`💥 [必殺] ${unit.char.name} → ${target.char.name}: SP${dmg}体消散（残${target.soldiers}）`);
+    } else {
+      const dmg = this._calcDamage(unit.attackCount, this._calcRate(cp.charAtk, cp.defCharVal));
+      target.charHp      = Math.max(0, target.charHp - dmg);
+      target.char.charHp = target.charHp;
+      this._onShake(target);
+      this._onLog(`💥 [必殺] ${unit.char.name} → ${target.char.name}: HP-${dmg}（残${target.charHp}/${target.charMaxHp}）`);
+    }
+    this._onCardUpdate(target);
+    this._applyPenalty(target);
+  }
+
+  /** instant型: 特技即時発動 */
+  _execInstant(unit, allies, defenders, skill) {
+    switch (skill.id) {
+      case 'rally':
+        allies.filter(u => this._isAlive(u)).forEach(u => { u._rallyBuff = (u._rallyBuff ?? 1) * 1.2; });
+        this._onLog(`🎺 [特技] ${unit.char.name}「鼓舞」: 味方全体の攻撃 +20%`);
+        break;
+      case 'pierce':
+        unit._pierce = true;
+        this._onLog(`🔍 [特技] ${unit.char.name}「看破」: 次攻撃で相手防御を無視`);
+        break;
+      case 'fortress':
+        unit._fortress = true;
+        this._onLog(`🛡 [特技] ${unit.char.name}「鉄壁」: このラウンドの被ダメージを無効化`);
+        break;
+      case 'volley': {
+        const N = Math.min(unit.soldiers, this.battleCapacity);
+        defenders.filter(d => this._isAlive(d)).forEach(d => {
+          const params = this._atkParams(unit, d);
+          const rate   = this._calcRate(params.atkVal, params.defMemeVal, d.action === 'defend');
+          const dmg    = Math.floor(this._calcDamage(N, rate) * params.mult * 0.5);
+          d.soldiers        = Math.max(0, d.soldiers - dmg);
+          d.char.soldiers   = d.soldiers;
+          this._onLog(`🌀 [特技] ${unit.char.name}「乱撃」→ ${d.char.name}: SP${dmg}体消散（残${d.soldiers}）`);
+          this._onCardUpdate(d);
+        });
+        break;
+      }
+      default:
+        this._onLog(`[特技] ${unit.char.name}「${skill.name}」発動（効果未実装）`);
+    }
+  }
+
+  // ────────────────────────────────────────────────
+  // ダメージ計算
+  // ────────────────────────────────────────────────
+
+  /**
+   * 攻撃パラメータを解決する（action基準）
+   * @returns {{ atkVal, defMemeVal, defCharVal, mult, isSong, isRanged }}
+   */
+  _atkParams(atk, def) {
     const isSong   = atk.action === 'song';
     const isRanged = atk.action === 'ranged';
 
-    const atkVal = isSong
+    const pierce   = atk._pierce;
+    atk._pierce    = false;
+
+    const atkRaw  = isSong
       ? Math.max(1, (atk.char.charSong ?? 20) + (atk.bonus.charSong ?? 0))
       : Math.max(1, (atk.char.soldierAtk ?? 10) + atk.bonus.soldierAtk);
+    const atkVal  = atk._rallyBuff ? Math.round(atkRaw * atk._rallyBuff) : atkRaw;
 
-    const defMemeVal = isSong
+    const defMemeVal = pierce ? 0 : def ? (isSong
       ? Math.max(1, (def.char.charSong ?? 20) + (def.bonus.charSong ?? 0))
-      : Math.max(1, (def.char.soldierDef ?? 8) + def.bonus.soldierDef);
+      : Math.max(1, (def.char.soldierDef ?? 8) + def.bonus.soldierDef)) : 1;
 
-    const defCharVal = isSong
+    const defCharVal = pierce ? 0 : def ? (isSong
       ? Math.max(0, (def.char.charSong ?? 20) + (def.bonus.charSong ?? 0))
-      : Math.max(0, def.charDefense ?? def.char.charDefense ?? 10);
+      : Math.max(0, def.charDefense ?? def.char.charDefense ?? 10)) : 1;
 
-    const damageMult = isRanged ? 0.7 : isSong ? 0.8 : 1.0;
-    const canCounter = !isRanged && !isSong; // melee のみ反撃
-
-    return { atkVal, defMemeVal, defCharVal, damageMult, isSong, isRanged, canCounter };
+    const mult = isRanged ? 0.7 : isSong ? 0.8 : 1.0;
+    return { atkVal, defMemeVal, defCharVal, mult, isSong, isRanged };
   }
 
-  /** 将軍本人攻撃のパラメータ（action基準） */
+  /** キャラ本体の攻撃パラメータ */
   _charParams(atk, def) {
-    const isSong = atk.action === 'song';
+    const isSong  = atk.action === 'song';
     const charAtk = isSong
       ? Math.max(1, (atk.char.charSong ?? 20) + (atk.bonus.charSong ?? 0))
       : Math.max(1, (atk.char.charAttack ?? atk.char.attack ?? 70) + (atk.bonus.charAttack ?? 0));
-    const defMemeVal = isSong
-      ? Math.max(1, (def.char.charSong ?? 20) + (def.bonus.charSong ?? 0))
-      : Math.max(1, (def.char.soldierDef ?? 8) + def.bonus.soldierDef);
-    const defCharVal = isSong
-      ? Math.max(0, (def.char.charSong ?? 20) + (def.bonus.charSong ?? 0))
-      : Math.max(0, def.charDefense ?? def.char.charDefense ?? 10);
-    return { charAtk, defMemeVal, defCharVal };
+    return {
+      charAtk,
+      defMemeVal: Math.max(1, (def.char.soldierDef ?? 8) + def.bonus.soldierDef),
+      defCharVal: Math.max(0, def.charDefense ?? def.char.charDefense ?? 10),
+    };
   }
 
-  // ────────────────────────────────────────────────
-  // 内部: ダメージ計算
-  // ────────────────────────────────────────────────
-
   _calcRate(atk, def, isDefending = false) {
-    let rate = atk > def ? (atk - def) * 8 : (8 + atk) - def;
-    rate = Math.max(1, Math.min(100, rate));
-    if (isDefending) rate -= 1 + Math.floor(Math.random() * 20);
-    else             rate -= 1;
-    return Math.max(1, Math.min(100, rate));
+    let r = atk > def ? (atk - def) * 8 : (8 + atk) - def;
+    r = Math.max(1, Math.min(100, r)) - 1;
+    if (isDefending) r -= Math.floor(Math.random() * 20);
+    return Math.max(1, Math.min(100, r));
   }
 
   _calcDamage(N, rate) {
     if (N <= 0) return 0;
     if (N >= 81) {
-      let dmg = Math.floor(N * rate / 100);
-      dmg = dmg <= 10
-        ? Math.max(0, dmg + Math.floor(Math.random() * 3) - 1)
-        : Math.max(0, Math.floor(dmg * (0.80 + Math.random() * 0.30)));
-      return dmg;
+      let d = Math.floor(N * rate / 100);
+      return d <= 10
+        ? Math.max(0, d + Math.floor(Math.random() * 3) - 1)
+        : Math.max(0, Math.floor(d * (0.8 + Math.random() * 0.3)));
     }
-    let dmg = 0;
-    for (let i = 0; i < N; i++) if (Math.random() < rate / 100) dmg++;
-    return dmg;
+    let d = 0;
+    for (let i = 0; i < N; i++) if (Math.random() < rate / 100) d++;
+    return d;
   }
 
   // ────────────────────────────────────────────────
-  // 内部: コアロジック
+  // 戦闘解決コア
   // ────────────────────────────────────────────────
 
   /**
-   * atk→def の一方向ダメージを算出する（適用はしない）
-   * @returns {{ memeDmg, charDmg, toMeme, toChar, N, p }}
+   * 一方向ダメージを算出する（適用しない）
+   * 返り値を _resolveExchange が双方同時適用する
    */
-  _calcOneSide(atk, def) {
-    const p = this._params(atk, def);
-    const N = Math.min(atk.soldiers, this.battleCapacity);
-
+  _calcOneSide(atk, def, isAtkPlayer) {
+    const p      = this._atkParams(atk, def);
+    const N      = Math.min(atk.soldiers, this.battleCapacity);
     const atkSol = N;
     const vicSol = Math.min(def.soldiers, this.battleCapacity);
+    const stratMult = this._strat(isAtkPlayer);
 
-    // ミーム攻撃の振り分け
-    const { toMeme, toChar } = _split(N, vicSol, atkSol);
+    const { toMeme, toChar } = _splitHits(N, vicSol, atkSol);
 
-    // ミームへのダメージ
+    // ① SP へのダメージ
     let memeDmg = 0;
-    if (toMeme > 0 && def.soldiers > 0) {
+    if (toMeme > 0 && def.soldiers > 0 && !def._fortress) {
       const rate = this._calcRate(p.atkVal, p.defMemeVal, def.action === 'defend');
-      memeDmg = Math.floor(this._calcDamage(toMeme, rate) * p.damageMult);
+      memeDmg    = Math.floor(this._calcDamage(toMeme, rate) * p.mult * stratMult);
     }
 
-    // 将軍へのダメージ
+    // ② 将軍へのダメージ（charActive時のみ）
     let charDmg = 0;
-    if (toChar > 0 && def.charHp > 0) {
-      const charActive = def.soldiers < this.battleCapacity;
-      if (charActive) {
-        const rate = this._calcRate(p.atkVal, p.defCharVal, false);
-        charDmg = Math.floor(this._calcDamage(toChar, rate) * p.damageMult);
-      }
+    if (toChar > 0 && def.charHp > 0 && !def._fortress && def.soldiers < this.battleCapacity) {
+      const rate = this._calcRate(p.atkVal, p.defCharVal);
+      charDmg    = Math.floor(this._calcDamage(toChar, rate) * p.mult);
     }
 
-    // 将軍本人の攻撃
-    let charSelfMemeDmg = 0;
-    let charSelfCharDmg = 0;
-    const selfActive = atk.soldiers < this.battleCapacity && atk.charHp > 0;
-    if (selfActive && def.action !== 'defend') {
+    // ③ 将軍本人の攻撃
+    let selfMemeDmg = 0, selfCharDmg = 0;
+    if (atk.soldiers < this.battleCapacity && atk.charHp > 0 && def.action !== 'defend') {
       const cp     = this._charParams(atk, def);
       const defSol = Math.min(def.soldiers, this.battleCapacity);
-      const isExtreme = defSol < 50 || (defSol > 0 && atkSol / defSol >= 10) || defSol === 0;
-
-      if (isExtreme) {
-        const p_char = 1 / (defSol + 1);
-        if (Math.random() < p_char) {
-          // 全攻撃が将軍へ
-          if (def.charHp > 0) {
-            const rate = this._calcRate(cp.charAtk, cp.defCharVal, false);
-            charSelfCharDmg = this._calcDamage(atk.attackCount, rate);
-          }
-        } else {
-          // 全攻撃がミームへ
-          if (def.soldiers > 0) {
-            const rate = this._calcRate(cp.charAtk, cp.defMemeVal, def.action === 'defend');
-            charSelfMemeDmg = this._calcDamage(atk.attackCount, rate);
-          }
+      const extreme = defSol < 50 || defSol === 0 || (defSol > 0 && atkSol / defSol >= 10);
+      if (extreme && Math.random() < 1 / (defSol + 1)) {
+        if (def.charHp > 0 && !def._fortress) {
+          selfCharDmg = this._calcDamage(atk.attackCount, this._calcRate(cp.charAtk, cp.defCharVal));
         }
-      } else {
-        // 通常時: 全てミームへ
-        if (def.soldiers > 0) {
-          const rate = this._calcRate(cp.charAtk, cp.defMemeVal, def.action === 'defend');
-          charSelfMemeDmg = this._calcDamage(atk.attackCount, rate);
-        }
+      } else if (def.soldiers > 0 && !def._fortress) {
+        const rate = this._calcRate(cp.charAtk, cp.defMemeVal, def.action === 'defend');
+        selfMemeDmg = Math.floor(this._calcDamage(atk.attackCount, rate) * stratMult);
       }
     }
 
-    return { memeDmg, charDmg, charSelfMemeDmg, charSelfCharDmg, toMeme, toChar, N, p };
+    return { memeDmg, charDmg, selfMemeDmg, selfCharDmg, N };
+  }
+
+  /** 攻撃と反撃を同時算出・同時適用 */
+  _resolveExchange(atk, def, isPlayer) {
+    const ar = this._calcOneSide(atk, def, isPlayer);
+    const dr = (atk.action === 'attack' && def.char.attackType === 'melee' && this._isAlive(def))
+      ? this._calcOneSide(def, atk, !isPlayer)
+      : null;
+
+    const atkMem = ar.memeDmg + ar.selfMemeDmg;
+    const atkChr = ar.charDmg + ar.selfCharDmg;
+    const defMem = dr ? dr.memeDmg + dr.selfMemeDmg : 0;
+    const defChr = dr ? dr.charDmg + dr.selfCharDmg : 0;
+
+    def.soldiers      = Math.max(0, def.soldiers - atkMem);
+    def.char.soldiers = def.soldiers;
+    atk.soldiers      = Math.max(0, atk.soldiers - defMem);
+    atk.char.soldiers = atk.soldiers;
+    let newDefHp = Math.max(0, def.charHp - atkChr);
+    let newAtkHp = Math.max(0, atk.charHp - defChr);
+
+    // 同時戦闘不能はプレイヤー側HP=1に補正
+    if (newAtkHp <= 0 && newDefHp <= 0) {
+      if (isPlayer) newAtkHp = 1; else newDefHp = 1;
+    }
+    atk.charHp      = newAtkHp;
+    atk.char.charHp = atk.charHp;
+    def.charHp      = newDefHp;
+    def.char.charHp = def.charHp;
+
+    // 一時フラグクリア
+    def._fortress  = false;
+    atk._fortress  = false;
+    atk._rallyBuff = undefined;
+
+    // ペナルティ・エフェクト
+    this._applyPenalty(atk);
+    this._applyPenalty(def);
+    if (atkChr > 0 || defChr > 0) { this._onShake(def); this._onShake(atk); }
+    if (atkMem > 0) this._onPopup(def, atkMem, '#c4427a');
+    if (defMem > 0) this._onPopup(atk, defMem, '#c4427a');
+
+    this._logExchange(atk, def, ar, dr, atkMem, atkChr, defMem, defChr);
+    this._onExchangeResult(atk, def, {
+      atkMem, atkChr, defMem, defChr,
+      N:  ar.N,
+      Nr: dr ? dr.N : 0,
+    });
+  }
+
+  _logExchange(atk, def, ar, dr, atkMem, atkChr, defMem, defChr) {
+    const label = { attack: '近接', ranged: '遠距離', song: '歌', skill: '特技' }[atk.action] ?? atk.action;
+    this._onLog(`─ ${atk.char.name} が ${label} ▶ ${def.char.name}`);
+    const ap = [atkMem > 0 && `SP${atkMem}体消散（残${def.soldiers}）`, atkChr > 0 && `HP-${atkChr}`].filter(Boolean);
+    if (ap.length) this._onLog(`  [攻] N=${ar.N} → ${ap.join(' / ')}`);
+    if (dr) {
+      const dp = [defMem > 0 && `SP${defMem}体消散（残${atk.soldiers}）`, defChr > 0 && `HP-${defChr}`].filter(Boolean);
+      if (dp.length) this._onLog(`  [被] N=${dr.N} → ${dp.join(' / ')}`);
+    }
+    this._onLog(`  HP: ${atk.char.name} ${atk.charHp}/${atk.charMaxHp}  ${def.char.name} ${def.charHp}/${def.charMaxHp}`);
+  }
+
+  // ────────────────────────────────────────────────
+  // 作戦システム
+  // ────────────────────────────────────────────────
+
+  _initStrategy() {
+    const maxRate = side => Math.max(0, ...side.map(u => u.char.strategyRate ?? 0));
+    const pRate   = maxRate(this.playerSide);
+    const eRate   = maxRate(this.enemySide);
+    const diff    = Math.abs(pRate - eRate);
+
+    if (diff <= 0 || Math.random() >= diff / 100) {
+      this._onLog(`作戦: 両軍互角`);
+      return;
+    }
+
+    const side  = pRate > eRate ? 'player' : 'enemy';
+    const bonus = diff > 50 && Math.random() < (diff - 50) / 100 ? 0.5 : 0.1;
+    const winnerSide = side === 'player' ? this.playerSide : this.enemySide;
+    const winnerUnit = winnerSide.reduce((best, u) =>
+      (u.char.strategyRate ?? 0) > (best.char.strategyRate ?? 0) ? u : best
+    );
+    this.strategyMult = { give: 0, take: 0, side, bonus, winnerChar: winnerUnit.char };
+    this.strategyMult.give = side === 'player' ? 1 + bonus : 1 - bonus;
+    this.strategyMult.take = side === 'player' ? 1 - bonus : 1 + bonus;
+
+    this._onLog(`作戦成功（${side === 'player' ? 'プレイヤー' : '敵'}）: SPダメージ ${bonus === 0.5 ? '50' : '10'}%補正`);
   }
 
   /**
-   * 攻撃と反撃を同時算出して適用する。
-   * melee同士のとき def→atk も同時に計算。
+   * 攻撃側が受け取る作戦補正倍率（SP与ダメージに適用）
    */
-  _resolveExchange(atk, def, isPlayer) {
-    const atkResult = this._calcOneSide(atk, def);
-    const defResult = atk.action === 'attack' && def.char.attackType === 'melee' && this._isAlive(def)
-      ? this._calcOneSide(def, atk)
-      : null;
-
-    // ── ダメージ適用 ──
-    // atk→def
-    const atkMemeDmg     = atkResult.memeDmg + atkResult.charSelfMemeDmg;
-    const atkCharDmg     = atkResult.charDmg + atkResult.charSelfCharDmg;
-    def.soldiers = Math.max(0, def.soldiers - atkMemeDmg);
-    let newDefHp = Math.max(0, def.charHp - atkCharDmg);
-
-    // def→atk（同時）
-    let newAtkHp = atk.charHp;
-    let defMemeDmgTotal = 0;
-    let defCharDmgTotal = 0;
-    if (defResult) {
-      defMemeDmgTotal = defResult.memeDmg + defResult.charSelfMemeDmg;
-      defCharDmgTotal = defResult.charDmg + defResult.charSelfCharDmg;
-      atk.soldiers = Math.max(0, atk.soldiers - defMemeDmgTotal);
-      newAtkHp     = Math.max(0, atk.charHp - defCharDmgTotal);
-    }
-
-    // 同時死亡補正: プレイヤー側HP=1
-    if (newAtkHp <= 0 && newDefHp <= 0) {
-      if (isPlayer) newAtkHp = 1;
-      else          newDefHp = 1;
-    }
-
-    atk.charHp = newAtkHp;
-    def.charHp = newDefHp;
-
-    if (atkCharDmg > 0 || defCharDmgTotal > 0) {
-      this._onShake(def);
-      this._onShake(atk);
-    }
-    if (atkMemeDmg > 0) this._onPopup(def, atkMemeDmg, '#c4427a');
-    if (defMemeDmgTotal > 0) this._onPopup(atk, defMemeDmgTotal, '#c4427a');
-
-    // ── ログ出力 ──
-    this._log(atk, def, atkResult, defResult, atkMemeDmg, atkCharDmg, defMemeDmgTotal, defCharDmgTotal);
-  }
-
-  _log(atk, def, ar, dr, atkMemeDmg, atkCharDmg, defMemeDmg, defCharDmg) {
-    const actionLabel = { attack: '近接', ranged: '遠距離', song: '歌' }[atk.action] ?? atk.action;
-    const lines = [];
-
-    lines.push(`─ ${atk.char.name} が ${actionLabel} ▶ ${def.char.name}`);
-
-    // ミーム攻撃
-    const memeParts = [];
-    if (atkMemeDmg > 0)  memeParts.push(`ミーム${atkMemeDmg}体消散（残${def.soldiers}）`);
-    if (atkCharDmg > 0)  memeParts.push(`将軍に${atkCharDmg}ダメージ`);
-    if (memeParts.length > 0) lines.push(`  [攻] N=${ar.N} → ${memeParts.join(' / ')}`);
-
-    // 同時反撃
-    if (dr) {
-      const defParts = [];
-      if (defMemeDmg > 0) defParts.push(`ミーム${defMemeDmg}体消散（残${atk.soldiers}）`);
-      if (defCharDmg > 0) defParts.push(`将軍に${defCharDmg}ダメージ`);
-      if (defParts.length > 0) lines.push(`  [被] N=${dr.N} → ${defParts.join(' / ')}`);
-    }
-
-    // HP
-    lines.push(`  HP: ${atk.char.name} ${atk.charHp}/${atk.charMaxHp}  ${def.char.name} ${def.charHp}/${def.charMaxHp}`);
-
-    lines.forEach(l => this._onLog(l));
+  _strat(isAtkPlayer) {
+    const { side, bonus } = this.strategyMult;
+    if (!side) return 1.0;
+    const atkWins = (isAtkPlayer && side === 'player') || (!isAtkPlayer && side === 'enemy');
+    return atkWins ? 1 + bonus : 1 - bonus;
   }
 
   // ────────────────────────────────────────────────
-  // 内部: ユーティリティ
+  // ユーティリティ
   // ────────────────────────────────────────────────
 
-  _isAlive(unit) { return !this.isDead(unit) && !unit.retreated; }
-  _finishBattle(attackerWins) { this.gameOver = true; this._onBattleEnd(attackerWins); }
-  _updateAllCards() { [...this.playerSide, ...this.enemySide].forEach(u => this._onCardUpdate(u)); }
+  /** HP0ユニットに戦闘不能ペナルティをセット（死亡廃止） */
+  _applyPenalty(unit) {
+    if (unit.charHp <= 0 && !(unit.char.penaltyTurns > 0)) {
+      unit.char.penaltyTurns = 2;
+      this._onLog(`${unit.char.name} 戦闘不能（2ターンペナルティ）`);
+      this._onCardUpdate(unit);
+    }
+  }
+
+  _lossRatio(u) {
+    const init = this._initStats.get(u.char.id);
+    return init && init.soldiers > 0 ? 1 - u.soldiers / init.soldiers : 0;
+  }
+
+  _isAlive(unit)      { return !this.isDead(unit) && !unit.retreated; }
+  _finish(atkWins)    { this.gameOver = true; this._onBattleEnd(atkWins); }
+  _updateAllCards()   { [...this.playerSide, ...this.enemySide].forEach(u => this._onCardUpdate(u)); }
 }

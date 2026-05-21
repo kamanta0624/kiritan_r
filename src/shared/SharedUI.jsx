@@ -47,11 +47,6 @@ export function TopBar({ scene, areaName, currentArea, breadcrumb, rightSlot, tu
                 color:item.c, whiteSpace:'nowrap'}}>{item.val}</span>
             </div>
           ))}
-          <div style={{marginLeft:'auto', paddingLeft:12, fontFamily:'Rajdhani',
-            fontSize:15, fontWeight:700, letterSpacing:1, color:TX,
-            whiteSpace:'nowrap', flexShrink:0}}>
-            ROUND {GAME_STATE.round}
-          </div>
         </>
       )}
 
@@ -81,7 +76,6 @@ export function BottomBar({ scene, onNavigate, onNextTurn, extraLeft, extraRight
       {isMap && (
         <>
           <NavButton label="≡ メニュー"   onClick={() => onNavigate('save', {mode:'save'})} activeColor={TEAL} activeBg='rgba(26,138,150,.08)'/>
-          <NavButton label="研究"         onClick={() => onNavigate('research')}  activeColor={AC}   activeBg='rgba(192,112,16,.08)'/>
           <NavButton label="研究"         onClick={() => onNavigate('research')}  activeColor={AC}   activeBg='rgba(192,112,16,.08)'/>
           <NavButton label="アイテム"     onClick={() => onNavigate('items')}     activeColor={AC}   activeBg='rgba(192,112,16,.08)'/>
           <NavButton label="仲間"         onClick={() => onNavigate('characters')} activeColor={TEAL} activeBg='rgba(26,138,150,.12)'/>

@@ -45,35 +45,15 @@ export default function TitleScene({ onNavigate, hasSaveData = true, hasNewGameP
         backgroundImage:`repeating-linear-gradient(115deg, transparent 0, transparent 90px, rgba(196,66,122,.06) 90px, rgba(196,66,122,.06) 92px)`,
       }}/>
 
-      {/* eyebrow */}
-      <div style={{position:'absolute', top:48, left:64,
-        display:'flex', alignItems:'center', gap:14, animation:'fadeIn .5s .1s both'}}>
-        <div style={{width:42, height:2, background:PK}}/>
-        <span style={{fontFamily:'Rajdhani', fontSize:11, fontWeight:700, letterSpacing:'.5em', color:'rgba(255,255,255,.65)'}}>
-          TOHOKU STRATEGY
-        </span>
-      </div>
-
       {/* Title block */}
-      <div style={{position:'absolute', left:'8%', top:'18%', maxWidth:'52%',
+      <div style={{position:'absolute', left:'8%', top:'18%', maxWidth:'62%',
         animation:'fadeUp .7s .15s both'}}>
-        <div style={{fontFamily:'Rajdhani', fontWeight:700, fontSize:13,
-          letterSpacing:'.4em', color:PK, marginBottom:18,
-          textShadow:`0 0 18px ${PK}88`}}>
-          KIRITAN — REGIONAL CONQUEST
-        </div>
         <div style={{
           fontFamily:"'Zen Maru Gothic'", fontWeight:900,
-          fontSize:'min(9vw, 130px)', lineHeight:.98, letterSpacing:'.04em',
+          fontSize:'min(9vw, 120px)', lineHeight:.98, letterSpacing:'.04em',
           color:'#fff',
           textShadow:`0 4px 40px rgba(196,66,122,.45), 0 2px 8px rgba(0,0,0,.7)`,
-        }}>きりたんの<br/>天下</div>
-        <div style={{marginTop:24, fontFamily:"'Noto Sans JP'", fontSize:14,
-          color:'rgba(255,255,255,.6)', letterSpacing:'.18em', lineHeight:1.8,
-          maxWidth:520, borderLeft:`2px solid ${PK}88`, paddingLeft:14}}>
-          東北の地より、ミームと旗印を掲げよ。<br/>
-          全92拠点 — 制圧の物語が始まる。
-        </div>
+        }}>ボイロ（広義）大戦</div>
       </div>
 
       {/* Menu */}
