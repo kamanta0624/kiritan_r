@@ -1,36 +1,57 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import './App.css';
 import { useGame } from './context/GameContext.jsx';
 
-// シーンコンポーネント
-import TitleScene       from './scenes/TitleScene.jsx';
-import MapScene         from './scenes/MapScene.jsx';
-import BaseMenuScene    from './scenes/BaseMenuScene.jsx';
+import TitleScene           from './scenes/TitleScene.jsx';
+import MapScene             from './scenes/MapScene.jsx';
+import BaseMenuScene        from './scenes/BaseMenuScene.jsx';
 import AttackFormationScene from './scenes/FormationScene.jsx';
-import BattleScene      from './scenes/BattleScene.jsx'; // BActionScene (export default)
-import EnemyTurnScene   from './scenes/EnemyTurnScene.jsx';
-import PartyScene       from './scenes/PartyScene.jsx';
-import ItemsScene       from './scenes/ItemsScene.jsx';
-import ResearchScene    from './scenes/ResearchScene.jsx';
-import SaveScene        from './scenes/SaveScene.jsx';
-import GameEndScene     from './scenes/GameEndScene.jsx';
-import DungeonScene     from './scenes/DungeonScene.jsx';
-import NewGamePlusScene from './scenes/NewGamePlusScene.jsx';
-import ADVScene         from './scenes/ADVScene.jsx';
-import BattleQAScene    from './scenes/BattleQAScene.jsx';
+import BattleScene          from './scenes/BattleScene.jsx';
+import EnemyTurnScene       from './scenes/EnemyTurnScene.jsx';
+import PartyScene           from './scenes/PartyScene.jsx';
+import ItemsScene           from './scenes/ItemsScene.jsx';
+import ResearchScene        from './scenes/ResearchScene.jsx';
+import SaveScene            from './scenes/SaveScene.jsx';
+import GameEndScene         from './scenes/GameEndScene.jsx';
+import DungeonScene         from './scenes/DungeonScene.jsx';
+import NewGamePlusScene     from './scenes/NewGamePlusScene.jsx';
+import ADVScene, { convertEventScript } from './scenes/ADVScene.jsx';
+import BattleQAScene        from './scenes/BattleQAScene.jsx';
+import BattleFullQAScene    from './scenes/BattleFullQAScene.jsx';
+import WorldMapQAScene      from './scenes/WorldMapQAScene.jsx';
 
 export default function App() {
   const game = useGame();
   const [scene, setScene]             = useState('title');
   const [sceneParams, setSceneParams] = useState({});
+  // defenseFlow: null | { queue, index, phase: 'adv'|'abandon_confirm'|'formation'|'battle', formation? }
+  const [defenseFlow, setDefenseFlow] = useState(null);
+  const [focusKey, setFocusKey]       = useState(0);
 
-  const navigate = (dest, params = {}) => {
+  const navigate = useCallback((dest, params = {}) => {
     setSceneParams(params);
     setScene(dest);
-  };
+  }, []);
 
-  // ── ゲームデータ派生値 ──
-  const { currentTurn, playerFaction, playerBases, income, bases, factions, characters } = game;
+  useEffect(() => {
+    game.setStartDialogHandler((script, onComplete) => {
+      const scenario = convertEventScript(script);
+      navigate('adv', { scenario, returnTo: 'map', _onComplete: onComplete });
+    });
+  }, []);
+
+  const {
+    currentTurn, playerFaction, playerBases, income,
+    bases, factions, characters, availableChars,
+    gamePhase, systems, legionAI,
+  } = game;
+
+  // defenseFlow の最新値を非同期コールバックから参照するための ref
+  const defenseFlowRef        = useRef(null);
+  const defenseFlowResolveRef = useRef(null);
+
+  useEffect(() => { defenseFlowRef.current = defenseFlow; }, [defenseFlow]);
+
   const gameState = {
     turn:   currentTurn,
     meme:   playerFaction?.treasury ?? 0,
@@ -38,26 +59,249 @@ export default function App() {
     bases:  `${playerBases.length}/${bases.length}`,
   };
 
-  // 自勢力の出撃可能キャラ（ペナルティなし・未使用）
-  const availableChars = characters.filter(c =>
-    c.factionId === playerFaction?.id &&
-    !(c.penaltyTurns > 0) &&
-    !c.usedThisTurn
-  );
+  // ── ゲームフェーズ変化 → game_end遷移 ──
+  useEffect(() => {
+    if (gamePhase === 'victory') {
+      navigate('game_end', {
+        isVictory:       true,
+        clearedCount:    0,
+        currentTurn,
+        playerBaseCount: playerBases.length,
+        totalBaseCount:  bases.length,
+      });
+    } else if (gamePhase === 'defeat') {
+      navigate('game_end', {
+        isVictory:       false,
+        clearedCount:    0,
+        currentTurn,
+        playerBaseCount: playerBases.length,
+        totalBaseCount:  bases.length,
+      });
+    }
+  }, [gamePhase, navigate]);
 
-  // QAモード
-  if (new URLSearchParams(window.location.search).get('qa') === 'battle') {
+  // ── 防衛フロー state machine ──────────────────────────────────────────────
+
+  // キューの1アイテム処理完了後に呼ぶ。次アイテムへ進むか、キューを終了する
+  const advanceDefenseQueue = useCallback((resultPhase) => {
+    const df = defenseFlowRef.current;
+    if (!df) return;
+
+    if (resultPhase === 'defeat' || resultPhase === 'victory') {
+      // gamePhase useEffect が game_end 遷移を担保するため、ここでは resolve だけ
+      defenseFlowResolveRef.current?.('ended');
+      defenseFlowResolveRef.current = null;
+      setDefenseFlow(null);
+      return;
+    }
+
+    const nextIndex = df.index + 1;
+    if (nextIndex >= df.queue.length) {
+      defenseFlowResolveRef.current?.('ok');
+      defenseFlowResolveRef.current = null;
+      setDefenseFlow(null);
+      return;
+    }
+
+    const nextItem = df.queue[nextIndex];
+    navigate('map', { focusBaseId: nextItem?.defenderBase?.id });
+    setFocusKey(k => k + 1);
+    setDefenseFlow({ queue: df.queue, index: nextIndex, phase: 'adv' });
+  }, [navigate]);
+
+  // ADV の選択肢ハンドラ
+  const handleDefenseAdvChoice = useCallback((value) => {
+    const df = defenseFlowRef.current;
+    if (!df) return;
+    const item = df.queue[df.index];
+
+    if (value === 'defend') {
+      setDefenseFlow({ ...df, phase: 'formation' });
+    } else if (value === 'abandon') {
+      setDefenseFlow({ ...df, phase: 'abandon_confirm' });
+    } else if (value === 'confirm_abandon') {
+      game.actions.battleEnd({
+        usedCharIds: [], deadCharIds: [], deadMobIds: [], unitResults: [],
+        conquered:      true,
+        defenderBaseId: item.defenderBase?.id ?? item.defenderBase?.baseId,
+        winnerFactionId: item.attackerFactionId,
+      }).then(phase => advanceDefenseQueue(phase ?? null));
+    } else if (value === 'back') {
+      setDefenseFlow({ ...df, phase: 'adv' });
+    }
+  }, [game.actions, advanceDefenseQueue]);
+
+  // ADV シナリオ（phase に応じて切り替え）
+  const defenseAdvScenario = useMemo(() => {
+    if (!defenseFlow) return [];
+    const item          = defenseFlow.queue[defenseFlow.index];
+    const attackerFaction = factions.find(f => f.id === item?.attackerFactionId);
+    const defenderBase  = item?.defenderBase;
+
+    if (defenseFlow.phase === 'abandon_confirm') {
+      return [{
+        type: 'choice',
+        text: `本当に「${defenderBase?.name ?? '拠点'}」を放棄しますか？`,
+        choices: [
+          { label: 'はい、放棄する', value: 'confirm_abandon' },
+          { label: 'いいえ、戻る',   value: 'back' },
+        ],
+      }];
+    }
+
+    return [
+      { type: 'setup', cast: [], bg: 'assets/bg_battle.jpg', location: defenderBase?.name ?? '拠点' },
+      { type: 'narration', text: `${attackerFaction?.name ?? '敵勢力'}が${defenderBase?.name ?? '拠点'}に侵攻してきた。` },
+      {
+        type: 'choice',
+        text: '迎撃するか？',
+        choices: [
+          { label: '防衛する', value: 'defend' },
+          { label: '放棄する', value: 'abandon' },
+        ],
+      },
+      { type: 'end' },
+    ];
+  }, [defenseFlow, factions]);
+
+  // 防衛キュー全体を state machine で駆動し、完了まで待てる Promise を返す
+  const startDefenseQueue = useCallback((queue) => {
+    return new Promise((resolve) => {
+      defenseFlowResolveRef.current = resolve;
+      const item = queue[0];
+      navigate('map', { focusBaseId: item?.defenderBase?.id });
+      setFocusKey(k => k + 1);
+      setDefenseFlow({ queue, index: 0, phase: 'adv' });
+    });
+  }, [navigate]);
+
+  // ── ターン終了 → 勢力ごとに演出→防衛→次勢力 ──────────────────
+  const handleNextTurn = useCallback(async () => {
+    const fullQueue    = await game.actions.runEnemyPhase();
+    const enemyFactions = factions.filter(f => !f.isPlayer);
+
+    for (const faction of enemyFactions) {
+      await game.actions.runEnemyPhaseForFaction(faction.id);
+
+      const factionQueue = (fullQueue ?? []).filter(q => q.attackerFactionId === faction.id);
+      if (!factionQueue.length) continue;
+
+      // カットイン演出（Promise は現行維持）
+      await new Promise((resolve) => {
+        navigate('enemy_turn', {
+          faction,
+          attackQueue: factionQueue,
+          _onComplete: resolve,
+        });
+      });
+
+      const defResult = await startDefenseQueue(factionQueue);
+      if (defResult === 'ended') return;
+    }
+
+    // YOUR TURN カットイン
+    await new Promise((resolve) => {
+      navigate('enemy_turn', {
+        playerTurnMode: true,
+        _onComplete: resolve,
+      });
+    });
+
+    await game.actions.startPlayerTurn();
+    navigate('map');
+  }, [game.actions, factions, navigate, startDefenseQueue]);
+
+  // ── QAモード ──
+  const qaParam = new URLSearchParams(window.location.search).get('qa');
+  if (qaParam === 'battle') {
     return <div id="app-root"><BattleQAScene onBack={() => window.history.back()} /></div>;
   }
+  if (qaParam === 'battlefull') {
+    return <div id="app-root"><BattleFullQAScene onBack={() => window.history.back()} /></div>;
+  }
+  if (qaParam === 'worldmap') {
+    return <div id="app-root"><WorldMapQAScene onBack={() => window.history.back()} /></div>;
+  }
 
+  // ── シーンレンダリング ──
   const renderScene = () => {
+
+    // 防衛フロー: formation / battle フェーズはシーン描画を上書き
+    if (defenseFlow?.phase === 'formation') {
+      const item        = defenseFlow.queue[defenseFlow.index];
+      const attackerIds = item.attackerCharIds ?? [];
+      const fEnemyChars = attackerIds.length > 0
+        ? characters.filter(c => attackerIds.includes(c.id)).slice(0, 4)
+        : characters.filter(c =>
+            (c.factionId === item.attackerFactionId || c._legionId === item.legionId) &&
+            !(c.penaltyTurns > 0) && (c.soldiers ?? 0) > 0
+          ).slice(0, 4);
+      const fEnemyStrategyRate = fEnemyChars.length > 0
+        ? Math.max(...fEnemyChars.map(c => c.strategyRate ?? 0)) : 0;
+
+      return <AttackFormationScene
+        targetNode={item.defenderBase}
+        availableChars={availableChars}
+        isDefense={true}
+        battleCapacity={item.defenderBase?.battleCapacity ?? 3500}
+        enemyStrategyRate={fEnemyStrategyRate}
+        enemyChars={fEnemyChars}
+        battleMode={item.retreatRule ?? null}
+        onLaunch={(formation) => {
+          setDefenseFlow(prev => prev ? { ...prev, phase: 'battle', formation } : null);
+        }}
+        onCancel={() => {
+          setDefenseFlow(prev => prev ? { ...prev, phase: 'adv' } : null);
+        }}
+      />;
+    }
+
+    if (defenseFlow?.phase === 'battle') {
+      const item        = defenseFlow.queue[defenseFlow.index];
+      const attackerIds = item.attackerCharIds ?? [];
+      const enemyChars  = attackerIds.length > 0
+        ? characters.filter(c => attackerIds.includes(c.id)).slice(0, 4)
+        : characters.filter(c =>
+            c.factionId === item.attackerFactionId &&
+            !(c.penaltyTurns > 0) && (c.soldiers ?? 0) > 0
+          ).slice(0, 4);
+
+      return (
+        <div style={{ width:'100vw', height:'100vh', background:'#000' }}>
+          <BattleScene
+            formation={defenseFlow.formation}
+            targetNode={item.defenderBase}
+            enemyChars={enemyChars}
+            onComplete={async (result) => {
+              const phase = await game.actions.battleEnd({
+                usedCharIds:    result?.usedCharIds  ?? [],
+                deadCharIds:    result?.deadCharIds  ?? [],
+                deadMobIds:     result?.deadMobIds   ?? [],
+                unitResults:    result?.unitResults  ?? [],
+                conquered:      !(result?.conquered  ?? false),
+                defenderBaseId: item.defenderBase?.id ?? item.defenderBase?.baseId,
+                winnerFactionId: !(result?.conquered ?? false)
+                  ? item.attackerFactionId
+                  : playerFaction?.id,
+              });
+              advanceDefenseQueue(phase ?? null);
+            }}
+          />
+        </div>
+      );
+    }
+
     switch (scene) {
 
       // ── タイトル ──
       case 'title':
         return <TitleScene
-          onNavigate={(dest, params) => {
-            if (dest === 'map') game.actions.startNewGame();
+          onNavigate={async (dest, params) => {
+            if (dest === 'map') {
+              await game.actions.startNewGame();
+              navigate('map');
+              return;
+            }
             if (dest === 'save') { navigate('save', { mode: 'load' }); return; }
             navigate(dest, params);
           }}
@@ -72,14 +316,17 @@ export default function App() {
           onAttackNode={(node) => navigate('formation', { targetNode: node })}
           onNodeClick={(node) => navigate('base_menu', {
             node,
-            isOwned:   node.owner === 'player',
-            canAttack: node.canAttack ?? node.owner !== 'player',
+            isOwned:    node.factionId === playerFaction?.id,
+            canAttack:  node.canAttack ?? false,
             hasDungeon: !!node.dungeonId,
           })}
           gameState={gameState}
           basesData={bases}
           factionsData={factions}
-          onNextTurn={() => game.actions.nextTurn()}
+          onNextTurn={handleNextTurn}
+          focusBaseId={sceneParams.focusBaseId}
+          focusKey={focusKey}
+          onReady={sceneParams._onReady}
         />;
 
       // ── 拠点メニュー ──
@@ -92,51 +339,115 @@ export default function App() {
               canAttack={sceneParams.canAttack ?? false}
               hasDungeon={sceneParams.hasDungeon ?? false}
               onNavigate={(dest, params) => {
-                if (dest === 'formation') navigate('formation', { targetNode: sceneParams.node });
-                else if (dest === 'dungeon') navigate('dungeon', { baseNode: sceneParams.node });
-                else navigate(dest, params);
+                if (dest === 'formation') {
+                  navigate('formation', { targetNode: sceneParams.node });
+                } else if (dest === 'dungeon') {
+                  navigate('dungeon', { baseNode: sceneParams.node });
+                } else {
+                  navigate(dest, params);
+                }
               }}
               onClose={() => navigate('map')}
             />
           </div>
         );
 
-      // ── 攻撃編成 ──
-      case 'formation':
+      // ── 攻撃編成（防衛は defenseFlow state machine が処理）──
+      case 'formation': {
+        const fNode           = sceneParams.targetNode;
+        const fEnemyFactionId = fNode?.factionId;
+        const fEnemyChars     = fEnemyFactionId && legionAI
+          ? legionAI.getDefenders(fEnemyFactionId, fNode, characters).slice(0, 4)
+          : characters.filter(c =>
+              c.factionId === fEnemyFactionId &&
+              !(c.penaltyTurns > 0) && (c.soldiers ?? 0) > 0
+            ).slice(0, 4);
+        const fEnemyStrategyRate = fEnemyChars.length > 0
+          ? Math.max(...fEnemyChars.map(c => c.strategyRate ?? 0)) : 0;
+
         return <AttackFormationScene
-          targetNode={sceneParams.targetNode}
-          availableChars={availableChars}   // 実データ
-          onLaunch={(formation) => navigate('battle', {
-            formation,
-            targetNode: sceneParams.targetNode,
-          })}
+          targetNode={fNode}
+          availableChars={availableChars}
+          isDefense={false}
+          battleCapacity={fNode?.battleCapacity ?? 3500}
+          enemyStrategyRate={fEnemyStrategyRate}
+          enemyChars={fEnemyChars}
+          battleMode={null}
+          onLaunch={async (formation, _tNode, opts) => {
+            await game.actions.beforeAttack(fNode?.baseId, playerFaction?.id);
+            navigate('battle', {
+              mode:           'attack',
+              formation,
+              targetNode:     fNode,
+              battleCapacity: opts?.battleCapacity ?? fNode?.battleCapacity ?? 3500,
+            });
+          }}
           onCancel={() => navigate('map')}
         />;
+      }
 
-      // ── 戦闘 ──
-      case 'battle':
+      // ── 攻撃戦闘（防衛は defenseFlow state machine が処理）──
+      case 'battle': {
+        const targetBase     = sceneParams.targetNode;
+        const enemyFactionId = targetBase?.factionId;
+        const enemyChars     = enemyFactionId && legionAI
+          ? legionAI.getDefenders(enemyFactionId, targetBase, characters).slice(0, 4)
+          : [];
+
         return (
           <div style={{ width:'100vw', height:'100vh', background:'#000' }}>
             <BattleScene
               formation={sceneParams.formation}
-              targetNode={sceneParams.targetNode}
-              onComplete={(result) => {
-                game.actions.battleEnd({
-                  usedCharIds:     result?.usedCharIds ?? Object.values(sceneParams.formation ?? {}).filter(Boolean).map(c => c.id),
-                  deadCharIds:     result?.deadCharIds ?? [],
-                  conquered:       result?.conquered ?? false,
-                  defenderBaseId:  sceneParams.targetNode?.baseId,
-                  winnerFactionId: playerFaction?.id,
+              targetNode={targetBase}
+              enemyChars={enemyChars}
+              onComplete={async (result) => {
+                // D-03: 攻撃戦で制圧した場合、battleEnd前に宣戦布告（制圧前のfactionIdを使う）
+                if (result?.conquered) {
+                  game.actions.declareWar(targetBase?.factionId);
+                }
+                const phase = await game.actions.battleEnd({
+                  usedCharIds:     result?.usedCharIds    ?? [],
+                  deadCharIds:     result?.deadCharIds    ?? [],
+                  deadMobIds:      result?.deadMobIds     ?? [],
+                  unitResults:     result?.unitResults    ?? [],
+                  conquered:       result?.conquered      ?? false,
+                  defenderBaseId:  targetBase?.id ?? targetBase?.baseId,
+                  winnerFactionId: result?.conquered
+                    ? playerFaction?.id
+                    : (targetBase?.factionId),
                 });
+
+                if (phase === 'defeat' || phase === 'victory') {
+                  navigate('game_end', {
+                    isVictory:       phase === 'victory',
+                    clearedCount:    0,
+                    currentTurn,
+                    playerBaseCount: playerBases.length,
+                    totalBaseCount:  bases.length,
+                  });
+                  return;
+                }
+
                 navigate('map');
               }}
             />
           </div>
         );
+      }
 
       // ── 敵ターン演出 ──
       case 'enemy_turn':
-        return <EnemyTurnScene onComplete={() => navigate('map')} />;
+        return (
+          <div style={{ width:'100vw', height:'100vh', position:'relative', background:'#0a0610' }}>
+            <EnemyTurnScene
+              faction={sceneParams.faction ?? null}
+              attackQueue={sceneParams.attackQueue ?? []}
+              playerFactionName={playerFaction?.name}
+              playerTurnMode={sceneParams.playerTurnMode ?? false}
+              onComplete={() => sceneParams._onComplete?.()}
+            />
+          </div>
+        );
 
       // ── キャラクター ──
       case 'characters':
@@ -144,18 +455,20 @@ export default function App() {
 
       // ── アイテム ──
       case 'items':
-        return <ItemsScene onNavigate={navigate} inventory={game.inventory} onRemoveItem={game.actions.removeItem} />;
+        return <ItemsScene
+          onNavigate={navigate}
+          inventory={game.inventory}
+          onRemoveItem={game.actions.removeItem}
+        />;
 
       // ── 研究 ──
       case 'research':
         return <ResearchScene
           onNavigate={navigate}
-          completedResearch={game.research}
+          buildingSystem={systems?.buildingSystem}
+          buildings={game.buildings}
           treasury={playerFaction?.treasury ?? 0}
-          onResearch={(id, cost) => {
-            game.actions.addResearch(id);
-            game.actions.setTreasury(playerFaction.id, (playerFaction.treasury ?? 0) - cost);
-          }}
+          onResearch={(id) => game.actions.doResearch(id)}
         />;
 
       // ── セーブ/ロード ──
@@ -178,6 +491,9 @@ export default function App() {
         return <GameEndScene
           isVictory={sceneParams.isVictory ?? true}
           clearedCount={sceneParams.clearedCount ?? 0}
+          currentTurn={sceneParams.currentTurn ?? 1}
+          playerBaseCount={sceneParams.playerBaseCount ?? 0}
+          totalBaseCount={sceneParams.totalBaseCount ?? 92}
           hasNewGamePlus={false}
           onNavigate={navigate}
         />;
@@ -193,8 +509,13 @@ export default function App() {
       // ── 会話 ──
       case 'adv':
         return <ADVScene
-          scenario={sceneParams.scenario ?? null}
-          onExit={() => navigate(sceneParams.returnTo ?? 'map')}
+          scenario={sceneParams.scenario ?? []}
+          transparent={sceneParams.transparent ?? false}
+          onExit={() => {
+            sceneParams._onComplete?.();
+            navigate(sceneParams.returnTo ?? 'map');
+          }}
+          onChoice={(value) => sceneParams._onChoice?.(value)}
         />;
 
       // ── 空実装 ──
@@ -220,5 +541,20 @@ export default function App() {
     }
   };
 
-  return <div id="app-root">{renderScene()}</div>;
+  return (
+    <div id="app-root" style={{ position:'relative', width:'100vw', height:'100vh' }}>
+      {renderScene()}
+      {(defenseFlow?.phase === 'adv' || defenseFlow?.phase === 'abandon_confirm') && scene === 'map' && (
+        <div style={{ position:'absolute', inset:0, zIndex:100 }}>
+          <ADVScene
+            key={`defense-adv-${defenseFlow.phase}`}
+            scenario={defenseAdvScenario}
+            transparent={true}
+            onExit={() => {}}
+            onChoice={handleDefenseAdvChoice}
+          />
+        </div>
+      )}
+    </div>
+  );
 }
