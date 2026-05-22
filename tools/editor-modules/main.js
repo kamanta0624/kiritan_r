@@ -10,7 +10,6 @@ import {
 
 import { renderCharTab, setFilter, addChar, saveChar, duplicateChar, deleteChar, addNameVariant, removeNameVariant } from './tab-characters.js';
 import { renderItemTab, saveItem, addItem, deleteItem } from './tab-items.js';
-import { renderLinesTab, addLineRow, removeLineRow, saveLines } from './tab-lines.js';
 import { renderFactionTab, syncColorPicker, saveFaction, addFaction, deleteFaction } from './tab-factions.js';
 import { renderMapTab, onBaseCoordChange, saveBase, addBase, deleteBase } from './tab-map.js';
 import {
@@ -27,7 +26,7 @@ import { initEventsTab } from './tab-events.js';
 // ----------------------------------------------------------------
 // タブ切替
 // ----------------------------------------------------------------
-const TAB_ORDER = ['characters', 'items', 'lines', 'factions', 'map', 'legions', 'events'];
+const TAB_ORDER = ['characters', 'items', 'factions', 'map', 'legions', 'events'];
 
 function switchTab(tab) {
   state.tab        = tab;
@@ -48,11 +47,14 @@ function renderAll() {
   try {
     if      (state.tab === 'characters') renderCharTab(main);
     else if (state.tab === 'items')      renderItemTab(main);
-    else if (state.tab === 'lines')      renderLinesTab(main);
     else if (state.tab === 'factions')   renderFactionTab(main);
     else if (state.tab === 'map')        renderMapTab(main);
     else if (state.tab === 'legions')    renderLegionTab(main);
-    else if (state.tab === 'events')     initEventsTab(main, state.data);
+    else if (state.tab === 'events') {
+      main.style.overflow = 'hidden';
+      main.style.padding  = '0';
+      initEventsTab(main, state.data);
+    }
   } catch (err) {
     main.innerHTML = `<div class="error-box"><p style="color:#f85149">描画エラー</p><pre>${err.stack}</pre></div>`;
     console.error(err);
@@ -101,8 +103,6 @@ window.EditorApp = {
   addNameVariant, removeNameVariant,
   // items
   saveItem, addItem, deleteItem,
-  // lines
-  addLineRow, removeLineRow, saveLines,
   // factions
   syncColorPicker, saveFaction, addFaction, deleteFaction,
   // map

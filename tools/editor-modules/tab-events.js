@@ -21,6 +21,7 @@ const CONDITION_TYPES = [
   { value: 'defenderFaction',label: '防衛側勢力', params: ['factionId:防衛側勢力ID'] },
   { value: 'baseConquered',  label: '拠点制圧済み', params: ['baseId:拠点ID', 'factionId:制圧した勢力ID'] },
   { value: 'turnAfterFlag',  label: 'フラグ成立からNターン後', params: ['flag:フラグ名', 'value:ターン数'] },
+  { value: 'defeatedChar',  label: '特定キャラを撃破済み', params: ['charId:キャラID'] },
 ];
 
 const EFFECT_TYPES = [
@@ -42,6 +43,7 @@ const EFFECT_TYPES = [
   { value: 'baseTransfer',     label: '拠点所有権移行（勢力一括）' },
   { value: 'attackUnlock',     label: '攻撃可能フラグ設定' },
   { value: 'legionForceAttack',label: '軍団全体に攻撃命令' },
+  { value: 'actionPointsBonus', label: '行動力上限増加' },
 ];
 
 const CHAR_PARAM_FIELDS = [
@@ -128,9 +130,10 @@ async function _save() {
 
 function _render() {
   _container.innerHTML = '';
+  _container.style.cssText = 'display:flex;flex-direction:column;height:100%;overflow:hidden';
 
   const layout = document.createElement('div');
-  layout.style.cssText = 'display:grid;grid-template-columns:260px 1fr 300px;gap:12px;height:100%';
+  layout.style.cssText = 'display:grid;grid-template-columns:260px 1fr 300px;gap:12px;flex:1;min-height:0;padding:12px';
 
   const left   = _buildList();
   const center = document.createElement('div');
@@ -160,7 +163,7 @@ function _render() {
 
 function _buildList() {
   const wrap = document.createElement('div');
-  wrap.style.cssText = 'display:flex;flex-direction:column;gap:6px;height:100%';
+  wrap.style.cssText = 'display:flex;flex-direction:column;gap:6px;height:100%;min-height:0';
 
   const addBtn = document.createElement('button');
   addBtn.textContent = '+ 新規イベント';
@@ -187,7 +190,8 @@ function _buildList() {
     const item = document.createElement('div');
     item.style.cssText = `padding:8px 10px;border-radius:6px;cursor:pointer;font-size:13px;border:1px solid ${i === _selIdx ? 'var(--color-border-primary)' : 'var(--color-border-tertiary)'};background:${i === _selIdx ? 'var(--color-background-secondary)' : 'transparent'}`;
     const trigLabel = TRIGGER_OPTIONS.find(t => t.value === ev.trigger)?.label ?? ev.trigger;
-    item.innerHTML = `<div style="font-weight:500;color:var(--color-text-primary)">${ev.name}</div><div style="font-size:11px;color:var(--color-text-secondary)">${trigLabel} / p=${ev.probability} / pri=${ev.priority}</div>`;
+    const typeLabel = ev.type ? `<span style="padding:1px 5px;border-radius:3px;background:#1a2a1a;color:#88ffaa;font-size:10px;margin-right:4px">[${ev.type}]</span>` : '';
+    item.innerHTML = `<div style="font-weight:500;color:var(--color-text-primary)">${typeLabel}${ev.name}</div><div style="font-size:11px;color:var(--color-text-secondary)">${trigLabel} / p=${ev.probability} / pri=${ev.priority}</div>`;
     item.onclick = () => { _selIdx = i; _render(); };
     const del = document.createElement('span');
     del.textContent = '✕';
@@ -206,7 +210,7 @@ function _buildList() {
 
   const saveBtn = document.createElement('button');
   saveBtn.textContent = '保存';
-  saveBtn.style.cssText = 'padding:8px;background:var(--color-background-success);color:var(--color-text-success);border:1px solid var(--color-border-success);border-radius:6px;cursor:pointer;font-weight:500';
+  saveBtn.style.cssText = 'position:sticky;bottom:0;padding:8px;background:var(--color-background-success);color:var(--color-text-success);border:1px solid var(--color-border-success);border-radius:6px;cursor:pointer;font-weight:500';
   saveBtn.onclick = _save;
   wrap.appendChild(saveBtn);
 
@@ -221,6 +225,7 @@ function _buildEditor(pane, ev) {
   pane.innerHTML = '';
 
   _section(pane, '基本情報');
+  _field(pane, 'タイプ', _inp(ev, 'type', 'theater / (空=通常イベント)'));
   _field(pane, 'ID', _text(ev, 'id', true));
   _field(pane, '名前', _text(ev, 'name'));
 
@@ -452,6 +457,19 @@ function _buildChoicesInline(card, step, stepIdx) {
     delChoice.onclick = () => { step.choices.splice(ci, 1); _buildChoicesInline(card, step, stepIdx); choiceWrap.remove(); };
     labelRow.append(badge, labelInp, document.createTextNode('→#'), nextInp, delChoice);
     choiceCard.appendChild(labelRow);
+
+    const keyRow = document.createElement('div');
+    keyRow.style.cssText = 'display:flex;gap:6px;align-items:center;margin-bottom:6px';
+    const keyLbl = document.createElement('span');
+    keyLbl.textContent = 'effectsKey（上級）:';
+    keyLbl.style.cssText = 'font-size:11px;color:var(--color-text-secondary);white-space:nowrap';
+    const keyInp = document.createElement('input');
+    keyInp.type = 'text'; keyInp.value = choice.effectsKey ?? '';
+    keyInp.placeholder = 'effectsKeyを使う場合のみ';
+    keyInp.style.cssText = 'flex:1;padding:3px 6px;border-radius:4px;border:1px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);font-size:12px';
+    keyInp.oninput = () => { choice.effectsKey = keyInp.value || undefined; };
+    keyRow.append(keyLbl, keyInp);
+    choiceCard.appendChild(keyRow);
 
     const effSection = document.createElement('div');
     effSection.style.cssText = 'padding:6px;background:var(--color-background-secondary);border-radius:4px;border:1px solid var(--color-border-tertiary)';
@@ -773,6 +791,8 @@ function _buildEffectParams(eff) {
         lbl('攻撃対象勢力:'), sel(eff, 'targetFactionId', factions.map(f => ({ value: f.id, label: f.name })), true)
       ); break;
     }
+    case 'actionPointsBonus':
+      wrap.append(lbl('増減:'), numInp(eff, 'delta', '増減値（+1 など）')); break;
     case 'setFlag':
     case 'clearFlag':
       wrap.append(lbl('フラグ名:'), txtInp(eff, 'flag', 'フラグ名')); break;

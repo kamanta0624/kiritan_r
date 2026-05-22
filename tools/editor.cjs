@@ -105,6 +105,12 @@ const server = http.createServer(async (req, res) => {
         return;
       }
 
+      if (pathname === '/bulk-input.html') {
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        res.end(fs.readFileSync(path.join(__dirname, 'bulk-input.html')));
+        return;
+      }
+
       // editor-modules/*.js および editor.css の静的配信
       if (pathname.startsWith('/editor-modules/') || pathname === '/editor.css') {
         const filePath = path.join(__dirname, pathname);
@@ -201,6 +207,44 @@ const server = http.createServer(async (req, res) => {
         writeJSON(path.join(DATA, 'characters.json'), JSON.parse(body.toString()));
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ok: true }));
+        return;
+      }
+
+      if (pathname === '/api/bulk-register/characters') {
+        const body = await readBody(req);
+        const { characters: incoming } = JSON.parse(body.toString());
+        if (!Array.isArray(incoming)) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'characters must be an array' }));
+          return;
+        }
+        const charFile = path.join(DATA, 'characters.json');
+        const existing = readJSONSafe(charFile, { characters: [] });
+        const map = {};
+        existing.characters.forEach(c => { map[c.id] = c; });
+        let added = 0, updated = 0;
+        incoming.forEach(c => {
+          const soldiers = c.soldiers ?? 100;
+          const entry = {
+            isTemplate: false,
+            status: 'standby',
+            maxSoldiers: soldiers,
+            charHp: 100, charMaxHp: 100,
+            charAttack: 10, charSong: 5,
+            soldierAtk: 8, soldierDef: 5,
+            battleCapacity: 30,
+            skills: [],
+            nameVariants: [],
+            ...c,
+            soldiers,
+          };
+          if (map[c.id]) { map[c.id] = entry; updated++; }
+          else { map[c.id] = entry; added++; }
+        });
+        existing.characters = Object.values(map);
+        writeJSON(charFile, existing);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, added, updated }));
         return;
       }
 
