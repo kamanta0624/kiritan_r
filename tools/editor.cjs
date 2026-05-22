@@ -198,6 +198,23 @@ const server = http.createServer(async (req, res) => {
         res.end(JSON.stringify(result));
         return;
       }
+
+      // API: 戦闘背景画像一覧
+      if (pathname === '/api/battle-backgrounds') {
+        const dir = path.join(ASSETS, 'battle_backgrounds');
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+        const files = fs.readdirSync(dir)
+          .filter(f => /\.(png|jpg|jpeg|gif|webp)$/i.test(f))
+          .sort();
+        const images = files.map(f => ({
+          id: path.basename(f, path.extname(f)),
+          filename: f,
+          url: `/assets/battle_backgrounds/${f}`,
+        }));
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ images }));
+        return;
+      }
     }
 
     if (req.method === 'POST') {
@@ -342,6 +359,36 @@ const server = http.createServer(async (req, res) => {
         return;
       }
 
+      if (pathname === '/api/upload/battle-bg') {
+        const ct = req.headers['content-type'] || '';
+        const boundary = ct.split('boundary=')[1];
+        if (!boundary) { res.writeHead(400); res.end('Bad Request'); return; }
+        const body = await readBody(req);
+        const parts = parseMultipart(body, boundary);
+        const filePart = parts.find(p => p.filename);
+        if (!filePart) { res.writeHead(400); res.end('Missing file'); return; }
+
+        const dir = path.join(ASSETS, 'battle_backgrounds');
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+        const existing = fs.readdirSync(dir)
+          .filter(f => /^bg_\d+\./i.test(f))
+          .map(f => parseInt(f.match(/^bg_(\d+)\./)[1], 10))
+          .filter(n => !isNaN(n));
+        const nextNum = existing.length > 0 ? Math.max(...existing) + 1 : 1;
+        const ext = path.extname(filePart.filename).toLowerCase() || '.jpg';
+        const newFilename = `bg_${String(nextNum).padStart(3, '0')}${ext}`;
+        const destPath = path.join(dir, newFilename);
+
+        fs.writeFileSync(destPath, filePart.data);
+        const newId = path.basename(newFilename, ext);
+        const newUrl = `/assets/battle_backgrounds/${newFilename}`;
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, id: newId, url: newUrl }));
+        return;
+      }
+
       if (pathname === '/api/upload') {
         const ct       = req.headers['content-type'] || '';
         const boundary = ct.split('boundary=')[1];
@@ -358,6 +405,17 @@ const server = http.createServer(async (req, res) => {
         fs.writeFileSync(destPath, filePart.data);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ok: true, url: `/assets/${destField.data.toString().trim()}/${filename}` }));
+        return;
+      }
+
+      if (pathname === '/api/delete-battle-bg') {
+        const body = await readBody(req);
+        const { id } = JSON.parse(body.toString());
+        const dir = path.join(ASSETS, 'battle_backgrounds');
+        const files = fs.readdirSync(dir).filter(f => f.startsWith(id + '.'));
+        files.forEach(f => fs.unlinkSync(path.join(dir, f)));
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true }));
         return;
       }
 

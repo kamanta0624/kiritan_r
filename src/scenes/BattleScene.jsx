@@ -655,8 +655,9 @@ function MessageWindow({ speaker, line }) {
 }
 
 // ── R15: BattleAnimOverlay (V3.2対応 — animStateから実値を参照) ──
-function BattleAnimOverlay({ anim, onContinue }) {
-  const { attacker, defender, atkMem, atkChr, defMem, defChr, N, Nr, actionLabel, attackType='melee', attackerSide='player' } = anim;
+function BattleAnimOverlay({ anim, targetNode, onContinue }) {
+  const { attacker, defender, atkMem, atkChr, defMem, defChr, N, Nr, actionLabel, attackType='melee', attackerSide='player',
+          atkSolBefore, defSolBefore, atkHpBefore, defHpBefore } = anim;
   const isSpecial   = actionLabel === '必殺技';
   const atkColor    = attackerSide === 'player' ? PK : AC;
 
@@ -668,10 +669,15 @@ function BattleAnimOverlay({ anim, onContinue }) {
   const enemySPdmg = allyIsAttacker ? (atkMem ?? 0) : (defMem ?? 0);
   const enemyHPdmg = allyIsAttacker ? (atkChr ?? 0) : (defChr ?? 0);
 
-  const [allySP, setAllySP]   = useState(attacker.soldiers);
-  const [allyHP, setAllyHP]   = useState(attacker.charHp);
-  const [enemySP, setEnemySP] = useState(defender.soldiers);
-  const [enemyHP, setEnemyHP] = useState(defender.charHp);
+  const allySolBefore  = allyIsAttacker ? atkSolBefore : defSolBefore;
+  const allyHpBefore   = allyIsAttacker ? atkHpBefore  : defHpBefore;
+  const enemySolBefore = allyIsAttacker ? defSolBefore : atkSolBefore;
+  const enemyHpBefore  = allyIsAttacker ? defHpBefore  : atkHpBefore;
+
+  const [allySP, setAllySP]   = useState(allySolBefore);
+  const [allyHP, setAllyHP]   = useState(allyHpBefore);
+  const [enemySP, setEnemySP] = useState(enemySolBefore);
+  const [enemyHP, setEnemyHP] = useState(enemyHpBefore);
   const [phase, setPhase] = useState(isSpecial ? 'cutin' : 'counts');
   const [moved, setMoved] = useState(false);
 
@@ -720,8 +726,8 @@ function BattleAnimOverlay({ anim, onContinue }) {
     return arr;
   }, []);
 
-  const allyWillDie   = (allyUnit.charHp  - allyHPdmg)  <= 0;
-  const enemyWillDie  = (enemyUnit.charHp - enemyHPdmg) <= 0;
+  const allyWillDie   = allyUnit.charHp  <= 0;
+  const enemyWillDie  = enemyUnit.charHp <= 0;
   const anyoneDies    = allyWillDie || enemyWillDie;
   const defenderWillDie = allyIsAttacker ? enemyWillDie : allyWillDie;
 
@@ -770,7 +776,7 @@ function BattleAnimOverlay({ anim, onContinue }) {
     <div onClick={handleClick} style={{
       position:'absolute', inset:0, zIndex:55, cursor:'pointer',
       backgroundColor:'#0a0816',
-      backgroundImage:'url(assets/bg_battle.jpg)',
+      backgroundImage: targetNode?.battleBgId ? `url(${targetNode.battleBgId})` : 'url(assets/bg_battle.jpg)',
       backgroundSize:'cover', backgroundPosition:'center 40%',
       display:'flex', flexDirection:'column', overflow:'hidden',
     }}>
@@ -921,7 +927,7 @@ function BActionScene({
     <div className="fade-in" style={{
       width:'100%', height:'100%', display:'flex', flexDirection:'column',
       color:TX, position:'relative',
-      backgroundImage:'url(assets/bg_battle.jpg)',
+      backgroundImage: targetNode?.battleBgId ? `url(${targetNode.battleBgId})` : 'url(assets/bg_battle.jpg)',
       backgroundSize:'cover', backgroundPosition:'center 40%',
     }}>
       <div style={{ position:'absolute', inset:0, background:'linear-gradient(180deg, rgba(251,247,239,.7) 0%, rgba(245,237,224,.18) 45%, rgba(245,237,224,.18) 65%, rgba(251,247,239,.78) 100%)' }}/>
@@ -1254,6 +1260,10 @@ export default function BattleFlow({ formation, targetNode, onComplete, enemyCha
           defChr:      result.defChr,
           N:           result.N,
           Nr:          result.Nr,
+          atkSolBefore: result.atkSolBefore,
+          defSolBefore: result.defSolBefore,
+          atkHpBefore:  result.atkHpBefore,
+          defHpBefore:  result.defHpBefore,
           actionLabel: ATK_LABEL[atk.action] ?? atk.action,
           attackType:  atk.char.attackType,
           attackerSide: isPlayerUnit ? 'player' : 'enemy',
@@ -1389,7 +1399,7 @@ export default function BattleFlow({ formation, targetNode, onComplete, enemyCha
 
       {/* R15: 戦闘アニメーションオーバーレイ */}
       {animState && (
-        <BattleAnimOverlay anim={animState} onContinue={() => {
+        <BattleAnimOverlay anim={animState} targetNode={targetNode} onContinue={() => {
           animStateRef.current = null;
           setAnimState(null);
           if (animResolveRef.current) { animResolveRef.current(); animResolveRef.current = null; }

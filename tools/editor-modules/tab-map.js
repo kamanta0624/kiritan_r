@@ -69,6 +69,7 @@ export function renderMapTab(main) {
     formArea.innerHTML = '<div style="padding:20px 0;color:#484f58;font-size:13px">拠点を選択してください</div>';
   }
   mapMain.appendChild(formArea);
+  if (selBase) { _appendBgSection(formArea, selBase); }
   layout.appendChild(mapMain);
   main.appendChild(layout);
 
@@ -278,6 +279,7 @@ export function saveBase() {
   base.income        = n('fb_income');
   base.battleCapacity = n('fb_battleCapacity');
   base.dungeonId     = v('fb_dungeonId') || null;
+  base.battleBgId    = document.getElementById('fb_battleBgId')?.value || null;
 
   const checkedAdj   = [...document.querySelectorAll('.adj-cb:checked')].map(cb => cb.value);
   const uncheckedAdj = [...document.querySelectorAll('.adj-cb:not(:checked)')].map(cb => cb.value);
@@ -323,6 +325,94 @@ export function deleteBase() {
   bases.forEach(b => { b.adjacentBases = b.adjacentBases.filter(id => id !== delId); });
   state.selectedBaseId = null;
   saveBasesToServer();
+}
+
+async function _appendBgSection(container, base) {
+  let images = [];
+  try {
+    const res = await fetch('/api/battle-backgrounds');
+    const json = await res.json();
+    images = json.images ?? [];
+  } catch {}
+
+  const section = document.createElement('div');
+  section.className = 'form-section';
+  section.innerHTML = '<div class="form-section-title">🎨 戦闘背景画像</div>';
+
+  const previewWrap = document.createElement('div');
+  previewWrap.style.cssText = 'margin-bottom:10px';
+  const currentImg = images.find(img => img.url === base.battleBgId);
+  if (currentImg) {
+    previewWrap.innerHTML = `
+      <img src="${currentImg.url}" style="width:120px;height:68px;object-fit:cover;border-radius:5px;border:1px solid #30363d;display:block;margin-bottom:4px"/>
+      <div style="font-size:10px;color:#8b949e">設定中: ${currentImg.id}</div>`;
+  } else {
+    previewWrap.innerHTML =
+      '<div style="width:120px;height:68px;border:2px dashed #30363d;border-radius:5px;display:flex;align-items:center;justify-content:center;color:#484f58;font-size:11px;margin-bottom:4px">未設定</div>';
+  }
+  section.appendChild(previewWrap);
+
+  const selRow = document.createElement('div');
+  selRow.className = 'form-row';
+  const selGroup = document.createElement('div');
+  selGroup.className = 'form-group';
+  selGroup.innerHTML = '<label>登録済み画像から選択</label>';
+  const sel = document.createElement('select');
+  sel.id = 'fb_battleBgId';
+  sel.innerHTML = '<option value="">（背景なし）</option>' +
+    images.map(img =>
+      `<option value="${img.url}" ${base.battleBgId === img.url ? 'selected' : ''}>${img.id}</option>`
+    ).join('');
+  sel.onchange = () => {
+    base.battleBgId = sel.value || null;
+    const selected = images.find(i => i.url === sel.value);
+    if (selected) {
+      previewWrap.innerHTML = `
+        <img src="${selected.url}" style="width:120px;height:68px;object-fit:cover;border-radius:5px;border:1px solid #30363d;display:block;margin-bottom:4px"/>
+        <div style="font-size:10px;color:#8b949e">設定中: ${selected.id}</div>`;
+    } else {
+      previewWrap.innerHTML =
+        '<div style="width:120px;height:68px;border:2px dashed #30363d;border-radius:5px;display:flex;align-items:center;justify-content:center;color:#484f58;font-size:11px;margin-bottom:4px">未設定</div>';
+    }
+  };
+  selGroup.appendChild(sel);
+  selRow.appendChild(selGroup);
+  section.appendChild(selRow);
+
+  const upRow = document.createElement('div');
+  upRow.className = 'form-row';
+  const upGroup = document.createElement('div');
+  upGroup.className = 'form-group';
+  upGroup.innerHTML = '<label>新規アップロード（自動採番）</label>';
+  const upInput = document.createElement('input');
+  upInput.type = 'file'; upInput.accept = 'image/*';
+  upInput.style.cssText = 'margin-top:4px;font-size:12px;color:#8b949e';
+  upInput.onchange = async () => {
+    const file = upInput.files[0]; if (!file) return;
+    const fd = new FormData();
+    fd.append('file', file, file.name);
+    try {
+      const r = await fetch('/api/upload/battle-bg', { method: 'POST', body: fd });
+      const json = await r.json();
+      if (json.ok) {
+        const opt = document.createElement('option');
+        opt.value = json.url; opt.textContent = json.id; opt.selected = true;
+        sel.appendChild(opt);
+        images.push({ id: json.id, url: json.url });
+        base.battleBgId = json.url;
+        previewWrap.innerHTML = `
+          <img src="${json.url}" style="width:120px;height:68px;object-fit:cover;border-radius:5px;border:1px solid #30363d;display:block;margin-bottom:4px"/>
+          <div style="font-size:10px;color:#8b949e">設定中: ${json.id}</div>`;
+        showToast(`${json.id} をアップロードしました`);
+      }
+    } catch (e) { showToast('アップロードエラー: ' + e.message, true); }
+  };
+  upGroup.appendChild(upInput);
+  upRow.appendChild(upGroup);
+  section.appendChild(upRow);
+
+  const btnRow = container.querySelector('.btn-row');
+  container.insertBefore(section, btnRow);
 }
 
 async function saveBasesToServer() {
