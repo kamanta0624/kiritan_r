@@ -35,8 +35,8 @@ export default function App() {
 
   useEffect(() => {
     game.setStartDialogHandler((script, onComplete) => {
-      const scenario = convertEventScript(script);
-      navigate('adv', { scenario, returnTo: 'map', _onComplete: onComplete });
+      const { scenario, cast, bg, location } = convertEventScript(script);
+      navigate('adv', { scenario, cast, bg, location, returnTo: 'map', _onComplete: onComplete });
     });
   }, []);
 
@@ -132,36 +132,45 @@ export default function App() {
   }, [game.actions, advanceDefenseQueue]);
 
   // ADV シナリオ（phase に応じて切り替え）
-  const defenseAdvScenario = useMemo(() => {
-    if (!defenseFlow) return [];
+  const defenseAdvConfig = useMemo(() => {
+    if (!defenseFlow) return { scenario: [], cast: [], bg: null, location: '' };
     const item          = defenseFlow.queue[defenseFlow.index];
     const attackerFaction = factions.find(f => f.id === item?.attackerFactionId);
     const defenderBase  = item?.defenderBase;
 
     if (defenseFlow.phase === 'abandon_confirm') {
-      return [{
-        type: 'choice',
-        text: `本当に「${defenderBase?.name ?? '拠点'}」を放棄しますか？`,
-        choices: [
-          { label: 'はい、放棄する', value: 'confirm_abandon' },
-          { label: 'いいえ、戻る',   value: 'back' },
-        ],
-      }];
+      return {
+        scenario: [{
+          type: 'choice',
+          text: `本当に「${defenderBase?.name ?? '拠点'}」を放棄しますか？`,
+          choices: [
+            { label: 'はい、放棄する', value: 'confirm_abandon' },
+            { label: 'いいえ、戻る',   value: 'back' },
+          ],
+        }],
+        cast: [],
+        bg: null,
+        location: '',
+      };
     }
 
-    return [
-      { type: 'setup', cast: [], bg: 'assets/bg_battle.jpg', location: defenderBase?.name ?? '拠点' },
-      { type: 'narration', text: `${attackerFaction?.name ?? '敵勢力'}が${defenderBase?.name ?? '拠点'}に侵攻してきた。` },
-      {
-        type: 'choice',
-        text: '迎撃するか？',
-        choices: [
-          { label: '防衛する', value: 'defend' },
-          { label: '放棄する', value: 'abandon' },
-        ],
-      },
-      { type: 'end' },
-    ];
+    return {
+      scenario: [
+        { type: 'narration', text: `${attackerFaction?.name ?? '敵勢力'}が${defenderBase?.name ?? '拠点'}に侵攻してきた。` },
+        {
+          type: 'choice',
+          text: '迎撃するか？',
+          choices: [
+            { label: '防衛する', value: 'defend' },
+            { label: '放棄する', value: 'abandon' },
+          ],
+        },
+        { type: 'end' },
+      ],
+      cast: [],
+      bg: 'assets/bg_battle.jpg',
+      location: defenderBase?.name ?? '拠点',
+    };
   }, [defenseFlow, factions]);
 
   // 防衛キュー全体を state machine で駆動し、完了まで待てる Promise を返す
@@ -323,6 +332,7 @@ export default function App() {
           gameState={gameState}
           basesData={bases}
           factionsData={factions}
+          conqueredThisTurn={game.conqueredThisTurn}
           onNextTurn={handleNextTurn}
           focusBaseId={sceneParams.focusBaseId}
           focusKey={focusKey}
@@ -458,6 +468,8 @@ export default function App() {
         return <ItemsScene
           onNavigate={navigate}
           inventory={game.inventory}
+          systems={systems}
+          characters={characters}
           onRemoveItem={game.actions.removeItem}
         />;
 
@@ -510,6 +522,9 @@ export default function App() {
       case 'adv':
         return <ADVScene
           scenario={sceneParams.scenario ?? []}
+          cast={sceneParams.cast ?? []}
+          bg={sceneParams.bg ?? null}
+          location={sceneParams.location ?? ''}
           transparent={sceneParams.transparent ?? false}
           onExit={() => {
             sceneParams._onComplete?.();
@@ -548,7 +563,10 @@ export default function App() {
         <div style={{ position:'absolute', inset:0, zIndex:100 }}>
           <ADVScene
             key={`defense-adv-${defenseFlow.phase}`}
-            scenario={defenseAdvScenario}
+            scenario={defenseAdvConfig.scenario}
+            cast={defenseAdvConfig.cast}
+            bg={defenseAdvConfig.bg}
+            location={defenseAdvConfig.location}
             transparent={true}
             onExit={() => {}}
             onChoice={handleDefenseAdvChoice}

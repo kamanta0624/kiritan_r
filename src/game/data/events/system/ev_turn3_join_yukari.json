@@ -3,20 +3,45 @@
   "name": "3ターン目：結月ゆかり加入",
   "trigger": "player_turn",
   "conditions": [
-    { "type": "turn", "op": "eq", "value": 3 },
-    { "type": "flag", "flag": "flag_r2_yukari" }
+    {
+      "type": "turn",
+      "op": "eq",
+      "value": 3
+    },
+    {
+      "type": "flag",
+      "flag": "flag_r2_yukari"
+    }
   ],
-  "probability": 1, "priority": 780, "maxOccurrences": 1,
+  "probability": 1,
+  "priority": 780,
+  "maxOccurrences": 1,
   "script": [
-    { "type": "conversation", "lines": [
-      { "characterId": "char_011", "position": "center", "text": "呼んでくださったのね。ゆかり、お役に立てるかしら。" }
-    ]},
-    { "type": "end" }
+    {
+      "type": "conversation",
+      "lines": [
+        {
+          "characterId": "char_011",
+          "position": "center",
+          "text": "呼んでくださったのね。ゆかり、お役に立てるかしら。"
+        }
+      ]
+    },
+    {
+      "type": "end"
+    }
   ],
   "effects": {
     "default": [
-      { "type": "charJoin", "charId": "char_011", "factionId": "東北家" },
-      { "type": "clearFlag", "flag": "flag_r2_yukari" }
+      {
+        "type": "charJoin",
+        "charId": "char_011",
+        "factionId": "東北家"
+      },
+      {
+        "type": "clearFlag",
+        "flag": "flag_r2_yukari"
+      }
     ]
   }
 }

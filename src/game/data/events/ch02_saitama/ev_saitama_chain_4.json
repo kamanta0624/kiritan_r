@@ -3,22 +3,54 @@
   "name": "埼玉連続イベント４（全軍攻撃開始）",
   "trigger": "before_faction_turn",
   "conditions": [
-    { "type": "flag", "flag": "flag_saitama_chain3_done" },
-    { "type": "turnAfterFlag", "flag": "flag_saitama_chain3_done", "value": 1 },
-    { "type": "noFlag", "flag": "flag_saitama_chain4_done" }
+    {
+      "type": "flag",
+      "flag": "flag_saitama_chain3_done"
+    },
+    {
+      "type": "turnAfterFlag",
+      "flag": "flag_saitama_chain3_done",
+      "value": 1
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_saitama_chain4_done"
+    }
   ],
-  "probability": 1, "priority": 900, "maxOccurrences": 1,
+  "probability": 1,
+  "priority": 900,
+  "maxOccurrences": 1,
   "script": [
-    { "type": "conversation", "lines": [
-      { "characterId": "char_075", "position": "left",  "text": "さあ東北家よ。サイタマの全軍がお前たちの屋根を捧く時が来た。" },
-      { "characterId": "char_075", "position": "left",  "text": "一兵残らず、東北の地を璲にしてやる。" }
-    ]},
-    { "type": "end" }
+    {
+      "type": "conversation",
+      "lines": [
+        {
+          "characterId": "char_075",
+          "position": "left",
+          "text": "さあ東北家よ。サイタマの全軍がお前たちの屋根を捧く時が来た。"
+        },
+        {
+          "characterId": "char_075",
+          "position": "left",
+          "text": "一兵残らず、東北の地を璲にしてやる。"
+        }
+      ]
+    },
+    {
+      "type": "end"
+    }
   ],
   "effects": {
     "default": [
-      { "type": "setFlag", "flag": "flag_saitama_chain4_done" },
-      { "type": "legionForceAttack", "factionId": "faction_green", "targetFactionId": "東北家" }
+      {
+        "type": "setFlag",
+        "flag": "flag_saitama_chain4_done"
+      },
+      {
+        "type": "legionForceAttack",
+        "factionId": "faction_green",
+        "targetFactionId": "東北家"
+      }
     ]
   }
 }

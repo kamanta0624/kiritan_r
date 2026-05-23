@@ -3,9 +3,19 @@
   "name": "2ターン目助っ人召集（1人目選択）",
   "trigger": "player_turn",
   "conditions": [
-    { "type": "turn", "op": "eq", "value": 2 },
-    { "type": "flag", "flag": "ev_turn1_done" },
-    { "type": "noFlag", "flag": "flag_recruit1_done" }
+    {
+      "type": "turn",
+      "op": "eq",
+      "value": 2
+    },
+    {
+      "type": "flag",
+      "flag": "ev_turn1_done"
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_recruit1_done"
+    }
   ],
   "probability": 1,
   "priority": 900,
@@ -14,9 +24,21 @@
     {
       "type": "conversation",
       "lines": [
-        { "characterId": "char_016", "position": "center", "text": "きりたん、納豆ファクトリーやばいなのだ。オラは助っ人を呼びに行くのだ。" },
-        { "characterId": "char_004", "position": "right", "text": "ずんだもん…ありがとう。誤りなく言って。" },
-        { "characterId": "char_016", "position": "center", "text": "任せるのだ・・・。まず誤りなく戦える子を一人選ぶのだ。" }
+        {
+          "characterId": "char_016",
+          "position": "center",
+          "text": "きりたん、納豆ファクトリーやばいなのだ。オラは助っ人を呼びに行くのだ。"
+        },
+        {
+          "characterId": "char_004",
+          "position": "right",
+          "text": "ずんだもん…ありがとう。誤りなく言って。"
+        },
+        {
+          "characterId": "char_016",
+          "position": "center",
+          "text": "任せるのだ・・・。まず誤りなく戦える子を一人選ぶのだ。"
+        }
       ]
     },
     {
@@ -25,17 +47,52 @@
       "position": "right",
       "text": "最初の一人は誰にする？",
       "choices": [
-        { "label": "琺葉茹を呼ぶ", "next": 2, "effects": [ { "type": "setFlag", "flag": "flag_r1_akane" } ] },
-        { "label": "琺葉葵を呼ぶ", "next": 2, "effects": [ { "type": "setFlag", "flag": "flag_r1_aoi" } ] },
-        { "label": "鎖成あかりを呼ぶ", "next": 2, "effects": [ { "type": "setFlag", "flag": "flag_r1_akari" } ] }
+        {
+          "label": "琺葉茹を呼ぶ",
+          "next": 2,
+          "effects": [
+            {
+              "type": "setFlag",
+              "flag": "flag_r1_akane"
+            }
+          ]
+        },
+        {
+          "label": "琺葉葵を呼ぶ",
+          "next": 2,
+          "effects": [
+            {
+              "type": "setFlag",
+              "flag": "flag_r1_aoi"
+            }
+          ]
+        },
+        {
+          "label": "鎖成あかりを呼ぶ",
+          "next": 2,
+          "effects": [
+            {
+              "type": "setFlag",
+              "flag": "flag_r1_akari"
+            }
+          ]
+        }
       ]
     },
-    { "type": "end" }
+    {
+      "type": "end"
+    }
   ],
   "effects": {
     "default": [
-      { "type": "setFlag", "flag": "flag_recruit1_done" },
-      { "type": "charUsedThisTurn", "charId": "char_016" }
+      {
+        "type": "setFlag",
+        "flag": "flag_recruit1_done"
+      },
+      {
+        "type": "charUsedThisTurn",
+        "charId": "char_016"
+      }
     ]
   }
 }

@@ -3,22 +3,54 @@
   "name": "[鳴花ヒメ撃破]鳴花ヒメ加入",
   "trigger": "char_defeated",
   "conditions": [
-    { "type": "defeatedChar", "charId": "char_073" },
-    { "type": "noFlag", "flag": "flag_naruhanahi_me_joined" }
+    {
+      "type": "defeatedChar",
+      "charId": "char_073"
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_naruhanahi_me_joined"
+    }
   ],
-  "probability": 1, "priority": 900, "maxOccurrences": 1,
+  "probability": 1,
+  "priority": 900,
+  "maxOccurrences": 1,
   "script": [
-    { "type": "conversation", "lines": [
-      { "characterId": "char_073", "position": "left",  "text": "負けた。これの事就、東北家の力を認めてやるよ。" },
-      { "characterId": "char_004", "position": "right", "text": "ヒメ…。一緒に戦ってくれない？" },
-      { "characterId": "char_073", "position": "left",  "text": "向こうから挑んできたんだ。孤れられた側としては筑品筋だけど。まあ、いいよ。" }
-    ]},
-    { "type": "end" }
+    {
+      "type": "conversation",
+      "lines": [
+        {
+          "characterId": "char_073",
+          "position": "left",
+          "text": "負けた。これの事就、東北家の力を認めてやるよ。"
+        },
+        {
+          "characterId": "char_004",
+          "position": "right",
+          "text": "ヒメ…。一緒に戦ってくれない？"
+        },
+        {
+          "characterId": "char_073",
+          "position": "left",
+          "text": "向こうから挑んできたんだ。孤れられた側としては筑品筋だけど。まあ、いいよ。"
+        }
+      ]
+    },
+    {
+      "type": "end"
+    }
   ],
   "effects": {
     "default": [
-      { "type": "charJoin", "charId": "char_073", "factionId": "東北家" },
-      { "type": "setFlag", "flag": "flag_naruhanahi_me_joined" }
+      {
+        "type": "charJoin",
+        "charId": "char_073",
+        "factionId": "東北家"
+      },
+      {
+        "type": "setFlag",
+        "flag": "flag_naruhanahi_me_joined"
+      }
     ]
   }
 }

@@ -197,8 +197,8 @@
       "charAttack": 22,
       "charSong": 0,
       "soldierName": "きりたんミーム",
-      "soldierAtk": 6,
-      "soldierDef": 4,
+      "soldierAtk": 12,
+      "soldierDef": 10,
       "description": "東北家の三女。",
       "hireCost": 0,
       "equipment": {

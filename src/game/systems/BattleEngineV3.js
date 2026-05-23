@@ -455,6 +455,11 @@ export class BattleEngineV3 {
     const defMem = dr ? dr.memeDmg + dr.selfMemeDmg : 0;
     const defChr = dr ? dr.charDmg + dr.selfCharDmg : 0;
 
+    const atkSolBefore = atk.soldiers;
+    const defSolBefore = def.soldiers;
+    const atkHpBefore  = atk.charHp;
+    const defHpBefore  = def.charHp;
+
     def.soldiers      = Math.max(0, def.soldiers - atkMem);
     def.char.soldiers = def.soldiers;
     atk.soldiers      = Math.max(0, atk.soldiers - defMem);
@@ -488,6 +493,10 @@ export class BattleEngineV3 {
       atkMem, atkChr, defMem, defChr,
       N:  ar.N,
       Nr: dr ? dr.N : 0,
+      atkSolBefore,
+      defSolBefore,
+      atkHpBefore,
+      defHpBefore,
     });
   }
 

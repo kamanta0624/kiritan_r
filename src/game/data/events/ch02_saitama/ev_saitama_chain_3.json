@@ -3,22 +3,54 @@
   "name": "埼玉連続イベント３（攻撃警告）",
   "trigger": "turn_start",
   "conditions": [
-    { "type": "flag", "flag": "flag_saitama_chain2_done" },
-    { "type": "turnAfterFlag", "flag": "flag_saitama_chain2_done", "value": 1 },
-    { "type": "noFlag", "flag": "flag_saitama_chain3_done" }
+    {
+      "type": "flag",
+      "flag": "flag_saitama_chain2_done"
+    },
+    {
+      "type": "turnAfterFlag",
+      "flag": "flag_saitama_chain2_done",
+      "value": 1
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_saitama_chain3_done"
+    }
   ],
-  "probability": 1, "priority": 900, "maxOccurrences": 1,
+  "probability": 1,
+  "priority": 900,
+  "maxOccurrences": 1,
   "script": [
-    { "type": "conversation", "lines": [
-      { "characterId": "char_004", "position": "center", "text": "…情報が入ってきた。サイタマが全軍で動く気配がある。" },
-      { "characterId": "char_017", "position": "left",  "text": "このターン中に仕掛けてくる可能性が高い。全層戦開まえに防衛を整えるべきだ。" },
-      { "characterId": "char_004", "position": "center", "text": "わかった。みんな、気を几らせて。" }
-    ]},
-    { "type": "end" }
+    {
+      "type": "conversation",
+      "lines": [
+        {
+          "characterId": "char_004",
+          "position": "center",
+          "text": "…情報が入ってきた。サイタマが全軍で動く気配がある。"
+        },
+        {
+          "characterId": "char_017",
+          "position": "left",
+          "text": "このターン中に仕掛けてくる可能性が高い。全層戦開まえに防衛を整えるべきだ。"
+        },
+        {
+          "characterId": "char_004",
+          "position": "center",
+          "text": "わかった。みんな、気を几らせて。"
+        }
+      ]
+    },
+    {
+      "type": "end"
+    }
   ],
   "effects": {
     "default": [
-      { "type": "setFlag", "flag": "flag_saitama_chain3_done" }
+      {
+        "type": "setFlag",
+        "flag": "flag_saitama_chain3_done"
+      }
     ]
   }
 }

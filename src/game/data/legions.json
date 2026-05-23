@@ -223,7 +223,9 @@
         "base_047",
         "base_046"
       ],
-      "attackFrequency": null,
+      "attackFrequency": {
+        "type": "every_turn"
+      },
       "retreatRule": {
         "onAttack": "hp_any",
         "onDefend": "char_dead",

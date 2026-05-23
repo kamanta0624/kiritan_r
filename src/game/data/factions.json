@@ -11,20 +11,24 @@
         "char_002",
         "char_003"
       ],
-      "atWarWith": ["faction_red"],
+      "atWarWith": [
+        "faction_red"
+      ],
       "warFlags": {}
     },
     {
       "id": "faction_red",
-      "name": "納豆ファクトリー",
-      "color": "#190094",
+      "name": "大都会",
+      "color": "#7300ff",
       "isPlayer": false,
       "treasury": 400,
       "characters": [
         "char_101",
         "char_102"
       ],
-      "atWarWith": ["東北家"],
+      "atWarWith": [
+        "東北家"
+      ],
       "warFlags": {}
     },
     {
@@ -45,7 +49,7 @@
     },
     {
       "id": "faction_yellow",
-      "name": "小樽潮風高校",
+      "name": "小樽潮風",
       "color": "#ffca28",
       "isPlayer": false,
       "treasury": 300,
@@ -61,7 +65,7 @@
     },
     {
       "id": "faction_new01",
-      "name": "東京島",
+      "name": "東京",
       "color": "#4294d7",
       "isPlayer": false,
       "treasury": 300,

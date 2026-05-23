@@ -3,20 +3,45 @@
   "name": "3ターン目：終星あかり加入",
   "trigger": "player_turn",
   "conditions": [
-    { "type": "turn", "op": "eq", "value": 3 },
-    { "type": "flag", "flag": "flag_r1_akari" }
+    {
+      "type": "turn",
+      "op": "eq",
+      "value": 3
+    },
+    {
+      "type": "flag",
+      "flag": "flag_r1_akari"
+    }
   ],
-  "probability": 1, "priority": 800, "maxOccurrences": 1,
+  "probability": 1,
+  "priority": 800,
+  "maxOccurrences": 1,
   "script": [
-    { "type": "conversation", "lines": [
-      { "characterId": "char_010", "position": "center", "text": "ついたって！よろしくね、みんな。あかり、全力でがんばるからっ！" }
-    ]},
-    { "type": "end" }
+    {
+      "type": "conversation",
+      "lines": [
+        {
+          "characterId": "char_010",
+          "position": "center",
+          "text": "ついたって！よろしくね、みんな。あかり、全力でがんばるからっ！"
+        }
+      ]
+    },
+    {
+      "type": "end"
+    }
   ],
   "effects": {
     "default": [
-      { "type": "charJoin", "charId": "char_010", "factionId": "東北家" },
-      { "type": "clearFlag", "flag": "flag_r1_akari" }
+      {
+        "type": "charJoin",
+        "charId": "char_010",
+        "factionId": "東北家"
+      },
+      {
+        "type": "clearFlag",
+        "flag": "flag_r1_akari"
+      }
     ]
   }
 }

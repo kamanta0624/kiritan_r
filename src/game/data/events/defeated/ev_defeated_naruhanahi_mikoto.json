@@ -3,22 +3,54 @@
   "name": "[鳴花ミコト撃破]鳴花ミコト加入",
   "trigger": "char_defeated",
   "conditions": [
-    { "type": "defeatedChar", "charId": "char_074" },
-    { "type": "noFlag", "flag": "flag_naruhanahi_mikoto_joined" }
+    {
+      "type": "defeatedChar",
+      "charId": "char_074"
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_naruhanahi_mikoto_joined"
+    }
   ],
-  "probability": 1, "priority": 900, "maxOccurrences": 1,
+  "probability": 1,
+  "priority": 900,
+  "maxOccurrences": 1,
   "script": [
-    { "type": "conversation", "lines": [
-      { "characterId": "char_074", "position": "left",  "text": "、、変わった敗者の言葉だな。かってんいいよ。" },
-      { "characterId": "char_004", "position": "right", "text": "ミコトさん…。こっちに来てくれる？" },
-      { "characterId": "char_074", "position": "left",  "text": "ヒメが一緒なら、まあ、いいですよ。販弔めヒメと同じ架くにはいかないが。" }
-    ]},
-    { "type": "end" }
+    {
+      "type": "conversation",
+      "lines": [
+        {
+          "characterId": "char_074",
+          "position": "left",
+          "text": "、、変わった敗者の言葉だな。かってんいいよ。"
+        },
+        {
+          "characterId": "char_004",
+          "position": "right",
+          "text": "ミコトさん…。こっちに来てくれる？"
+        },
+        {
+          "characterId": "char_074",
+          "position": "left",
+          "text": "ヒメが一緒なら、まあ、いいですよ。販弔めヒメと同じ架くにはいかないが。"
+        }
+      ]
+    },
+    {
+      "type": "end"
+    }
   ],
   "effects": {
     "default": [
-      { "type": "charJoin", "charId": "char_074", "factionId": "東北家" },
-      { "type": "setFlag", "flag": "flag_naruhanahi_mikoto_joined" }
+      {
+        "type": "charJoin",
+        "charId": "char_074",
+        "factionId": "東北家"
+      },
+      {
+        "type": "setFlag",
+        "flag": "flag_naruhanahi_mikoto_joined"
+      }
     ]
   }
 }

@@ -3,31 +3,97 @@
   "name": "水戸制圧イベント",
   "trigger": "base_conquered",
   "conditions": [
-    { "type": "baseConquered", "baseId": "base_045", "factionId": "東北家" },
-    { "type": "noFlag", "flag": "flag_mito_conquest_done" }
+    {
+      "type": "baseConquered",
+      "baseId": "base_045",
+      "factionId": "東北家"
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_mito_conquest_done"
+    }
   ],
-  "probability": 1, "priority": 999, "maxOccurrences": 1,
+  "probability": 1,
+  "priority": 999,
+  "maxOccurrences": 1,
   "script": [
-    { "type": "conversation", "lines": [
-      { "characterId": "char_020", "position": "left",  "text": "…負けた。東北家を甘めて見てたのに。" },
-      { "characterId": "char_021", "position": "right", "text": "大江戸さん。納豆ファクトリーに未来はない。東北家の方が終わりはない。" },
-      { "characterId": "char_020", "position": "left",  "text": "つるぎ…おまえもそう思ってたのか。" },
-      { "characterId": "char_021", "position": "right", "text": "東北家の擾下で屋更ししましょう。この地を守るのに、名分が要る。" },
-      { "characterId": "char_004", "position": "center", "text": "…たしかに。サイタマの存在は知っていた。これで潋戦できるね。" },
-      { "characterId": "char_020", "position": "left",  "text": "大江戸ちゃんこと中部つるぎ、東北家に就く。寝返りなしに戦ってやる。" }
-    ]},
-    { "type": "end" }
+    {
+      "type": "conversation",
+      "lines": [
+        {
+          "characterId": "char_020",
+          "position": "left",
+          "text": "…負けた。東北家を甘めて見てたのに。"
+        },
+        {
+          "characterId": "char_021",
+          "position": "right",
+          "text": "大江戸さん。納豆ファクトリーに未来はない。東北家の方が終わりはない。"
+        },
+        {
+          "characterId": "char_020",
+          "position": "left",
+          "text": "つるぎ…おまえもそう思ってたのか。"
+        },
+        {
+          "characterId": "char_021",
+          "position": "right",
+          "text": "東北家の擾下で屋更ししましょう。この地を守るのに、名分が要る。"
+        },
+        {
+          "characterId": "char_004",
+          "position": "center",
+          "text": "…たしかに。サイタマの存在は知っていた。これで潋戦できるね。"
+        },
+        {
+          "characterId": "char_020",
+          "position": "left",
+          "text": "大江戸ちゃんこと中部つるぎ、東北家に就く。寝返りなしに戦ってやる。"
+        }
+      ]
+    },
+    {
+      "type": "end"
+    }
   ],
   "effects": {
     "default": [
-      { "type": "charJoin", "charId": "char_020", "factionId": "東北家" },
-      { "type": "charJoin", "charId": "char_021", "factionId": "東北家" },
-      { "type": "baseTransfer", "fromFactionId": "faction_red", "toFactionId": "東北家" },
-      { "type": "attackUnlock", "factionId": "faction_new02" },
-      { "type": "attackUnlock", "factionId": "faction_green" },
-      { "type": "setFlagWithTurn", "flag": "flag_mito_conquest_done" },
-      { "type": "setFlag", "flag": "flag_saitama_chain_active" },
-      { "type": "warFlag", "factionId": "faction_green", "atWar": true }
+      {
+        "type": "charJoin",
+        "charId": "char_020",
+        "factionId": "東北家"
+      },
+      {
+        "type": "charJoin",
+        "charId": "char_021",
+        "factionId": "東北家"
+      },
+      {
+        "type": "baseTransfer",
+        "fromFactionId": "faction_red",
+        "toFactionId": "東北家"
+      },
+      {
+        "type": "attackUnlock",
+        "factionId": "faction_new02"
+      },
+      {
+        "type": "attackUnlock",
+        "factionId": "faction_green"
+      },
+      {
+        "type": "setFlagWithTurn",
+        "flag": "flag_mito_conquest_done"
+      },
+      {
+        "type": "setFlag",
+        "flag": "flag_saitama_chain_active"
+      },
+      {
+        "type": "warFlag",
+        "factionId": "faction_green",
+        "atWar": true
+      }
     ]
   }
 }

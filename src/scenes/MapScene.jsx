@@ -328,7 +328,7 @@ function Legend({ factionsData }) {
 }
 
 // ── Map Scene ──────────────────────────────────────────────
-export default function MapScene({ onNavigate, onAttackNode, onNodeClick, gameState, basesData, factionsData, onNextTurn, focusBaseId, focusKey, onReady }) {
+export default function MapScene({ onNavigate, onAttackNode, onNodeClick, gameState, basesData, factionsData, conqueredThisTurn, onNextTurn, focusBaseId, focusKey, onReady }) {
   // bases.json 実データから NODES を動的生成
   const liveNodes = React.useMemo(() => {
     if (!basesData || !factionsData) return [];
@@ -370,14 +370,14 @@ export default function MapScene({ onNavigate, onAttackNode, onNodeClick, gameSt
         factionName,
         troops:      b.soldiers ?? b.battleCapacity ?? 400,
         income:      b.income ?? 0,
-        canAttack:   !isPlayer && isAtWar && attackableIds.has(b.id),
+        canAttack:   !isPlayer && isAtWar && attackableIds.has(b.id) && !conqueredThisTurn,
         baseId:      b.id,
         dungeonId:   b.dungeonId ?? null,
         isCapital:   b.isCapital ?? false,
         area:        b.area ?? 'tohoku',
       };
     });
-  }, [basesData, factionsData]);
+  }, [basesData, factionsData, conqueredThisTurn]);
 
   // adjacentBases から EDGES を動的生成（重複除去）
   const liveEdges = React.useMemo(() => {

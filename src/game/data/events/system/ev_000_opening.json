@@ -1,6 +1,6 @@
 {
   "id": "ev_000_opening",
-  "name": "東北家の決意",
+  "name": "オープニング",
   "trigger": "game_start",
   "conditions": [],
   "probability": 1,
@@ -10,15 +10,23 @@
     {
       "type": "conversation",
       "lines": [
-        { "characterId": "char_004", "position": "center", "text": "…ここから始めるんだ。東北の地から、天下を目指して。" },
-        { "characterId": "char_004", "position": "center", "text": "みんな、ついてきてね。" }
+        {
+          "characterId": "char_005",
+          "position": "center",
+          "text": "テスト！！"
+        },
+        {
+          "characterId": null,
+          "position": "center",
+          "text": "テスト２"
+        }
       ]
     },
-    { "type": "end" }
+    {
+      "type": "end"
+    }
   ],
   "effects": {
-    "default": [
-      { "type": "setFlag", "flag": "ev_000_done" }
-    ]
+    "default": []
   }
 }

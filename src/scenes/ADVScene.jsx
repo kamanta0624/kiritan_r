@@ -7,14 +7,15 @@ import { TopBar } from '../shared/SharedUI.jsx';
 //       — 表情差分は portrait_<id>_<expr>.png を読みに行き、無ければ通常立ち絵にフォールバック
 // type: 'narration' (no speaker, full-width gray box), 'dialog' (speaker label + text)
 //       'cutin' (special — full-screen close-up with quote, ペルソナ風カットイン)
-const DEMO_SCENARIO = [
-  // セットアップ：3人が舞台に登場
-  { type:'setup', cast:[
-      {id:'c1', pos:'left'},   // きりたん
-      {id:'c4', pos:'center'}, // ずんだもん
-      {id:'c3', pos:'right'},  // しゅお
-    ], bg:'assets/bg_battle.jpg', location:'東北 — 仙台城本丸' },
+export const DEMO_CAST = [
+  { id:'c1', pos:'left' },
+  { id:'c4', pos:'center' },
+  { id:'c3', pos:'right' },
+];
+export const DEMO_BG = 'assets/bg_battle.jpg';
+export const DEMO_LOCATION = '東北 — 仙台城本丸';
 
+const DEMO_SCENARIO = [
   { type:'narration', text:'長きにわたる遠征を経て、東北家は仙台へと帰還した。' },
 
   { type:'dialog', speaker:'c1', expr:'normal',
@@ -158,22 +159,6 @@ function StandingChar({ char, expr, pos, isActive, isSpeaking }) {
   );
 }
 
-// ── Persona-style slash effect on speaker change ─────────
-function SlashEffect({ keyId }) {
-  return (
-    <div key={keyId} style={{
-      position:'absolute', inset:0, pointerEvents:'none', zIndex:6,
-      overflow:'hidden',
-    }}>
-      <div style={{
-        position:'absolute', top:'-20%', left:'-30%', right:'-30%', height:'140%',
-        background:'linear-gradient(115deg, transparent 40%, rgba(255,255,255,.55) 50%, transparent 60%)',
-        animation:'slashSweep .55s cubic-bezier(.4,0,.2,1) both',
-      }}/>
-    </div>
-  );
-}
-
 // ── Speaker name tag (ペルソナ風斜めパネル) ──────────────
 function SpeakerTag({ char, color }) {
   return (
@@ -226,9 +211,16 @@ function useTypewriter(text, speed=24, paused=false) {
 }
 
 // ── Dialog box (bottom) ─────────────────────────────────
-function DialogBox({ entry, char, color, onAdvance, onFinishType, transparent }) {
+function DialogBox({ entry, char, color, onAdvance, onFinishType, transparent, disabled }) {
   const [shown, done, finish] = useTypewriter(entry.text, 22);
   useEffect(() => { if(done) onFinishType?.(); }, [done]);
+
+  // クリック共通ハンドラ（タイプライター完了前→即表示、完了後→進む）
+  const handleClick = useCallback((e) => {
+    e.stopPropagation();
+    if(!done) finish();
+    else onAdvance();
+  }, [done, finish, onAdvance]);
 
   const textBlock = (
     <>
@@ -262,30 +254,30 @@ function DialogBox({ entry, char, color, onAdvance, onFinishType, transparent })
   );
 
   return (
+    // 全画面クリックエリア。バックログ/choice中は disabled=true で無効化
     <div
-      onClick={(e) => {
-        e.stopPropagation();
-        if(!done) finish();
-        else onAdvance();
-      }}
+      onClick={disabled ? undefined : handleClick}
       style={{
         position:'absolute', inset:0, zIndex:20,
-        cursor:'pointer', background:'transparent',
+        cursor: disabled ? 'default' : 'pointer',
+        background:'transparent',
       }}>
 
       {transparent ? (
         /* transparent mode: full-width bar at bottom */
-        <div style={{
-          position:'absolute', bottom:0, left:0, right:0,
-          background:'rgba(10,5,15,.88)',
-          borderTop:'1px solid rgba(255,255,255,.12)',
-          borderRadius:0,
-          padding:'28px 10vw 32px 10vw',
-          minHeight:140,
-          boxShadow:'0 -8px 32px rgba(0,0,0,.6)',
-          backdropFilter:'blur(12px)',
-          animation:'dialogFadeIn .3s ease both',
-        }}>
+        <div
+          onClick={disabled ? undefined : handleClick}
+          style={{
+            position:'absolute', bottom:0, left:0, right:0,
+            background:'rgba(10,5,15,.88)',
+            borderTop:'1px solid rgba(255,255,255,.12)',
+            borderRadius:0,
+            padding:'28px 10vw 32px 10vw',
+            minHeight:140,
+            boxShadow:'0 -8px 32px rgba(0,0,0,.6)',
+            backdropFilter:'blur(12px)',
+            animation:'dialogFadeIn .3s ease both',
+          }}>
           {textBlock}
         </div>
       ) : (
@@ -296,7 +288,9 @@ function DialogBox({ entry, char, color, onAdvance, onFinishType, transparent })
               <SpeakerTag char={char} color={color}/>
             </div>
           )}
-          <div style={{
+          <div
+            onClick={disabled ? undefined : handleClick}
+            style={{
             position:'relative',
             margin:'0 16px 16px 16px',
             background: char
@@ -592,8 +586,6 @@ export function convertEventScript(script, { bg = null, location = '' } = {}) {
   const cast = Array.from(castMap.entries()).map(([pos, id]) => ({ id, pos }));
   const scenario = [];
 
-  scenario.push({ type: 'setup', cast, bg, location });
-
   script.forEach(step => {
     if (step.type === 'text') {
       scenario.push({
@@ -614,7 +606,7 @@ export function convertEventScript(script, { bg = null, location = '' } = {}) {
     scenario.push({ type: 'end' });
   }
 
-  return scenario;
+  return { scenario, cast, bg, location };
 }
 
 // ── Choice UI ────────────────────────────────────────────
@@ -659,41 +651,20 @@ function ChoiceUI({ entry, onSelect }) {
 }
 
 // ── Main ADVScene ───────────────────────────────────────
-export default function ADVScene({ scenario, onExit, onChoice, transparent }) {
+export default function ADVScene({ scenario, cast: castProp=[], bg: bgProp=null, location: locationProp='', onExit, onChoice, transparent }) {
   const [idx, setIdx] = useState(0);
-  const [cast, setCast] = useState([]); // [{id, pos}]
-  const [bg, setBg] = useState(null);
-  const [location, setLocation] = useState('');
+  const [cast, setCast] = useState(castProp);
+  const [bg, setBg] = useState(bgProp);
+  const [location, setLocation] = useState(locationProp);
   const [history, setHistory] = useState([]); // dialog/narration only
   const [isAuto, setIsAuto] = useState(false);
   const [showLog, setShowLog] = useState(false);
-  const [slashKey, setSlashKey] = useState(0);
-  const [lastSpeaker, setLastSpeaker] = useState(null);
 
-  // Process setup-type entries (advance through them)
   useEffect(() => {
-    if(idx >= scenario.length) return;
-    const e = scenario[idx];
-    if(e.type === 'setup') {
-      setCast(e.cast);
-      if(e.bg) setBg(e.bg);
-      if(e.location) setLocation(e.location);
-      setIdx(i => i + 1);
-    } else if(e.type === 'end') {
-      onExit();
-    }
-  }, [idx, scenario]);
-
-  // Track speaker change for slash effect
-  const current = scenario[idx];
-  useEffect(() => {
-    if(current?.type === 'dialog' && current.speaker !== lastSpeaker) {
-      setSlashKey(k => k + 1);
-      setLastSpeaker(current.speaker);
-    } else if(current?.type === 'narration') {
-      setLastSpeaker(null);
-    }
+    if (scenario[idx]?.type === 'end') onExit();
   }, [idx]);
+
+  const current = scenario[idx];
 
   // Add to history when entering a dialog/narration
   useEffect(() => {
@@ -729,15 +700,6 @@ export default function ADVScene({ scenario, onExit, onChoice, transparent }) {
     if(next >= scenario.length || scenario[next]?.type === 'end') {
       onExit();
       return;
-    }
-    // process all setups encountered
-    for(let i = idx + 1; i <= next; i++) {
-      const e = scenario[i];
-      if(e?.type === 'setup') {
-        setCast(e.cast);
-        if(e.bg) setBg(e.bg);
-        if(e.location) setLocation(e.location);
-      }
     }
     setIdx(next);
   };
@@ -804,9 +766,6 @@ export default function ADVScene({ scenario, onExit, onChoice, transparent }) {
         );
       })}
 
-      {/* Slash effect */}
-      {slashKey > 0 && current.type === 'dialog' && <SlashEffect keyId={slashKey}/>}
-
       {/* Cutin */}
       {current.type === 'cutin' && speakerChar && (
         <PersonaCutin
@@ -826,6 +785,7 @@ export default function ADVScene({ scenario, onExit, onChoice, transparent }) {
           onAdvance={() => { setAutoReadyToAdvance(true); advance(); }}
           onFinishType={() => setAutoReadyToAdvance(true)}
           transparent={transparent}
+          disabled={showLog || current.type === 'choice'}
         />
       )}
 
@@ -875,7 +835,6 @@ export default function ADVScene({ scenario, onExit, onChoice, transparent }) {
   s.textContent = `
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
     @keyframes bounceY { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
-    @keyframes slashSweep { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
     @keyframes tagSlide { from{opacity:0;transform:skewX(-12deg) translateX(-30px)} to{opacity:1;transform:skewX(-12deg) translateX(0)} }
     @keyframes dialogFadeIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
     @keyframes cutinAppear { from{opacity:0} to{opacity:1} }

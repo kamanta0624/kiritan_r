@@ -1,282 +1,702 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>キャラクター一括登録 — Kiritan_R Editor</title>
-  <link rel="stylesheet" href="/editor.css">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background: var(--color-background-primary);
-      color: var(--color-text-primary);
-      font-family: 'Noto Sans JP', sans-serif;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-    .header {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 10px 20px;
-      background: var(--color-background-secondary);
-      border-bottom: 1px solid var(--color-border-tertiary);
-      flex-shrink: 0;
-    }
-    .header h1 { font-size: 16px; font-weight: 600; }
-    .header a {
-      font-size: 13px;
-      color: var(--color-text-info);
-      text-decoration: none;
-    }
-    .header a:hover { text-decoration: underline; }
-    .body {
-      display: flex;
-      gap: 12px;
-      flex: 1;
-      overflow: hidden;
-      padding: 12px;
-    }
-    .left-col {
-      flex: 0 0 400px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .right-col {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      overflow: hidden;
-    }
-    label.col-label {
-      font-size: 12px;
-      color: var(--color-text-secondary);
-      font-weight: 500;
-    }
-    textarea.json-input {
-      flex: 1;
-      resize: none;
-      font-family: monospace;
-      font-size: 12px;
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid var(--color-border-secondary);
-      background: var(--color-background-secondary);
-      color: var(--color-text-primary);
-      line-height: 1.5;
-    }
-    .btn-row { display: flex; gap: 8px; }
-    button.btn-primary {
-      padding: 7px 18px;
-      border-radius: 6px;
-      border: 1px solid var(--color-border-success);
-      background: var(--color-background-success);
-      color: var(--color-text-success);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    button.btn-secondary {
-      padding: 7px 18px;
-      border-radius: 6px;
-      border: 1px solid var(--color-border-info);
-      background: var(--color-background-info);
-      color: var(--color-text-info);
-      font-size: 13px;
-      cursor: pointer;
-    }
-    .error-box {
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid var(--color-border-danger);
-      background: var(--color-background-danger);
-      color: var(--color-text-danger);
-      font-size: 12px;
-      font-family: monospace;
-    }
-    .preview-wrap {
-      flex: 1;
-      overflow-y: auto;
-    }
-    table.preview-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 12px;
-    }
-    table.preview-table th {
-      text-align: left;
-      padding: 6px 8px;
-      border-bottom: 1px solid var(--color-border-secondary);
-      color: var(--color-text-secondary);
-      font-weight: 500;
-      white-space: nowrap;
-    }
-    table.preview-table td {
-      padding: 5px 8px;
-      border-bottom: 1px solid var(--color-border-tertiary);
-      color: var(--color-text-primary);
-      font-family: monospace;
-    }
-    table.preview-table tr:hover td { background: var(--color-background-secondary); }
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 10px 24px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 500;
-      color: #fff;
-      background: #2a7a4a;
-      box-shadow: 0 4px 16px rgba(0,0,0,.3);
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity .2s;
-      z-index: 999;
-    }
-    .toast.error { background: #8a2a2a; }
-    .toast.show { opacity: 1; }
-  </style>
+<meta charset="UTF-8">
+<title>一括登録 — Kiritan_R Editor</title>
+<link rel="stylesheet" href="/editor.css">
+<style>
+/* bulk-input固有スタイル（editor.cssで未定義のクラスのみ） */
+.main-bulk{flex:1;overflow-y:auto;padding:24px;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.section{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:18px;margin-bottom:20px;}
+.section-title{font-size:13px;color:#58a6ff;font-weight:600;letter-spacing:.05em;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid #21262d;display:flex;align-items:center;gap:8px;}
+.section-title .badge-count{font-size:10px;background:#21262d;color:#8b949e;border:1px solid #30363d;border-radius:4px;padding:1px 6px;}
+.card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:12px 14px;}
+.card-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.card-id{font-size:11px;color:#388bfd;font-family:monospace;}
+.card-name{font-size:13px;color:#c9d1d9;font-weight:500;flex:1;}
+.card-actions{display:flex;gap:6px;}
+.card-list{display:flex;flex-direction:column;gap:8px;}
+.btn-sm{font-size:11px;padding:3px 10px;border-radius:4px;border:1px solid #30363d;background:none;color:#8b949e;cursor:pointer;}
+.btn-sm:hover{border-color:#c9d1d9;color:#c9d1d9;}
+.btn-sm.danger:hover{border-color:#f85149;color:#f85149;}
+.empty{color:#484f58;font-size:12px;padding:12px 0;}
+.badge-uses{display:inline-block;padding:1px 6px;border-radius:8px;background:#0d2137;color:#58a6ff;border:1px solid #1f6feb;font-size:10px;}
+.badge-charge{display:inline-block;padding:1px 6px;border-radius:8px;background:#2a2010;color:#d4a044;border:1px solid #9e6a03;font-size:10px;}
+.char-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;background:#0d1117;border:1px solid #21262d;margin-bottom:4px;}
+.char-name{flex:0 0 160px;font-size:12px;color:#c9d1d9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.char-id-label{flex:0 0 100px;font-size:10px;color:#484f58;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.char-row select{flex:1;}
+.floor-card{background:#0d1117;border:1px solid #21262d;border-radius:6px;padding:10px 12px;margin-bottom:6px;}
+.floor-title{font-size:11px;color:#58a6ff;font-weight:600;margin-bottom:8px;}
+.bulk-table{width:100%;border-collapse:collapse;font-size:11px;}
+.bulk-table th{background:#161b22;color:#8b949e;padding:5px 7px;border:1px solid #21262d;font-weight:500;white-space:nowrap;font-size:10px;}
+.bulk-table td{padding:3px 4px;border:1px solid #21262d;vertical-align:middle;}
+.bulk-table tr:nth-child(even) td{background:#0d1117;}
+.bulk-table input,.bulk-table select{background:#0d1117;border:1px solid #21262d;border-radius:3px;color:#c9d1d9;padding:3px 5px;font-size:11px;width:100%;font-family:inherit;}
+.bulk-table input:focus,.bulk-table select:focus{outline:none;border-color:#388bfd;}
+.bulk-table .del-btn{background:none;border:none;color:#484f58;cursor:pointer;font-size:13px;padding:0 4px;}
+.bulk-table .del-btn:hover{color:#f85149;}
+.sticky-header th{position:sticky;top:0;z-index:2;}
+.table-wrap{overflow-x:auto;max-height:500px;overflow-y:auto;border-radius:6px;}
+.col-id{width:90px;}.col-name{width:110px;}.col-num{width:60px;}.col-sel{width:80px;}.col-status{width:80px;}.col-del{width:32px;}
+.info-box{background:#0d1828;border:1px solid #1f6feb;border-radius:6px;padding:10px 14px;font-size:11px;color:#6699cc;margin-bottom:14px;line-height:1.6;}
+</style>
 </head>
 <body>
-  <div class="header">
-    <a href="/">← エディタに戻る</a>
-    <h1>キャラクター一括登録</h1>
+<header>
+  <h1>✦ 一括登録</h1>
+  <div class="tab-bar">
+    <button class="tab active" onclick="switchTab('chars')">キャラクター一括登録</button>
+    <button class="tab" onclick="switchTab('skills')">特技 (skills)</button>
+    <button class="tab" onclick="switchTab('skill-assign')">特技アサイン</button>
+    <button class="tab" onclick="switchTab('dungeons')">迷宮 (dungeons)</button>
+    <button class="tab" onclick="switchTab('dungeon-assign')">迷宮アサイン</button>
   </div>
-  <div class="body">
-    <div class="left-col">
-      <label class="col-label">JSON 入力</label>
-      <textarea class="json-input" id="jsonInput" placeholder='以下のJSON配列を貼り付け:
-[
-  {
-    "id": "char_xxx",
-    "name": "名前",
-    "soldiers": 100,
-    "factionId": "faction_player"
+  <a href="/" style="font-size:13px;color:var(--color-text-info,#58a6ff);text-decoration:none;margin-left:auto">← メインエディタ</a>
+</header>
+<div class="main-bulk" id="mainArea">
+  <div class="loading">読み込み中...</div>
+</div>
+<div id="toast"></div>
+
+<script>
+const state = { data: null };
+const TABS = ['chars','skills','skill-assign','dungeons','dungeon-assign'];
+
+async function init() {
+  try {
+    const res = await fetch('/api/data');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    state.data = await res.json();
+    switchTab('chars');
+  } catch(e) {
+    document.getElementById('mainArea').innerHTML =
+      `<div style="color:#f85149;padding:40px"><p style="font-size:15px">⚠ データ読み込み失敗</p><pre style="margin-top:8px;font-size:12px">${e.message}\n\nnode tools/editor.cjs が起動しているか確認してください。</pre></div>`;
   }
-]'></textarea>
-      <div class="btn-row">
-        <button class="btn-secondary" onclick="doPreview()">プレビュー</button>
-        <button class="btn-primary" onclick="doRegister()">一括登録</button>
-      </div>
-      <div id="errorBox" style="display:none"></div>
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', TABS[i] === tab));
+  const main = document.getElementById('mainArea');
+  if      (tab === 'chars')          renderCharsTab(main);
+  else if (tab === 'skills')         renderSkillsTab(main);
+  else if (tab === 'skill-assign')   renderSkillAssignTab(main);
+  else if (tab === 'dungeons')       renderDungeonsTab(main);
+  else if (tab === 'dungeon-assign') renderDungeonAssignTab(main);
+}
+
+// ================================================================
+// タブ0: キャラクター一括登録
+// ================================================================
+function renderCharsTab(main) {
+  const chars    = state.data.characters?.characters ?? [];
+  const factions = state.data.factions?.factions ?? [];
+  const skills   = state.data.skills?.skills ?? [];
+  main.innerHTML = '';
+
+  const ctrl = document.createElement('div');
+  ctrl.className = 'section';
+  ctrl.innerHTML = `
+    <div class="section-title">👥 キャラクター一括登録 <span class="badge-count">${chars.length}体</span></div>
+    <div class="info-box">
+      全キャラクターを一覧表示・編集できます。行を直接編集して「まとめて保存」を押してください。<br>
+      詳細な画像設定・battleBonus設定はメインエディタのキャラクタータブで行ってください。
     </div>
-    <div class="right-col">
-      <label class="col-label">プレビュー</label>
-      <div class="preview-wrap">
-        <table class="preview-table">
-          <thead>
-            <tr>
-              <th>id</th>
-              <th>name</th>
-              <th>soldiers</th>
-              <th>factionId</th>
-            </tr>
-          </thead>
-          <tbody id="previewBody">
-            <tr><td colspan="4" style="color:var(--color-text-secondary);padding:16px 8px">JSONを入力して「プレビュー」を押してください</td></tr>
-          </tbody>
-        </table>
+    <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap">
+      <button class="btn-add" onclick="addCharRow()">＋ 行を追加</button>
+      <button class="btn-sm" onclick="addCharRowTemplate()">＋ テンプレートモブを追加</button>
+      <span style="font-size:11px;color:#484f58;margin-left:auto">※ ID は一意になるよう注意してください</span>
+    </div>`;
+  main.appendChild(ctrl);
+
+  const tableSection = document.createElement('div');
+  tableSection.className = 'section';
+
+  const factionOpts = factions.map(f => `<option value="${esc(f.id)}">${esc(f.name)}</option>`).join('');
+  const skillOpts   = `<option value="">なし</option>` + skills.map(s => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('');
+
+  const wrap = document.createElement('div'); wrap.className = 'table-wrap';
+  const table = document.createElement('table'); table.className = 'bulk-table sticky-header';
+  table.id = 'charBulkTable';
+
+  table.innerHTML = `<thead><tr>
+    <th class="col-id">ID</th>
+    <th class="col-name">名前 / 汎用名称</th>
+    <th class="col-status">ステータス</th>
+    <th class="col-sel">役割</th>
+    <th class="col-sel">攻撃タイプ</th>
+    <th class="col-sel">勢力</th>
+    <th class="col-num">HP</th>
+    <th class="col-num">攻撃力</th>
+    <th class="col-num">歌</th>
+    <th class="col-num">ミーム数</th>
+    <th class="col-num">上限</th>
+    <th class="col-num">攻</th>
+    <th class="col-num">守</th>
+    <th class="col-num">戦闘域</th>
+    <th class="col-sel">特技</th>
+    <th style="width:50px">テンプレ</th>
+    <th class="col-del"></th>
+  </tr></thead>`;
+
+  const tbody = document.createElement('tbody');
+  chars.forEach((c, idx) => tbody.appendChild(buildCharRow(c, idx, factionOpts, skillOpts)));
+  table.appendChild(tbody);
+  wrap.appendChild(table);
+  tableSection.appendChild(wrap);
+
+  const btnRow = document.createElement('div'); btnRow.className = 'btn-row';
+  btnRow.innerHTML = `<button class="btn-primary" onclick="saveAllChars()">まとめて保存</button>`;
+  tableSection.appendChild(btnRow);
+  main.appendChild(tableSection);
+}
+
+function buildCharRow(c, idx, factionOpts, skillOpts) {
+  const isTemplate = !!c.isTemplate;
+  const dispName   = isTemplate ? (c.displayName ?? '') : (c.name ?? '');
+  const tr = document.createElement('tr');
+  tr.dataset.idx = idx;
+  tr.innerHTML = `
+    <td><input type="text"   class="c_id"     value="${esc(c.id)}" /></td>
+    <td><input type="text"   class="c_name"   value="${esc(dispName)}" placeholder="${isTemplate?'displayName':'name'}" /></td>
+    <td><select class="c_status">
+      ${['active','recruitable','standby','dead'].map(s=>`<option value="${s}" ${c.status===s?'selected':''}>${s}</option>`).join('')}
+    </select></td>
+    <td><select class="c_role">
+      ${['attacker','guardian','commander'].map(r=>`<option value="${r}" ${c.role===r?'selected':''}>${r}</option>`).join('')}
+    </select></td>
+    <td><select class="c_attackType">
+      ${['melee','ranged','song'].map(t=>`<option value="${t}" ${c.attackType===t?'selected':''}>${t}</option>`).join('')}
+    </select></td>
+    <td><select class="c_factionId">
+      <option value="" ${!c.factionId?'selected':''}>(なし)</option>
+      ${factionOpts.replace(`value="${esc(c.factionId??'')}"`,`value="${esc(c.factionId??'')}" selected`)}
+    </select></td>
+    <td><input type="number" class="c_charMaxHp"       value="${c.charMaxHp??150}"          min="1"   max="9999" /></td>
+    <td><input type="number" class="c_charAttack"      value="${c.charAttack??70}"           min="1"   max="9999" /></td>
+    <td><input type="number" class="c_charSong"        value="${c.charSong??20}"             min="0"   max="200"  /></td>
+    <td><input type="number" class="c_soldiers"        value="${c.soldiers??500}"            min="0"   max="99999" /></td>
+    <td><input type="number" class="c_maxSoldiers"     value="${c.maxSoldiers??1000}"        min="1"   max="99999" /></td>
+    <td><input type="number" class="c_soldierAtk"      value="${c.soldierAtk??9}"            min="1"   max="100"  /></td>
+    <td><input type="number" class="c_soldierDef"      value="${c.soldierDef??9}"            min="1"   max="100"  /></td>
+    <td><input type="number" class="c_battleCapacity"  value="${c.battleCapacity??30}"       min="0"   max="99999" /></td>
+    <td><select class="c_skillId">
+      ${skillOpts.replace(`value="${esc(c.skillId??'')}"`,`value="${esc(c.skillId??'')}" selected`)}
+    </select></td>
+    <td style="text-align:center"><input type="checkbox" class="c_isTemplate" ${isTemplate?'checked':''} style="width:auto;accent-color:#388bfd" /></td>
+    <td><button class="del-btn" onclick="deleteCharRow(this)">✕</button></td>`;
+  tr.querySelector('.c_factionId').value = c.factionId ?? '';
+  tr.querySelector('.c_skillId').value   = c.skillId   ?? '';
+  return tr;
+}
+
+function addCharRow() {
+  const chars    = state.data.characters?.characters ?? [];
+  const factions = state.data.factions?.factions ?? [];
+  const skills   = state.data.skills?.skills ?? [];
+  const nums     = chars.map(c => parseInt(c.id.replace(/\D/g,''),10)).filter(n=>!isNaN(n));
+  const next     = nums.length > 0 ? Math.max(...nums) + 1 : 1;
+  const newChar  = {
+    id: `char_${String(next).padStart(3,'0')}`, name: '新規キャラクター',
+    factionId: factions[0]?.id ?? 'player', status: 'standby',
+    isTemplate: false, isLeader: false, usedThisTurn: false,
+    role: 'attacker', attackType: 'melee',
+    kana: '', recoveryRate: 0.3, strategyRate: 0.5,
+    charHp: 150, charMaxHp: 150, charAttack: 70, charDefense: 0, charSong: 20,
+    soldiers: 500, maxSoldiers: 1000, soldierName: '一般兵', soldierAtk: 9, soldierDef: 9,
+    battleCapacity: 30,
+    description: '', hireCost: 0, skillId: null, equipment: { item: null },
+    battleBonus: {
+      attack:  { soldierAtk:0, soldierDef:0, charAttack:0, charSong:0 },
+      defense: { soldierAtk:0, soldierDef:0, charAttack:0, charSong:0 },
+      dungeon: { soldierAtk:0, soldierDef:0, charAttack:0, charSong:0 },
+    },
+  };
+  chars.push(newChar);
+  const factionOpts = factions.map(f => `<option value="${esc(f.id)}">${esc(f.name)}</option>`).join('');
+  const skillOpts   = `<option value="">なし</option>` + skills.map(s => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('');
+  const tbody = document.querySelector('#charBulkTable tbody');
+  if (tbody) {
+    const tr = buildCharRow(newChar, chars.length - 1, factionOpts, skillOpts);
+    tbody.appendChild(tr);
+    tr.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }
+}
+
+function addCharRowTemplate() {
+  const chars    = state.data.characters?.characters ?? [];
+  const factions = state.data.factions?.factions ?? [];
+  const skills   = state.data.skills?.skills ?? [];
+  const mobNums  = chars.filter(c=>c.isTemplate).map(c=>parseInt(c.id.replace(/\D/g,''),10)).filter(n=>!isNaN(n));
+  const next     = mobNums.length > 0 ? Math.max(...mobNums) + 1 : 1;
+  const newMob   = {
+    id: `mob_${String(next).padStart(3,'0')}`, displayName: '新規モブ',
+    isTemplate: true, factionId: null, status: 'standby',
+    statVariance: 0.15, nameVariants: [],
+    isLeader: false, usedThisTurn: false,
+    role: 'attacker', attackType: 'melee',
+    kana: '', recoveryRate: 0.3, strategyRate: 0.5,
+    charHp: 120, charMaxHp: 120, charAttack: 50, charDefense: 0, charSong: 15,
+    soldiers: 400, maxSoldiers: 800, soldierName: '一般兵', soldierAtk: 8, soldierDef: 7,
+    battleCapacity: 30,
+    description: '', hireCost: 0, skillId: null, equipment: { item: null },
+    battleBonus: {
+      attack:  { soldierAtk:0, soldierDef:0, charAttack:0, charSong:0 },
+      defense: { soldierAtk:0, soldierDef:0, charAttack:0, charSong:0 },
+      dungeon: { soldierAtk:0, soldierDef:0, charAttack:0, charSong:0 },
+    },
+  };
+  chars.push(newMob);
+  const factionOpts = factions.map(f => `<option value="${esc(f.id)}">${esc(f.name)}</option>`).join('');
+  const skillOpts   = `<option value="">なし</option>` + skills.map(s => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('');
+  const tbody = document.querySelector('#charBulkTable tbody');
+  if (tbody) {
+    const tr = buildCharRow(newMob, chars.length - 1, factionOpts, skillOpts);
+    tbody.appendChild(tr);
+    tr.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }
+}
+
+function deleteCharRow(btn) {
+  const tr  = btn.closest('tr');
+  const idx = Number(tr.dataset.idx);
+  const chars = state.data.characters?.characters ?? [];
+  if (!confirm(`「${chars[idx]?.name ?? chars[idx]?.displayName ?? idx}」を削除しますか？`)) return;
+  chars.splice(idx, 1);
+  tr.remove();
+  document.querySelectorAll('#charBulkTable tbody tr').forEach((r, i) => { r.dataset.idx = i; });
+}
+
+function collectCharsFromTable() {
+  const chars = state.data.characters?.characters ?? [];
+  document.querySelectorAll('#charBulkTable tbody tr').forEach((tr, i) => {
+    const c = chars[i]; if (!c) return;
+    const isTemplate = tr.querySelector('.c_isTemplate').checked;
+    c.id             = tr.querySelector('.c_id').value.trim();
+    c.isTemplate     = isTemplate;
+    c.status         = tr.querySelector('.c_status').value;
+    c.role           = tr.querySelector('.c_role').value;
+    c.attackType     = tr.querySelector('.c_attackType').value;
+    c.factionId      = tr.querySelector('.c_factionId').value || null;
+    c.charMaxHp      = Number(tr.querySelector('.c_charMaxHp').value);
+    c.charHp         = c.charMaxHp;
+    c.charAttack     = Number(tr.querySelector('.c_charAttack').value);
+    c.charSong       = Number(tr.querySelector('.c_charSong').value);
+    c.soldiers       = Number(tr.querySelector('.c_soldiers').value);
+    c.maxSoldiers    = Number(tr.querySelector('.c_maxSoldiers').value);
+    c.soldierAtk     = Number(tr.querySelector('.c_soldierAtk').value);
+    c.soldierDef     = Number(tr.querySelector('.c_soldierDef').value);
+    c.battleCapacity = Number(tr.querySelector('.c_battleCapacity').value);
+    c.skillId        = tr.querySelector('.c_skillId').value || null;
+    const rawName = tr.querySelector('.c_name').value.trim();
+    if (isTemplate) { c.displayName = rawName; delete c.name; }
+    else            { c.name = rawName; delete c.displayName; }
+  });
+}
+
+async function saveAllChars() {
+  collectCharsFromTable();
+  const chars = state.data.characters?.characters ?? [];
+  const ids   = chars.map(c => c.id);
+  const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
+  if (dupes.length > 0) { showToast(`IDが重複しています: ${dupes.join(', ')}`, true); return; }
+  try {
+    const res  = await fetch('/api/save/characters', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(state.data.characters) });
+    const json = await res.json();
+    if (json.ok) showToast(`キャラクターを保存しました ✓（${chars.length}体）`);
+    else showToast('保存失敗: ' + (json.error ?? '不明'), true);
+  } catch(e) { showToast('通信エラー: ' + e.message, true); }
+}
+
+// ================================================================
+// タブ1: 特技管理
+// ================================================================
+function renderSkillsTab(main) {
+  const skills = state.data.skills?.skills ?? [];
+  main.innerHTML = '';
+
+  const addSection = document.createElement('div');
+  addSection.className = 'section';
+  addSection.innerHTML = `
+    <div class="section-title">✦ 特技を追加 <span class="badge-count">${skills.length}件</span></div>
+    <div class="info-box">特技の定義を追加します。追加後、「特技アサイン」タブでキャラクターに割り当ててください。</div>
+    <div class="grid-2">
+      <div class="form-group"><label>ID（例: skill_rally）</label><input type="text" id="ns_id" placeholder="skill_xxx" /></div>
+      <div class="form-group"><label>名前</label><input type="text" id="ns_name" placeholder="鼓舞" /></div>
+    </div>
+    <div class="form-group" style="margin-top:10px"><label>説明文</label><textarea id="ns_desc" rows="2" placeholder="効果の説明"></textarea></div>
+    <div class="grid-3" style="margin-top:10px">
+      <div class="form-group">
+        <label>エフェクト種別 (effect.type)</label>
+        <select id="ns_effectType" onchange="onEffectTypeChange(this)">
+          <option value="buff_all_allies">buff_all_allies（味方全体バフ）</option>
+          <option value="buff_self">buff_self（自分バフ）</option>
+          <option value="direct_char_attack">direct_char_attack（直接攻撃）</option>
+          <option value="negate_char_damage">negate_char_damage（被弾無効）</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>最大使用回数 (maxUses)</label>
+        <div class="num-wrap">
+          <input type="range" min="1" max="5" value="1" oninput="syncNum(this,'ns_maxUses')" />
+          <input type="number" id="ns_maxUses" value="1" min="1" max="99" oninput="syncRange(this)" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>溜め必要 (requireCharge)</label>
+        <select id="ns_requireCharge">
+          <option value="false">不要</option>
+          <option value="true">必要（溜めアクション）</option>
+        </select>
       </div>
     </div>
-  </div>
-  <div class="toast" id="toast"></div>
+    <div id="ns_buffExtra" style="margin-top:10px">
+      <div class="grid-3">
+        <div class="form-group"><label>対象パラメータ (target)</label>
+          <select id="ns_buffTarget">
+            <option value="soldierAtk">soldierAtk（ミーム攻撃力）</option>
+            <option value="soldierDef">soldierDef（ミーム防御力）</option>
+            <option value="charAttack">charAttack（キャラ攻撃力）</option>
+            <option value="charSong">charSong（歌パラメータ）</option>
+          </select>
+        </div>
+        <div class="form-group"><label>加算値 (value)</label>
+          <div class="num-wrap">
+            <input type="range" min="-20" max="50" value="1" oninput="syncNum(this,'ns_buffValue')" />
+            <input type="number" id="ns_buffValue" value="1" oninput="syncRange(this)" />
+          </div>
+        </div>
+        <div class="form-group"><label>持続 (duration)</label>
+          <select id="ns_buffDuration">
+            <option value="battle">battle（戦闘中ずっと）</option>
+            <option value="this_turn">this_turn（このターンのみ）</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div id="ns_attackExtra" style="display:none;margin-top:10px">
+      <div class="form-group"><label>ダメージ式 (damageFormula)</label>
+        <input type="text" id="ns_damageFormula" value="charAttack * 3" placeholder="charAttack * N" />
+        <div style="font-size:10px;color:#484f58;margin-top:3px">現在は charAttack * N 形式のみ対応</div>
+      </div>
+    </div>
+    <div class="btn-row"><button class="btn-primary" onclick="addSkill()">＋ 追加して保存</button></div>`;
+  main.appendChild(addSection);
 
-  <script>
-    const DEFAULTS = {
-      isTemplate: false,
-      status: 'standby',
-      charHp: 100,
-      charMaxHp: 100,
-      charAttack: 10,
-      charSong: 5,
-      soldierAtk: 8,
-      soldierDef: 5,
-      battleCapacity: 30,
-      skills: [],
-      nameVariants: [],
-    };
+  const listSection = document.createElement('div');
+  listSection.className = 'section';
+  listSection.innerHTML = `<div class="section-title">📋 登録済み特技</div>`;
+  if (skills.length === 0) {
+    listSection.innerHTML += '<div class="empty">特技が登録されていません。</div>';
+  } else {
+    const cardList = document.createElement('div'); cardList.className = 'card-list';
+    skills.forEach(skill => {
+      const card = document.createElement('div'); card.className = 'card';
+      const chargesTag = skill.requireCharge ? '<span class="badge-charge">溜め必要</span>' : '';
+      card.innerHTML = `
+        <div class="card-header">
+          <span class="card-id">${esc(skill.id)}</span>
+          <span class="card-name">${esc(skill.name)}</span>
+          <span class="badge-uses">×${skill.maxUses}</span>${chargesTag}
+          <div class="card-actions"><button class="btn-sm danger" onclick="deleteSkill('${esc(skill.id)}')">削除</button></div>
+        </div>
+        <div style="font-size:11px;color:#8b949e;margin-bottom:4px">${esc(skill.description)}</div>
+        <div style="font-size:10px;color:#484f58">type: ${esc(skill.effect?.type??'')} / trigger: ${esc(skill.trigger??'active')}</div>`;
+      cardList.appendChild(card);
+    });
+    listSection.appendChild(cardList);
+  }
+  main.appendChild(listSection);
+}
 
-    let _parsed = null;
+function onEffectTypeChange(sel) {
+  const isBuff   = ['buff_all_allies','buff_self'].includes(sel.value);
+  const isAttack = sel.value === 'direct_char_attack';
+  document.getElementById('ns_buffExtra').style.display   = isBuff   ? '' : 'none';
+  document.getElementById('ns_attackExtra').style.display = isAttack ? '' : 'none';
+}
 
-    function showError(msg) {
-      const box = document.getElementById('errorBox');
-      box.className = 'error-box';
-      box.textContent = msg;
-      box.style.display = 'block';
-    }
+function addSkill() {
+  const id  = document.getElementById('ns_id')?.value.trim();
+  const name = document.getElementById('ns_name')?.value.trim();
+  const desc = document.getElementById('ns_desc')?.value.trim();
+  const effectType    = document.getElementById('ns_effectType')?.value;
+  const maxUses       = Number(document.getElementById('ns_maxUses')?.value ?? 1);
+  const requireCharge = document.getElementById('ns_requireCharge')?.value === 'true';
+  if (!id || !name) { showToast('IDと名前は必須です', true); return; }
+  const skills = (state.data.skills ??= { skills: [] }).skills;
+  if (skills.find(s => s.id === id)) { showToast('同じIDが既に存在します', true); return; }
+  let effect = { type: effectType };
+  if (effectType === 'buff_all_allies' || effectType === 'buff_self') {
+    effect.target   = document.getElementById('ns_buffTarget')?.value;
+    effect.value    = Number(document.getElementById('ns_buffValue')?.value ?? 1);
+    effect.duration = document.getElementById('ns_buffDuration')?.value;
+  } else if (effectType === 'direct_char_attack') {
+    effect.damageFormula       = document.getElementById('ns_damageFormula')?.value.trim();
+    effect.ignoreCounterAttack = true;
+    effect.ignoreSoldiers      = true;
+  } else if (effectType === 'negate_char_damage') {
+    effect.duration = 'this_turn';
+  }
+  skills.push({ id, name, description: desc, trigger: 'active', effect, requireCharge, maxUses });
+  saveSkills();
+}
 
-    function clearError() {
-      document.getElementById('errorBox').style.display = 'none';
-    }
+function deleteSkill(skillId) {
+  if (!confirm(`「${skillId}」を削除しますか？`)) return;
+  const skills = state.data.skills?.skills ?? [];
+  const idx = skills.findIndex(s => s.id === skillId);
+  if (idx !== -1) skills.splice(idx, 1);
+  saveSkills();
+}
 
-    function showToast(msg, type = 'ok') {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.className = 'toast' + (type === 'error' ? ' error' : '') + ' show';
-      setTimeout(() => { t.classList.remove('show'); }, 2800);
-    }
+async function saveSkills() {
+  try {
+    const res = await fetch('/api/save/skills', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(state.data.skills) });
+    const json = await res.json();
+    if (json.ok) showToast('特技を保存しました ✓'); else showToast('保存失敗', true);
+  } catch(e) { showToast('通信エラー: '+e.message, true); }
+  renderSkillsTab(document.getElementById('mainArea'));
+}
 
-    function applyDefaults(char) {
-      const soldiers = char.soldiers ?? 100;
-      return {
-        ...DEFAULTS,
-        maxSoldiers: soldiers,
-        ...char,
-        soldiers,
-      };
-    }
+// ================================================================
+// タブ2: 特技アサイン
+// ================================================================
+function renderSkillAssignTab(main) {
+  main.innerHTML = '';
+  const chars  = state.data.characters?.characters ?? [];
+  const skills = state.data.skills?.skills ?? [];
+  const section = document.createElement('div'); section.className = 'section';
+  section.innerHTML = `
+    <div class="section-title">✦ キャラクターへの特技アサイン <span class="badge-count">${chars.length}体</span></div>
+    <div class="info-box">各キャラクターに特技（skillId）を一括で設定します。「まとめて保存」で反映されます。</div>
+    <div id="charSkillRows"></div>
+    <div class="btn-row" style="margin-top:14px">
+      <button class="btn-primary" onclick="saveSkillAssignments()">まとめて保存</button>
+    </div>`;
+  main.appendChild(section);
+  const rows = section.querySelector('#charSkillRows');
+  const skillOpts = `<option value="">なし（null）</option>` + skills.map(s =>
+    `<option value="${esc(s.id)}">${esc(s.name)} — ${esc(s.description)}</option>`).join('');
+  chars.forEach(c => {
+    const dispName = (c.isTemplate ? c.displayName : c.name) || c.id;
+    const row = document.createElement('div'); row.className = 'char-row';
+    row.innerHTML = `
+      <span class="char-name" title="${esc(c.id)}">${esc(dispName)}</span>
+      <span class="char-id-label">${esc(c.id)}</span>
+      <select class="char-skill-sel" data-charid="${esc(c.id)}">${skillOpts}</select>`;
+    row.querySelector('select').value = c.skillId ?? '';
+    rows.appendChild(row);
+  });
+}
 
-    function doPreview() {
-      clearError();
-      const raw = document.getElementById('jsonInput').value.trim();
-      if (!raw) { showError('JSONを入力してください'); return; }
-      try {
-        _parsed = JSON.parse(raw);
-        if (!Array.isArray(_parsed)) { showError('JSON配列（[...]）で入力してください'); _parsed = null; return; }
-      } catch (e) {
-        showError('JSONパースエラー: ' + e.message);
-        _parsed = null;
-        return;
-      }
-      const tbody = document.getElementById('previewBody');
-      tbody.innerHTML = '';
-      if (_parsed.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="color:var(--color-text-secondary);padding:16px 8px">エントリなし</td></tr>';
-        return;
-      }
-      _parsed.forEach(c => {
-        const tr = document.createElement('tr');
-        [c.id ?? '（未設定）', c.name ?? '（未設定）', c.soldiers ?? 100, c.factionId ?? ''].forEach(val => {
-          const td = document.createElement('td');
-          td.textContent = val;
-          tr.appendChild(td);
-        });
-        tbody.appendChild(tr);
+async function saveSkillAssignments() {
+  const chars = state.data.characters?.characters ?? [];
+  document.querySelectorAll('.char-skill-sel').forEach(sel => {
+    const c = chars.find(ch => ch.id === sel.dataset.charid);
+    if (c) c.skillId = sel.value || null;
+  });
+  try {
+    const res = await fetch('/api/save/characters', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(state.data.characters) });
+    const json = await res.json();
+    if (json.ok) showToast('キャラクターを保存しました ✓'); else showToast('保存失敗', true);
+  } catch(e) { showToast('通信エラー: '+e.message, true); }
+}
+
+// ================================================================
+// タブ3: 迷宮管理
+// ================================================================
+function renderDungeonsTab(main) {
+  const dungeons = state.data.dungeons?.dungeons ?? [];
+  const items    = state.data.items?.items ?? [];
+  main.innerHTML = '';
+
+  const addSection = document.createElement('div'); addSection.className = 'section';
+  addSection.innerHTML = `
+    <div class="section-title">🗝 迷宮を追加 <span class="badge-count">${dungeons.length}件</span></div>
+    <div class="info-box">迷宮を定義します。追加後、「迷宮アサイン」タブで拠点に紐づけてください。</div>
+    <div class="grid-2">
+      <div class="form-group"><label>ID（例: dungeon_001）</label><input type="text" id="nd_id" placeholder="dungeon_xxx" /></div>
+      <div class="form-group"><label>名前</label><input type="text" id="nd_name" placeholder="古代遺跡の迷宮" /></div>
+    </div>
+    <div class="form-group" style="margin-top:10px"><label>総階層数 (totalFloors)</label>
+      <div class="num-wrap">
+        <input type="range" min="1" max="10" value="5" oninput="syncNum(this,'nd_floors')" />
+        <input type="number" id="nd_floors" value="5" min="1" max="20" oninput="syncRange(this)" />
+      </div>
+    </div>
+    <div class="btn-row"><button class="btn-primary" onclick="addDungeon()">＋ 追加して保存</button></div>`;
+  main.appendChild(addSection);
+
+  const listSection = document.createElement('div'); listSection.className = 'section';
+  listSection.innerHTML = `<div class="section-title">📋 登録済み迷宮</div>`;
+  if (dungeons.length === 0) {
+    listSection.innerHTML += '<div class="empty">迷宮が登録されていません。</div>';
+  } else {
+    dungeons.forEach(dungeon => {
+      const card = document.createElement('div'); card.className = 'card'; card.style.marginBottom = '12px';
+      const itemOpts = `<option value="">報酬なし</option>` + items.map(it =>
+        `<option value="${esc(it.id)}">${esc(it.name)}</option>`).join('');
+      let floorsHtml = '';
+      (dungeon.floors || []).forEach((fl, i) => {
+        floorsHtml += `<div class="floor-card">
+          <div class="floor-title">第 ${fl.floor} 階</div>
+          <div class="grid-3">
+            <div class="form-group"><label>敵名</label><input type="text"   class="fl_ename" data-did="${esc(dungeon.id)}" data-fi="${i}" value="${esc(fl.enemy?.name??'')}" /></div>
+            <div class="form-group"><label>敵HP</label><input type="number"  class="fl_ehp"   data-did="${esc(dungeon.id)}" data-fi="${i}" value="${fl.enemy?.charHp??30}" /></div>
+            <div class="form-group"><label>敵攻撃力</label><input type="number" class="fl_eatk" data-did="${esc(dungeon.id)}" data-fi="${i}" value="${fl.enemy?.charAttack??10}" /></div>
+          </div>
+          <div class="grid-3" style="margin-top:6px">
+            <div class="form-group"><label>敵ミーム数</label><input type="number" class="fl_esol" data-did="${esc(dungeon.id)}" data-fi="${i}" value="${fl.enemy?.soldiers??200}" /></div>
+            <div class="form-group"><label>敵ミーム攻撃</label><input type="number" class="fl_esa" data-did="${esc(dungeon.id)}" data-fi="${i}" value="${fl.enemy?.soldierAtk??8}" /></div>
+            <div class="form-group"><label>敵ミーム防御</label><input type="number" class="fl_esd" data-did="${esc(dungeon.id)}" data-fi="${i}" value="${fl.enemy?.soldierDef??6}" /></div>
+          </div>
+          <div class="grid-2" style="margin-top:6px">
+            <div class="form-group"><label>報酬アイテム</label>
+              <select class="fl_reward" data-did="${esc(dungeon.id)}" data-fi="${i}">${itemOpts}</select>
+            </div>
+            <div class="form-group"><label>クリアイベントID</label><input type="text" class="fl_event" data-did="${esc(dungeon.id)}" data-fi="${i}" value="${esc(fl.eventId??'')}" placeholder="null or event_id" /></div>
+          </div>
+        </div>`;
       });
-    }
+      card.innerHTML = `
+        <div class="card-header">
+          <span class="card-id">${esc(dungeon.id)}</span>
+          <span class="card-name">${esc(dungeon.name)}</span>
+          <span style="font-size:11px;color:#484f58">${dungeon.totalFloors}階</span>
+          <div class="card-actions"><button class="btn-sm danger" onclick="deleteDungeon('${esc(dungeon.id)}')">削除</button></div>
+        </div>
+        ${floorsHtml}
+        <div class="btn-row" style="margin-top:8px">
+          <button class="btn-sm" onclick="saveDungeonFloors('${esc(dungeon.id)}')">この迷宮を保存</button>
+        </div>`;
+      listSection.appendChild(card);
+      (dungeon.floors || []).forEach((fl, i) => {
+        const sel = card.querySelectorAll('.fl_reward')[i];
+        if (sel) sel.value = fl.rewardItemId ?? '';
+      });
+    });
+  }
+  main.appendChild(listSection);
+}
 
-    async function doRegister() {
-      if (!_parsed) { doPreview(); if (!_parsed) return; }
-      const entries = _parsed.map(applyDefaults);
-      try {
-        const res = await fetch('/api/bulk-register/characters', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ characters: entries }),
-        });
-        const json = await res.json();
-        if (!res.ok) { showToast('登録失敗: ' + (json.error || res.status), 'error'); return; }
-        showToast(`登録完了 — 追加: ${json.added} 件 / 更新: ${json.updated} 件`);
-      } catch (e) {
-        showToast('通信エラー: ' + e.message, 'error');
-      }
-    }
-  </script>
+function addDungeon() {
+  const id     = document.getElementById('nd_id')?.value.trim();
+  const name   = document.getElementById('nd_name')?.value.trim();
+  const floors = Number(document.getElementById('nd_floors')?.value ?? 5);
+  if (!id || !name) { showToast('IDと名前は必須です', true); return; }
+  const dungeons = (state.data.dungeons ??= { dungeons: [] }).dungeons;
+  if (dungeons.find(d => d.id === id)) { showToast('同じIDが既に存在します', true); return; }
+  const floorArr = Array.from({ length: floors }, (_, i) => ({
+    floor: i + 1,
+    enemy: { name:`${name}の番人 ${i+1}`, charHp:30+i*10, charAttack:10+i*4, soldiers:200+i*100, soldierAtk:8+i*2, soldierDef:6+i*2 },
+    rewardItemId: null, eventId: null,
+  }));
+  dungeons.push({ id, name, baseId: null, totalFloors: floors, prerequisites:{eventFlags:[],requiredItemIds:[],requiredCharIds:[]}, floors: floorArr });
+  saveDungeons();
+}
+
+function deleteDungeon(dungeonId) {
+  if (!confirm(`「${dungeonId}」を削除しますか？`)) return;
+  const dungeons = state.data.dungeons?.dungeons ?? [];
+  const idx = dungeons.findIndex(d => d.id === dungeonId);
+  if (idx !== -1) dungeons.splice(idx, 1);
+  saveDungeons();
+}
+
+function saveDungeonFloors(dungeonId) {
+  const dungeon = (state.data.dungeons?.dungeons ?? []).find(d => d.id === dungeonId);
+  if (!dungeon) return;
+  document.querySelectorAll(`.fl_ename[data-did="${dungeonId}"]`).forEach((el, i) => {
+    if (!dungeon.floors[i]) return;
+    dungeon.floors[i].enemy.name       = el.value;
+    dungeon.floors[i].enemy.charHp     = Number(document.querySelectorAll(`.fl_ehp[data-did="${dungeonId}"]`)[i]?.value ?? 30);
+    dungeon.floors[i].enemy.charAttack = Number(document.querySelectorAll(`.fl_eatk[data-did="${dungeonId}"]`)[i]?.value ?? 10);
+    dungeon.floors[i].enemy.soldiers   = Number(document.querySelectorAll(`.fl_esol[data-did="${dungeonId}"]`)[i]?.value ?? 200);
+    dungeon.floors[i].enemy.soldierAtk = Number(document.querySelectorAll(`.fl_esa[data-did="${dungeonId}"]`)[i]?.value ?? 8);
+    dungeon.floors[i].enemy.soldierDef = Number(document.querySelectorAll(`.fl_esd[data-did="${dungeonId}"]`)[i]?.value ?? 6);
+    dungeon.floors[i].rewardItemId     = document.querySelectorAll(`.fl_reward[data-did="${dungeonId}"]`)[i]?.value || null;
+    dungeon.floors[i].eventId          = document.querySelectorAll(`.fl_event[data-did="${dungeonId}"]`)[i]?.value.trim() || null;
+  });
+  saveDungeons();
+}
+
+async function saveDungeons() {
+  try {
+    const res = await fetch('/api/save/dungeons', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(state.data.dungeons) });
+    const json = await res.json();
+    if (json.ok) showToast('迷宮データを保存しました ✓'); else showToast('保存失敗', true);
+  } catch(e) { showToast('通信エラー: '+e.message, true); }
+  renderDungeonsTab(document.getElementById('mainArea'));
+}
+
+// ================================================================
+// タブ4: 迷宮アサイン
+// ================================================================
+function renderDungeonAssignTab(main) {
+  main.innerHTML = '';
+  const bases    = state.data.bases?.bases ?? [];
+  const dungeons = state.data.dungeons?.dungeons ?? [];
+  const section = document.createElement('div'); section.className = 'section';
+  section.innerHTML = `
+    <div class="section-title">🗝 拠点への迷宮アサイン <span class="badge-count">${bases.length}件</span></div>
+    <div class="info-box">各拠点に迷宮（dungeonId）を割り当てます。迷宮を持たない拠点は「なし」のままにしてください。</div>
+    <div id="baseDungeonRows"></div>
+    <div class="btn-row" style="margin-top:14px">
+      <button class="btn-primary" onclick="saveDungeonAssignments()">まとめて保存</button>
+    </div>`;
+  main.appendChild(section);
+  const rows = section.querySelector('#baseDungeonRows');
+  const dungeonOpts = `<option value="">なし</option>` + dungeons.map(d =>
+    `<option value="${esc(d.id)}">${esc(d.name)} (${d.totalFloors}階)</option>`).join('');
+  bases.forEach(base => {
+    const row = document.createElement('div'); row.className = 'char-row';
+    row.innerHTML = `
+      <span class="char-name" title="${esc(base.name)}">${esc(base.name)}${base.isCapital?' ★':''}</span>
+      <span class="char-id-label">${esc(base.id)}</span>
+      <select class="base-dungeon-sel" data-baseid="${esc(base.id)}">${dungeonOpts}</select>`;
+    row.querySelector('select').value = base.dungeonId ?? '';
+    rows.appendChild(row);
+  });
+}
+
+async function saveDungeonAssignments() {
+  const bases    = state.data.bases?.bases ?? [];
+  const dungeons = state.data.dungeons?.dungeons ?? [];
+  document.querySelectorAll('.base-dungeon-sel').forEach(sel => {
+    const b = bases.find(bs => bs.id === sel.dataset.baseid);
+    if (b) b.dungeonId = sel.value || null;
+  });
+  dungeons.forEach(d => { d.baseId = null; });
+  bases.forEach(b => {
+    if (b.dungeonId) { const dun = dungeons.find(d => d.id === b.dungeonId); if (dun) dun.baseId = b.id; }
+  });
+  try {
+    const [resB, resD] = await Promise.all([
+      fetch('/api/save/bases',    { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(state.data.bases) }),
+      fetch('/api/save/dungeons', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(state.data.dungeons) }),
+    ]);
+    const [jB, jD] = await Promise.all([resB.json(), resD.json()]);
+    if (jB.ok && jD.ok) showToast('拠点・迷宮データを保存しました ✓'); else showToast('保存失敗', true);
+  } catch(e) { showToast('通信エラー: '+e.message, true); }
+}
+
+// ================================================================
+// ユーティリティ
+// ================================================================
+function syncNum(rangeEl, numId) { const el = document.getElementById(numId); if (el) el.value = rangeEl.value; }
+function syncRange(numEl) { const r = numEl.previousElementSibling; if (r?.type === 'range') r.value = numEl.value; }
+function esc(str) { return String(str ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+let _toastTimer = null;
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'show' + (isError ? ' error' : '');
+  clearTimeout(_toastTimer); _toastTimer = setTimeout(() => t.className = '', 2800);
+}
+
+init();
+</script>
 </body>
 </html>

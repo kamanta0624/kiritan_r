@@ -53,7 +53,7 @@ export default function TitleScene({ onNavigate, hasSaveData = true, hasNewGameP
           fontSize:'min(9vw, 120px)', lineHeight:.98, letterSpacing:'.04em',
           color:'#fff',
           textShadow:`0 4px 40px rgba(196,66,122,.45), 0 2px 8px rgba(0,0,0,.7)`,
-        }}>ボイロ（広義）大戦</div>
+        }}>ボイロ地域制圧型ゲーム</div>
       </div>
 
       {/* Menu */}

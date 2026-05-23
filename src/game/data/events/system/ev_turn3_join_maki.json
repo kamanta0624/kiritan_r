@@ -3,20 +3,45 @@
   "name": "3ターン目：弦巻マキ加入",
   "trigger": "player_turn",
   "conditions": [
-    { "type": "turn", "op": "eq", "value": 3 },
-    { "type": "flag", "flag": "flag_r2_maki" }
+    {
+      "type": "turn",
+      "op": "eq",
+      "value": 3
+    },
+    {
+      "type": "flag",
+      "flag": "flag_r2_maki"
+    }
   ],
-  "probability": 1, "priority": 780, "maxOccurrences": 1,
+  "probability": 1,
+  "priority": 780,
+  "maxOccurrences": 1,
   "script": [
-    { "type": "conversation", "lines": [
-      { "characterId": "char_012", "position": "center", "text": "呼んだ？まぁいいわよ。マキ・フルハラコールスタイルできっちり決めてあげる。" }
-    ]},
-    { "type": "end" }
+    {
+      "type": "conversation",
+      "lines": [
+        {
+          "characterId": "char_012",
+          "position": "center",
+          "text": "呼んだ？まぁいいわよ。マキ・フルハラコールスタイルできっちり決めてあげる。"
+        }
+      ]
+    },
+    {
+      "type": "end"
+    }
   ],
   "effects": {
     "default": [
-      { "type": "charJoin", "charId": "char_012", "factionId": "東北家" },
-      { "type": "clearFlag", "flag": "flag_r2_maki" }
+      {
+        "type": "charJoin",
+        "charId": "char_012",
+        "factionId": "東北家"
+      },
+      {
+        "type": "clearFlag",
+        "flag": "flag_r2_maki"
+      }
     ]
   }
 }

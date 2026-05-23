@@ -3,22 +3,54 @@
   "name": "埼玉連続イベント２",
   "trigger": "before_faction_turn",
   "conditions": [
-    { "type": "flag", "flag": "flag_saitama_chain1_done" },
-    { "type": "turnAfterFlag", "flag": "flag_saitama_chain1_done", "value": 2 },
-    { "type": "noFlag", "flag": "flag_saitama_chain2_done" }
+    {
+      "type": "flag",
+      "flag": "flag_saitama_chain1_done"
+    },
+    {
+      "type": "turnAfterFlag",
+      "flag": "flag_saitama_chain1_done",
+      "value": 2
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_saitama_chain2_done"
+    }
   ],
-  "probability": 1, "priority": 900, "maxOccurrences": 1,
+  "probability": 1,
+  "priority": 900,
+  "maxOccurrences": 1,
   "script": [
-    { "type": "conversation", "lines": [
-      { "characterId": null, "position": "center", "text": "【春日部・秘密会議】" },
-      { "characterId": "char_075", "position": "left",  "text": "東北家は次が田和山を狙っているはず。有利な内に先手を打つ。" },
-      { "characterId": "char_075", "position": "left",  "text": "全軍を動かす準備を始める。東北家よ、山から櫻をこんでいろ。" }
-    ]},
-    { "type": "end" }
+    {
+      "type": "conversation",
+      "lines": [
+        {
+          "characterId": null,
+          "position": "center",
+          "text": "【春日部・秘密会議】"
+        },
+        {
+          "characterId": "char_075",
+          "position": "left",
+          "text": "東北家は次が田和山を狙っているはず。有利な内に先手を打つ。"
+        },
+        {
+          "characterId": "char_075",
+          "position": "left",
+          "text": "全軍を動かす準備を始める。東北家よ、山から櫻をこんでいろ。"
+        }
+      ]
+    },
+    {
+      "type": "end"
+    }
   ],
   "effects": {
     "default": [
-      { "type": "setFlag", "flag": "flag_saitama_chain2_done" }
+      {
+        "type": "setFlag",
+        "flag": "flag_saitama_chain2_done"
+      }
     ]
   }
 }
