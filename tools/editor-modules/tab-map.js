@@ -426,8 +426,8 @@ async function _appendBgSection(container, base) {
     section.appendChild(upRow);
   }
 
-  const btnRow = container.querySelector('.btn-row');
-  container.insertBefore(section, btnRow);
+  const wrap = container.querySelector('div');
+  wrap.appendChild(section);
 }
 
 async function saveBasesToServer() {
