@@ -116,7 +116,7 @@ function StrategyBadge({ side, bonus }) {
 }
 
 // ── R9: 作戦カットイン ────────────────────────────────────────
-function StrategyCutin({ winner, onSkip }) {
+function StrategyCutin({ winner, onSkip, bgUrl = 'url(assets/bg_battle.jpg)' }) {
   const enemy   = winner.side === 'enemy';
   const accent  = enemy ? AC : TEAL;
   const accent2 = enemy ? AC2 : '#26b0bf';
@@ -125,7 +125,7 @@ function StrategyCutin({ winner, onSkip }) {
     <div onClick={onSkip} style={{
       position:'absolute', inset:0, zIndex:60, cursor:'pointer', overflow:'hidden',
       backgroundColor:'#0a0816',
-      backgroundImage:'url(assets/bg_battle.jpg)',
+      backgroundImage:bgUrl,
       backgroundSize:'cover', backgroundPosition:'center 40%',
       animation:'cutinFade .3s ease both',
     }}>
@@ -655,7 +655,7 @@ function MessageWindow({ speaker, line }) {
 }
 
 // ── R15: BattleAnimOverlay (V3.2対応 — animStateから実値を参照) ──
-function BattleAnimOverlay({ anim, targetNode, onContinue }) {
+function BattleAnimOverlay({ anim, targetNode, onContinue, bgUrl = 'url(assets/bg_battle.jpg)' }) {
   const { attacker, defender, atkMem, atkChr, defMem, defChr, N, Nr, actionLabel, attackType='melee', attackerSide='player',
           atkSolBefore, defSolBefore, atkHpBefore, defHpBefore } = anim;
   const isSpecial   = actionLabel === '必殺技';
@@ -776,7 +776,7 @@ function BattleAnimOverlay({ anim, targetNode, onContinue }) {
     <div onClick={handleClick} style={{
       position:'absolute', inset:0, zIndex:55, cursor:'pointer',
       backgroundColor:'#0a0816',
-      backgroundImage: targetNode?.battleBgId ? `url(${targetNode.battleBgId})` : 'url(assets/bg_battle.jpg)',
+      backgroundImage: bgUrl,
       backgroundSize:'cover', backgroundPosition:'center 40%',
       display:'flex', flexDirection:'column', overflow:'hidden',
     }}>
@@ -910,7 +910,7 @@ function BActionScene({
   allyDisplay, enemyDisplay, activeUnitId, specialPending,
   unitStates, log, winner, phase,
   strategyBonus, battleCapacity,
-  animState,
+  animState, bgUrl,
   onAllyAction, onEnemyAttack,
   onReturn,
 }) {
@@ -927,7 +927,7 @@ function BActionScene({
     <div className="fade-in" style={{
       width:'100%', height:'100%', display:'flex', flexDirection:'column',
       color:TX, position:'relative',
-      backgroundImage: targetNode?.battleBgId ? `url(${targetNode.battleBgId})` : 'url(assets/bg_battle.jpg)',
+      backgroundImage: bgUrl ?? 'url(assets/bg_battle.jpg)',
       backgroundSize:'cover', backgroundPosition:'center 40%',
     }}>
       <div style={{ position:'absolute', inset:0, background:'linear-gradient(180deg, rgba(251,247,239,.7) 0%, rgba(245,237,224,.18) 45%, rgba(245,237,224,.18) 65%, rgba(251,247,239,.78) 100%)' }}/>
@@ -1083,7 +1083,18 @@ function BActionScene({
 }
 
 // ── BattleFlow (メインコンポーネント) ──────────────────────────
-export default function BattleFlow({ formation, targetNode, onComplete, enemyChars = [], battleMode = 'normal' }) {
+function getBgUrl(targetNode, isDefense) {
+  if (isDefense) {
+    return targetNode?.bgCastle
+      ? `url(${targetNode.bgCastle})`
+      : 'url(assets/bg_battle.jpg)';
+  }
+  return targetNode?.bgField
+    ? `url(${targetNode.bgField})`
+    : 'url(assets/bg_battle.jpg)';
+}
+
+export default function BattleFlow({ formation, targetNode, onComplete, enemyChars = [], battleMode = 'normal', isDefense = false }) {
   const BATTLE_CAP  = targetNode?.battleCapacity ?? 400;
   const slots       = ['front1','front2','rear1','rear2'];
   const rawAllies   = useRef(slots.map(k => formation?.[k]).filter(Boolean)).current;
@@ -1369,6 +1380,8 @@ export default function BattleFlow({ formation, targetNode, onComplete, enemyCha
     if (battleResultRef.current) onComplete(battleResultRef.current);
   }, [onComplete]);
 
+  const bgUrl = getBgUrl(targetNode, isDefense);
+
   return (
     <div className="scene-enter" style={{ width:'100%', height:'100%', position:'relative', overflow:'hidden' }}>
       <BActionScene
@@ -1387,6 +1400,7 @@ export default function BattleFlow({ formation, targetNode, onComplete, enemyCha
         strategyBonus={strategyBonus}
         battleCapacity={BATTLE_CAP}
         animState={animState}
+        bgUrl={bgUrl}
         onAllyAction={handleAllyAction}
         onEnemyAttack={handleEnemyAttack}
         onReturn={handleReturn}
@@ -1394,12 +1408,12 @@ export default function BattleFlow({ formation, targetNode, onComplete, enemyCha
 
       {/* R9: 作戦カットイン */}
       {cutinVisible && strategyWinner && (
-        <StrategyCutin winner={strategyWinner} onSkip={() => setCutinVisible(false)}/>
+        <StrategyCutin winner={strategyWinner} onSkip={() => setCutinVisible(false)} bgUrl={bgUrl}/>
       )}
 
       {/* R15: 戦闘アニメーションオーバーレイ */}
       {animState && (
-        <BattleAnimOverlay anim={animState} targetNode={targetNode} onContinue={() => {
+        <BattleAnimOverlay anim={animState} targetNode={targetNode} bgUrl={bgUrl} onContinue={() => {
           animStateRef.current = null;
           setAnimState(null);
           if (animResolveRef.current) { animResolveRef.current(); animResolveRef.current = null; }

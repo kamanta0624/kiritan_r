@@ -161,7 +161,9 @@ const server = http.createServer(async (req, res) => {
         const events = indexData.events.map(entry => {
           const fullPath = path.join(DATA, 'events', entry.path);
           if (!fs.existsSync(fullPath)) return null;
-          return readJSON(fullPath);
+          const ev = readJSON(fullPath);
+          if (entry.chapter) ev._chapter = entry.chapter;
+          return ev;
         }).filter(Boolean);
         res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
         res.end(JSON.stringify({ events }));
@@ -209,7 +211,7 @@ const server = http.createServer(async (req, res) => {
         const images = files.map(f => ({
           id: path.basename(f, path.extname(f)),
           filename: f,
-          url: `/assets/battle_backgrounds/${f}`,
+          url: `/battle_backgrounds/${f}`,
         }));
         res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
         res.end(JSON.stringify({ images }));
@@ -335,7 +337,8 @@ const server = http.createServer(async (req, res) => {
           const fullPath = path.join(DATA, 'events', evPath);
           const dir = path.dirname(fullPath);
           if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-          writeJSON(fullPath, ev);
+          const { _chapter, ...evToSave } = ev;
+          writeJSON(fullPath, evToSave);
         }
 
         // _index.json を更新
@@ -382,7 +385,7 @@ const server = http.createServer(async (req, res) => {
 
         fs.writeFileSync(destPath, filePart.data);
         const newId = path.basename(newFilename, ext);
-        const newUrl = `/assets/battle_backgrounds/${newFilename}`;
+        const newUrl = `/battle_backgrounds/${newFilename}`;
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ok: true, id: newId, url: newUrl }));

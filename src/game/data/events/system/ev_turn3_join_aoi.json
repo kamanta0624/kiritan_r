@@ -1,6 +1,6 @@
 {
   "id": "ev_turn3_join_aoi",
-  "name": "3ターン目：琺葉葵加入",
+  "name": "3ターン目：琴葉葵加入",
   "trigger": "player_turn",
   "conditions": [
     {
@@ -23,7 +23,7 @@
         {
           "characterId": "char_009",
           "position": "center",
-          "text": "呼んでくれたの？葵、小っちゃい子のことはちゃんと守るから。一緒に戦おうね。"
+          "text": "葵加入イベント"
         }
       ]
     },

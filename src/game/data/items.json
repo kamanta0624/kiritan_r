@@ -11,7 +11,22 @@
         "value": 10
       },
       "cost": 300,
-      "sellPrice": 150
+      "sellPrice": 150,
+      "startWithPlayer": true
+    },
+    {
+      "id": "item_0002",
+      "name": "テスト２",
+      "type": "weapon",
+      "slotType": "weapon",
+      "description": "",
+      "effect": {
+        "type": "charAttack",
+        "value": 10
+      },
+      "cost": 300,
+      "sellPrice": 150,
+      "startWithPlayer": true
     }
   ],
   "shopStock": []

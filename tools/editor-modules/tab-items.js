@@ -74,6 +74,15 @@ function buildItemForm(item) {
       </div>
       <div class="form-row"><div class="form-group"><label>説明文</label>
         <textarea id="fi_description" rows="2">${esc(item.description||'')}</textarea></div></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="fi_startWithPlayer"
+              ${item.startWithPlayer ? 'checked' : ''} />
+            ゲーム開始時から所持
+          </label>
+        </div>
+      </div>
     </div>
     <div class="form-section"><div class="form-section-title">効果</div>
       <div class="form-row">
@@ -144,7 +153,8 @@ export function saveItem() {
   item.description = v('fi_description');
   item.cost        = n('fi_cost');
   item.sellPrice   = n('fi_sellPrice');
-  item.effect      = { type: v('fi_effectType'), value: n('fi_effectValue') };
+  item.effect           = { type: v('fi_effectType'), value: n('fi_effectValue') };
+  item.startWithPlayer  = document.getElementById('fi_startWithPlayer')?.checked ?? false;
   state.selectedId = item.id;
   saveItemsToServer();
 }
@@ -154,7 +164,8 @@ export function addItem() {
   const nums  = items.map(i => parseInt(i.id.replace(/\D/g, ''), 10)).filter(n => !isNaN(n));
   const newId = `item_${String(nums.length > 0 ? Math.max(...nums) + 1 : 1).padStart(4, '0')}`;
   items.push({ id: newId, name: '新規アイテム', type: 'weapon', slotType: 'weapon',
-    description: '', effect: { type: 'charAttack', value: 10 }, cost: 300, sellPrice: 150 });
+    description: '', effect: { type: 'charAttack', value: 10 }, cost: 300, sellPrice: 150,
+    startWithPlayer: false });
   state.selectedId = newId;
   saveItemsToServer();
 }

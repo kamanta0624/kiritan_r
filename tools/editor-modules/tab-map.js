@@ -279,7 +279,9 @@ export function saveBase() {
   base.income        = n('fb_income');
   base.battleCapacity = n('fb_battleCapacity');
   base.dungeonId     = v('fb_dungeonId') || null;
-  base.battleBgId    = document.getElementById('fb_battleBgId')?.value || null;
+  base.bgField  = document.getElementById('fb_bgField')?.value  || null;
+  base.bgCastle = document.getElementById('fb_bgCastle')?.value || null;
+  delete base.battleBgId;
 
   const checkedAdj   = [...document.querySelectorAll('.adj-cb:checked')].map(cb => cb.value);
   const uncheckedAdj = [...document.querySelectorAll('.adj-cb:not(:checked)')].map(cb => cb.value);
@@ -339,77 +341,90 @@ async function _appendBgSection(container, base) {
   section.className = 'form-section';
   section.innerHTML = '<div class="form-section-title">🎨 戦闘背景画像</div>';
 
-  const previewWrap = document.createElement('div');
-  previewWrap.style.cssText = 'margin-bottom:10px';
-  const currentImg = images.find(img => img.url === base.battleBgId);
-  if (currentImg) {
-    previewWrap.innerHTML = `
-      <img src="${currentImg.url}" style="width:120px;height:68px;object-fit:cover;border-radius:5px;border:1px solid #30363d;display:block;margin-bottom:4px"/>
-      <div style="font-size:10px;color:#8b949e">設定中: ${currentImg.id}</div>`;
-  } else {
-    previewWrap.innerHTML =
-      '<div style="width:120px;height:68px;border:2px dashed #30363d;border-radius:5px;display:flex;align-items:center;justify-content:center;color:#484f58;font-size:11px;margin-bottom:4px">未設定</div>';
+  // プレビューURLはエディタサーバ経由なので /assets/ プレフィックスで表示
+  function toPreviewUrl(saveUrl) {
+    if (!saveUrl) return null;
+    // saveUrl は /battle_backgrounds/bg_001.jpg 形式
+    return saveUrl.startsWith('/assets/') ? saveUrl : `/assets${saveUrl}`;
   }
-  section.appendChild(previewWrap);
 
-  const selRow = document.createElement('div');
-  selRow.className = 'form-row';
-  const selGroup = document.createElement('div');
-  selGroup.className = 'form-group';
-  selGroup.innerHTML = '<label>登録済み画像から選択</label>';
-  const sel = document.createElement('select');
-  sel.id = 'fb_battleBgId';
-  sel.innerHTML = '<option value="">（背景なし）</option>' +
-    images.map(img =>
-      `<option value="${img.url}" ${base.battleBgId === img.url ? 'selected' : ''}>${img.id}</option>`
-    ).join('');
-  sel.onchange = () => {
-    base.battleBgId = sel.value || null;
-    const selected = images.find(i => i.url === sel.value);
-    if (selected) {
-      previewWrap.innerHTML = `
-        <img src="${selected.url}" style="width:120px;height:68px;object-fit:cover;border-radius:5px;border:1px solid #30363d;display:block;margin-bottom:4px"/>
-        <div style="font-size:10px;color:#8b949e">設定中: ${selected.id}</div>`;
-    } else {
-      previewWrap.innerHTML =
-        '<div style="width:120px;height:68px;border:2px dashed #30363d;border-radius:5px;display:flex;align-items:center;justify-content:center;color:#484f58;font-size:11px;margin-bottom:4px">未設定</div>';
+  function makeImgPreview(saveUrl, id) {
+    const previewUrl = toPreviewUrl(saveUrl);
+    if (previewUrl) {
+      return `<img src="${previewUrl}" style="width:120px;height:68px;object-fit:cover;border-radius:5px;border:1px solid #30363d;display:block;margin-bottom:4px"/>
+        <div style="font-size:10px;color:#8b949e">設定中: ${id}</div>`;
     }
-  };
-  selGroup.appendChild(sel);
-  selRow.appendChild(selGroup);
-  section.appendChild(selRow);
+    return '<div style="width:120px;height:68px;border:2px dashed #30363d;border-radius:5px;display:flex;align-items:center;justify-content:center;color:#484f58;font-size:11px;margin-bottom:4px">未設定</div>';
+  }
 
-  const upRow = document.createElement('div');
-  upRow.className = 'form-row';
-  const upGroup = document.createElement('div');
-  upGroup.className = 'form-group';
-  upGroup.innerHTML = '<label>新規アップロード（自動採番）</label>';
-  const upInput = document.createElement('input');
-  upInput.type = 'file'; upInput.accept = 'image/*';
-  upInput.style.cssText = 'margin-top:4px;font-size:12px;color:#8b949e';
-  upInput.onchange = async () => {
-    const file = upInput.files[0]; if (!file) return;
-    const fd = new FormData();
-    fd.append('file', file, file.name);
-    try {
-      const r = await fetch('/api/upload/battle-bg', { method: 'POST', body: fd });
-      const json = await r.json();
-      if (json.ok) {
-        const opt = document.createElement('option');
-        opt.value = json.url; opt.textContent = json.id; opt.selected = true;
-        sel.appendChild(opt);
-        images.push({ id: json.id, url: json.url });
-        base.battleBgId = json.url;
-        previewWrap.innerHTML = `
-          <img src="${json.url}" style="width:120px;height:68px;object-fit:cover;border-radius:5px;border:1px solid #30363d;display:block;margin-bottom:4px"/>
-          <div style="font-size:10px;color:#8b949e">設定中: ${json.id}</div>`;
-        showToast(`${json.id} をアップロードしました`);
-      }
-    } catch (e) { showToast('アップロードエラー: ' + e.message, true); }
-  };
-  upGroup.appendChild(upInput);
-  upRow.appendChild(upGroup);
-  section.appendChild(upRow);
+  // 野戦・籠城の2フィールドをループで生成
+  const fields = [
+    { label: '野戦', key: 'bgField',  selId: 'fb_bgField'  },
+    { label: '籠城', key: 'bgCastle', selId: 'fb_bgCastle' },
+  ];
+
+  for (const field of fields) {
+    const subTitle = document.createElement('div');
+    subTitle.style.cssText = 'font-size:11px;color:#8b949e;font-weight:700;margin:8px 0 4px;letter-spacing:.06em';
+    subTitle.textContent = `[${field.label}]`;
+    section.appendChild(subTitle);
+
+    const previewWrap = document.createElement('div');
+    previewWrap.style.cssText = 'margin-bottom:8px';
+    const currentImg = images.find(img => img.url === base[field.key]);
+    previewWrap.innerHTML = makeImgPreview(base[field.key], currentImg?.id ?? '');
+    section.appendChild(previewWrap);
+
+    const selRow = document.createElement('div');
+    selRow.className = 'form-row';
+    const selGroup = document.createElement('div');
+    selGroup.className = 'form-group';
+    selGroup.innerHTML = '<label>登録済み画像から選択</label>';
+    const sel = document.createElement('select');
+    sel.id = field.selId;
+    sel.innerHTML = '<option value="">（背景なし）</option>' +
+      images.map(img =>
+        `<option value="${img.url}" ${base[field.key] === img.url ? 'selected' : ''}>${img.id}</option>`
+      ).join('');
+    sel.onchange = () => {
+      base[field.key] = sel.value || null;
+      const selected = images.find(i => i.url === sel.value);
+      previewWrap.innerHTML = makeImgPreview(sel.value || null, selected?.id ?? '');
+    };
+    selGroup.appendChild(sel);
+    selRow.appendChild(selGroup);
+    section.appendChild(selRow);
+
+    const upRow = document.createElement('div');
+    upRow.className = 'form-row';
+    const upGroup = document.createElement('div');
+    upGroup.className = 'form-group';
+    upGroup.innerHTML = '<label>新規アップロード（自動採番）</label>';
+    const upInput = document.createElement('input');
+    upInput.type = 'file'; upInput.accept = 'image/*';
+    upInput.style.cssText = 'margin-top:4px;font-size:12px;color:#8b949e';
+    upInput.onchange = async () => {
+      const file = upInput.files[0]; if (!file) return;
+      const fd = new FormData();
+      fd.append('file', file, file.name);
+      try {
+        const r = await fetch('/api/upload/battle-bg', { method: 'POST', body: fd });
+        const json = await r.json();
+        if (json.ok) {
+          const opt = document.createElement('option');
+          opt.value = json.url; opt.textContent = json.id; opt.selected = true;
+          sel.appendChild(opt);
+          images.push({ id: json.id, url: json.url });
+          base[field.key] = json.url;
+          previewWrap.innerHTML = makeImgPreview(json.url, json.id);
+          showToast(`${json.id} をアップロードしました`);
+        }
+      } catch (e) { showToast('アップロードエラー: ' + e.message, true); }
+    };
+    upGroup.appendChild(upInput);
+    upRow.appendChild(upGroup);
+    section.appendChild(upRow);
+  }
 
   const btnRow = container.querySelector('.btn-row');
   container.insertBefore(section, btnRow);

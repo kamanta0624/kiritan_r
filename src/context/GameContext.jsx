@@ -53,7 +53,14 @@ function createInitialState() {
     factions,
     bases:             basesData.bases.map(b => ({ ...b, _originalFactionId: b.factionId })),
     characters,
-    inventory:         [],
+    inventory:         (() => {
+      const sys = new ItemSystem();
+      const inv = [];
+      itemsData.items
+        .filter(item => item.startWithPlayer === true)
+        .forEach(item => sys.addToInventory(inv, item.id));
+      return inv;
+    })(),
     buildings:         [],          // 研究済みID配列（kiritan: worldScene.buildings）
     dungeonProgress:   {},          // { dungeonId: { clearedFloors, isFullyCleared } }
     eventFlags:        {},

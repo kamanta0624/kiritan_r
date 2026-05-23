@@ -280,6 +280,7 @@ export default function App() {
           <BattleScene
             formation={defenseFlow.formation}
             targetNode={item.defenderBase}
+            isDefense={true}
             enemyChars={enemyChars}
             onComplete={async (result) => {
               const phase = await game.actions.battleEnd({
@@ -409,6 +410,7 @@ export default function App() {
             <BattleScene
               formation={sceneParams.formation}
               targetNode={targetBase}
+              isDefense={false}
               enemyChars={enemyChars}
               onComplete={async (result) => {
                 // D-03: 攻撃戦で制圧した場合、battleEnd前に宣戦布告（制圧前のfactionIdを使う）
