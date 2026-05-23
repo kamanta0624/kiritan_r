@@ -2,6 +2,19 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { PK, PK2, AC, AC2, TEAL, TX, TXD, TXF, BR, glass, GAME_STATE, ROLES, CHARS } from '../shared/tokens.js';
 import { TopBar, BottomBar } from '../shared/SharedUI.jsx';
 
+const UPGRADE_COMMANDS = {
+  sp_refill: {
+    label: 'SP補充',
+    desc:  'SPをmaxの50%回復',
+    cost:  100,
+  },
+  sp_max_up: {
+    label: 'SP最大値増加',
+    desc:  'maxSoldiers +200',
+    cost:  200,
+  },
+};
+
 function StatBar({label, val, max=10, color}) {
   const pct = Math.min(val/max,1)*100;
   return (
@@ -34,7 +47,7 @@ function MemeBar({val, max, color}) {
   );
 }
 
-function LeftPanel({char, onConfirm}) {
+function LeftPanel({char, onConfirm, treasury, upgradeUnlocks, secretaryId, onUpgrade, onSetSecretary}) {
   const [key, setKey] = useState(0);
   const prevId = useRef(null);
   useEffect(()=>{
@@ -144,13 +157,62 @@ function LeftPanel({char, onConfirm}) {
           </div>
         )}
         {char.joined ? (
-          <button onClick={onConfirm} style={{
-            width:'100%', padding:'11px', borderRadius:8,
-            background:`linear-gradient(135deg,${role.color},${role.color}bb)`,
-            border:'none', color:'#fff', cursor:'pointer',
-            fontFamily:"'Noto Sans JP'", fontSize:12, fontWeight:700, letterSpacing:'.08em',
-            boxShadow:`0 3px 16px ${role.color}55`,
-          }}>キャラクター詳細を見る →</button>
+          <>
+            <button onClick={onConfirm} style={{
+              width:'100%', padding:'11px', borderRadius:8,
+              background:`linear-gradient(135deg,${role.color},${role.color}bb)`,
+              border:'none', color:'#fff', cursor:'pointer',
+              fontFamily:"'Noto Sans JP'", fontSize:12, fontWeight:700, letterSpacing:'.08em',
+              boxShadow:`0 3px 16px ${role.color}55`,
+              marginBottom:8,
+            }}>キャラクター詳細を見る →</button>
+
+            {/* 秘書ボタン */}
+            {onSetSecretary && (
+              <button
+                onClick={() => onSetSecretary(secretaryId === char.id ? null : char.id)}
+                style={{
+                  width:'100%', padding:'8px', borderRadius:8, marginBottom:8,
+                  background: secretaryId === char.id ? 'rgba(26,138,150,.12)' : 'rgba(0,0,0,.04)',
+                  border: secretaryId === char.id ? `1px solid ${TEAL}55` : `1px solid ${BR}`,
+                  color: secretaryId === char.id ? TEAL : TXD,
+                  cursor:'pointer', fontFamily:"'Noto Sans JP'", fontSize:11, fontWeight:700,
+                }}>
+                {secretaryId === char.id ? '👤 秘書を解除' : '👤 秘書に設定'}
+              </button>
+            )}
+
+            {/* 強化コマンド */}
+            {upgradeUnlocks?.length > 0 && onUpgrade && (
+              <div style={{display:'flex', flexDirection:'column', gap:5}}>
+                <div style={{fontSize:9, fontFamily:'Rajdhani', fontWeight:700,
+                  letterSpacing:'.15em', color:TXD, marginBottom:2}}>UPGRADE</div>
+                {upgradeUnlocks.filter(id => UPGRADE_COMMANDS[id]).map(id => {
+                  const cmd = UPGRADE_COMMANDS[id];
+                  const affordable = (treasury ?? 0) >= cmd.cost;
+                  return (
+                    <button key={id}
+                      onClick={() => onUpgrade(char.id, id)}
+                      disabled={!affordable}
+                      style={{
+                        width:'100%', padding:'7px 10px', borderRadius:7,
+                        background: affordable ? `rgba(192,112,16,.1)` : 'rgba(0,0,0,.04)',
+                        border: affordable ? `1px solid rgba(192,112,16,.3)` : `1px solid ${BR}`,
+                        color: affordable ? AC : TXF,
+                        cursor: affordable ? 'pointer' : 'not-allowed',
+                        fontFamily:"'Noto Sans JP'", fontSize:10, fontWeight:700,
+                        display:'flex', alignItems:'center', justifyContent:'space-between',
+                      }}>
+                      <span>{cmd.label}</span>
+                      <span style={{fontFamily:'Rajdhani', fontSize:11}}>
+                        {cmd.cost.toLocaleString()} ミーム
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </>
         ) : (
           <div style={{width:'100%', padding:'10px', borderRadius:8, textAlign:'center',
             background:'rgba(0,0,0,.04)', border:`1px dashed rgba(0,0,0,.12)`,
@@ -282,7 +344,7 @@ function CharDetail({char, onClose}) {
   );
 }
 
-export default function PartyScene({ onNavigate, characters }) {
+export default function PartyScene({ onNavigate, characters, treasury=0, upgradeUnlocks=[], secretaryId=null, onUpgrade, onSetSecretary }) {
   const [hovered, setHovered] = useState(null);
   const [selected, setSelected] = useState(null);
   const [detail, setDetail] = useState(null);
@@ -338,7 +400,10 @@ export default function PartyScene({ onNavigate, characters }) {
       <div style={{position:'absolute', top:52, left:0, right:0, bottom:52,
         display:'flex', overflow:'hidden'}}>
 
-        <LeftPanel char={activeChar} onConfirm={()=>{ if(activeChar&&activeChar.joined) setDetail(activeChar); }}/>
+        <LeftPanel char={activeChar} onConfirm={()=>{ if(activeChar&&activeChar.joined) setDetail(activeChar); }}
+          treasury={treasury} upgradeUnlocks={upgradeUnlocks} secretaryId={secretaryId}
+          onUpgrade={onUpgrade} onSetSecretary={onSetSecretary}
+        />
 
         <div style={{width:1, background:`linear-gradient(to bottom,transparent,${BR},transparent)`, flexShrink:0}}/>
 

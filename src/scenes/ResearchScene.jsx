@@ -14,21 +14,30 @@ const EFFECT_LABEL = {
 };
 const RCAT_COLOR = { economy:AC, military:PK, recon:TEAL, support:'#6a55b0' };
 
-export default function ResearchScene({ onNavigate, buildingSystem, buildings=[], treasury=0, onResearch }) {
+export default function ResearchScene({
+  onNavigate,
+  buildingSystem,
+  buildings = [],
+  treasury = 0,
+  onResearch,
+  researchQueue = null,
+  onStartResearch,
+}) {
   // BuildingSystem実データ。渡されない場合は空リスト表示
   const allDefs   = buildingSystem ? buildingSystem.getAllDefs() : [];
   const completed = buildings;
   const [selected, setSelected] = useState(allDefs[0]?.id ?? null);
   const meme = treasury;
 
-  const sel       = allDefs.find(r => r.id === selected) ?? null;
-  const isDone    = (id) => completed.includes(id);
-  const canAfford = sel ? meme >= sel.cost && !isDone(sel.id) : false;
-  const canResearch = sel && !isDone(sel.id) && canAfford;
+  const sel          = allDefs.find(r => r.id === selected) ?? null;
+  const isDone       = (id) => completed.includes(id);
+  const isResearching = researchQueue !== null;
+  const canAfford    = sel ? meme >= sel.cost && !isDone(sel.id) : false;
+  const canResearch  = sel && !isDone(sel.id) && canAfford && !isResearching;
 
   const handleResearch = () => {
-    if(!canResearch || !sel) return;
-    if (onResearch) onResearch(sel.id);
+    if (!canResearch || !sel) return;
+    if (onStartResearch) onStartResearch(sel.id);
   };
 
   return (
@@ -58,6 +67,23 @@ export default function ResearchScene({ onNavigate, buildingSystem, buildings=[]
         {/* List */}
         <div style={{flex:1, overflowY:'auto', padding:'16px 18px', minWidth:0,
           borderRight:`1px solid ${BR}`}}>
+          {isResearching && (() => {
+            const qDef = allDefs.find(r => r.id === researchQueue.id);
+            return (
+              <div style={{
+                display:'flex', alignItems:'center', gap:8,
+                padding:'8px 14px', borderRadius:20, marginBottom:12,
+                background:`${TEAL}15`, border:`1px solid ${TEAL}44`,
+                fontSize:12, color:TEAL, fontWeight:700,
+                fontFamily:"'Noto Sans JP'",
+              }}>
+                <span>🔬 研究中: {qDef?.name ?? researchQueue.id}</span>
+                <span style={{marginLeft:'auto', fontFamily:'Rajdhani', fontSize:13}}>
+                  残り {researchQueue.turnsRemaining} ターン
+                </span>
+              </div>
+            );
+          })()}
           <div style={{fontSize:10, fontFamily:'Rajdhani', fontWeight:700, letterSpacing:'.22em', color:TXD, marginBottom:10}}>
             RESEARCH PROJECTS — {allDefs.length}件
           </div>
@@ -65,10 +91,10 @@ export default function ResearchScene({ onNavigate, buildingSystem, buildings=[]
             {allDefs.map(r => {
               const done = isDone(r.id);
               const locked = false; // BuildingSystemに前提条件なし
-              const lockedBy = null;
               const affordable = meme >= r.cost;
               const active = selected === r.id;
               const cc = PK;
+              const dimmedByQueue = isResearching && !done;
               return (
                 <button key={r.id}
                   onClick={()=>setSelected(r.id)}
@@ -77,7 +103,7 @@ export default function ResearchScene({ onNavigate, buildingSystem, buildings=[]
                     borderRadius:10, textAlign:'left', fontFamily:'inherit',
                     background: done ? `${cc}10` : active ? `${cc}18` : 'rgba(255,255,255,.5)',
                     border: active ? `1.5px solid ${cc}` : `1px solid ${BR}`,
-                    opacity: locked ? .55 : 1,
+                    opacity: locked || dimmedByQueue ? .5 : 1,
                     transition:'all .15s',
                     display:'flex', flexDirection:'column', gap:6,
                   }}>
@@ -140,12 +166,26 @@ export default function ResearchScene({ onNavigate, buildingSystem, buildings=[]
                 </span>
               </div>
 
+              {sel.turns != null && (
+                <div style={{display:'flex', alignItems:'center', gap:6,
+                  padding:'6px 14px', borderRadius:8,
+                  background:`${TEAL}10`, border:`1px solid ${TEAL}33`,
+                  fontSize:11, color:TEAL}}>
+                  <span>🕐 研究期間: <strong>{sel.turns}</strong> ターン</span>
+                </div>
+              )}
+
               <div style={{marginTop:'auto'}}>
                 {isDone(sel?.id) ? (
                   <div style={{padding:'12px', borderRadius:8,
                     background:'rgba(42,154,88,.12)', border:'1px solid rgba(42,154,88,.3)',
                     color:'#2a9a58', textAlign:'center', fontWeight:700, fontSize:12,
                     fontFamily:"'Noto Sans JP'"}}>✓ 研究済み</div>
+                ) : isResearching ? (
+                  <div style={{padding:'12px', borderRadius:8,
+                    background:'rgba(0,0,0,.05)', border:`1px solid ${BR}`,
+                    color:TXF, textAlign:'center', fontWeight:700, fontSize:12,
+                    fontFamily:"'Noto Sans JP'"}}>研究中は新規開始不可</div>
                 ) : (
                   <button onClick={handleResearch} disabled={!canAfford}
                     style={{

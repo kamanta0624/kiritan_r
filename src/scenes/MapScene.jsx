@@ -513,6 +513,8 @@ export default function MapScene({ onNavigate, onAttackNode, onNodeClick, gameSt
         meme={gameState?.meme}
         income={gameState?.income}
         bases={gameState?.bases}
+        actionPoints={gameState?.actionPoints}
+        maxActionPoints={gameState?.maxActionPoints}
         rightSlot={
           <div style={{
             padding:'4px 12px', borderRadius:20,

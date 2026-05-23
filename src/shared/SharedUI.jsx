@@ -4,7 +4,7 @@ import { PK, PK2, AC, AC2, TEAL, TX, TXD, TXF, BR, glass, GAME_STATE, ROLES, CHA
 function fmtN(n){ return n >= 1000 ? n.toLocaleString() : String(n); }
 
 // ── Common Top Bar ─────────────────────────────────────────
-export function TopBar({ scene, areaName, currentArea, breadcrumb, rightSlot, turn, meme, income, bases }) {
+export function TopBar({ scene, areaName, currentArea, breadcrumb, rightSlot, turn, meme, income, bases, actionPoints, maxActionPoints }) {
   return (
     <div style={{
       ...glass({borderRadius:0, border:'none', borderBottom:`1px solid ${BR}`,
@@ -35,11 +35,12 @@ export function TopBar({ scene, areaName, currentArea, breadcrumb, rightSlot, tu
       {!breadcrumb && (
         <>
           {[
+            {label:'⚡',    val: actionPoints != null ? `${actionPoints}/${maxActionPoints ?? 5}` : null, c:AC2},
             {label:'ターン', val: turn != null ? String(turn) : String(GAME_STATE.turn), c:TX},
             {label:'ミーム', val: meme != null ? fmtN(meme) : String(GAME_STATE.meme), c:PK},
             {label:'収入',   val: income != null ? `+${fmtN(income)}/T` : `+${GAME_STATE.income}/T`, c:AC},
             {label:'拠点',   val: bases != null ? bases : GAME_STATE.bases, c:TX},
-          ].map((item,i) => (
+          ].filter(item => item.val != null).map((item,i) => (
             <div key={i} style={{display:'flex', alignItems:'center', gap:4,
               padding:'0 11px', borderRight:`1px solid ${BR}`, height:'100%'}}>
               <span style={{fontSize:10, color:TXD, whiteSpace:'nowrap'}}>{item.label}</span>
@@ -79,6 +80,7 @@ export function BottomBar({ scene, onNavigate, onNextTurn, extraLeft, extraRight
           <NavButton label="研究"         onClick={() => onNavigate('research')}  activeColor={AC}   activeBg='rgba(192,112,16,.08)'/>
           <NavButton label="アイテム"     onClick={() => onNavigate('items')}     activeColor={AC}   activeBg='rgba(192,112,16,.08)'/>
           <NavButton label="仲間"         onClick={() => onNavigate('characters')} activeColor={TEAL} activeBg='rgba(26,138,150,.12)'/>
+          <NavButton label="劇場"         onClick={() => onNavigate('theater')}    activeColor={PK}   activeBg='rgba(196,66,122,.08)'/>
           <div style={{flex:1}}/>
           <button
             onClick={() => { if (onNextTurn) onNextTurn(); else onNavigate('enemy_turn'); }}

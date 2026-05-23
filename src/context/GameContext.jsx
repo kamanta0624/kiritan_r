@@ -27,6 +27,7 @@ import charactersData from '../game/data/characters.json';
 import itemsData      from '../game/data/items.json';
 import skillsData     from '../game/data/skills.json';
 import legionsData    from '../game/data/legions.json';
+import researchData   from '../game/data/facilities.json';
 
 // ─────────────────────────────────────────────────────────────
 // 初期状態生成
@@ -69,6 +70,11 @@ function createInitialState() {
     conqueredThisTurn: false,
     hireCooldownUntil: 0,
     gamePhase:         'playing',   // 'playing' | 'victory' | 'defeat'
+    actionPoints:      5,
+    maxActionPoints:   5,
+    researchQueue:     null,        // null | { id: string, turnsRemaining: number }
+    upgradeUnlocks:    ['sp_refill', 'sp_max_up'],
+    secretaryId:       null,        // null | charId string
   };
 }
 
@@ -129,12 +135,41 @@ function gameReducer(state, action) {
         characters = [...characters, ...mobAdditions];
       }
 
+      // 行動力全回復
+      const actionPoints = state.maxActionPoints ?? 5;
+
+      // 研究キュー消化
+      let researchQueue  = state.researchQueue  ?? null;
+      let upgradeUnlocks = [...(state.upgradeUnlocks ?? [])];
+      let eventFlags     = { ...(state.eventFlags ?? {}) };
+
+      if (researchQueue !== null) {
+        const remaining = researchQueue.turnsRemaining - 1;
+        if (remaining <= 0) {
+          const researchDef = researchData.research.find(r => r.id === researchQueue.id);
+          if (researchDef?.unlocks?.upgradeCommands) {
+            upgradeUnlocks = [...new Set([...upgradeUnlocks, ...researchDef.unlocks.upgradeCommands])];
+          }
+          if (researchDef?.unlocks?.flags) {
+            researchDef.unlocks.flags.forEach(f => { eventFlags[f] = true; });
+          }
+          eventFlags[`${researchQueue.id}_done`] = true;
+          researchQueue = null;
+        } else {
+          researchQueue = { ...researchQueue, turnsRemaining: remaining };
+        }
+      }
+
       return {
         ...state,
         currentTurn:       state.currentTurn + 1,
         factions,
         characters,
         conqueredThisTurn: false,
+        actionPoints,
+        researchQueue,
+        upgradeUnlocks,
+        eventFlags,
       };
     }
 
@@ -306,6 +341,15 @@ function gameReducer(state, action) {
     case 'SET_GAME_PHASE':
       return { ...state, gamePhase: action.payload.phase };
 
+    case 'SET_RESEARCH_QUEUE':
+      return { ...state, researchQueue: action.payload };
+
+    case 'SET_ACTION_POINTS':
+      return { ...state, actionPoints: Math.max(0, action.payload) };
+
+    case 'SET_SECRETARY':
+      return { ...state, secretaryId: action.payload };
+
     case 'LOAD_SAVE_MOBS': {
       // セーブロード後のモブスロット復元でcharactersを更新
       const savedMobs = action.payload.mobs;
@@ -425,6 +469,12 @@ function applyEffectToState(state, eff) {
       delete flags[eff.flag];
       return { ...state, eventFlags: flags };
     }
+    case 'actionPointsBonus': {
+      return {
+        ...state,
+        maxActionPoints: (state.maxActionPoints ?? 5) + (eff.delta ?? 1),
+      };
+    }
     default:
       return state;
   }
@@ -434,7 +484,7 @@ function applyEffectToState(state, eff) {
 // セーブ・シリアライズ（SaveSystem v7互換）
 // ─────────────────────────────────────────────────────────────
 
-const SAVE_VERSION  = 7;
+const SAVE_VERSION  = 8;
 const STORAGE_KEY   = slot => `kiritan_save_${slot}`;
 
 function serializeState(state, legionAI) {
@@ -491,6 +541,11 @@ function serializeState(state, legionAI) {
       }
       return base;
     }),
+    actionPoints:    state.actionPoints    ?? 5,
+    maxActionPoints: state.maxActionPoints ?? 5,
+    researchQueue:   state.researchQueue   ?? null,
+    upgradeUnlocks:  state.upgradeUnlocks  ?? ['sp_refill', 'sp_max_up'],
+    secretaryId:     state.secretaryId     ?? null,
     inventory:      (state.inventory ?? []).map(i => ({ id: i.id, itemId: i.itemId })),
     legions:        legionAI ? legionAI.serializeMobSlots() : [],
     dungeonProgress: state.dungeonProgress ?? {},
@@ -552,6 +607,11 @@ function deserializeToState(data, itemSystem) {
     currentTurn:       data.currentTurn       ?? 1,
     hireCooldownUntil: data.hireCooldownUntil ?? 0,
     conqueredThisTurn: data.conqueredThisTurn ?? false,
+    actionPoints:    data.actionPoints    ?? 5,
+    maxActionPoints: data.maxActionPoints ?? 5,
+    researchQueue:   data.researchQueue   ?? null,
+    upgradeUnlocks:  data.upgradeUnlocks  ?? ['sp_refill', 'sp_max_up'],
+    secretaryId:     data.secretaryId     ?? null,
     factions,
     bases,
     characters:     restoredChars,
@@ -969,6 +1029,17 @@ export function GameProvider({ children }) {
       getSaveSlots,
       // 後方互換
       addResearch: (id) => doResearch(id),
+      setActionPoints: (n) => dispatch({ type: 'SET_ACTION_POINTS', payload: n }),
+      startResearch: (id) => {
+        const def = systemsRef.current.buildingSystem?.getDef(id);
+        if (!def) return;
+        const turns = def.turns ?? 1;
+        const pf = stateRef.current.factions.find(f => f.isPlayer);
+        if (!pf || pf.treasury < def.cost) return;
+        dispatch({ type: 'SET_TREASURY', payload: { factionId: pf.id, amount: pf.treasury - def.cost } });
+        dispatch({ type: 'SET_RESEARCH_QUEUE', payload: { id, turnsRemaining: turns } });
+      },
+      setSecretary: (charId) => dispatch({ type: 'SET_SECRETARY', payload: charId }),
     },
     buildBattleUnit: BattleEngineV3.buildUnit,
     checkVictory:    () => checkVictoryCondition(stateRef.current),

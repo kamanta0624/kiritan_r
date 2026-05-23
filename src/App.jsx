@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import './App.css';
 import { useGame } from './context/GameContext.jsx';
+import secretaryLinesData from './game/data/secretary_lines.json';
+import eventsData         from './game/data/events.json';
 
 import TitleScene           from './scenes/TitleScene.jsx';
 import MapScene             from './scenes/MapScene.jsx';
@@ -11,7 +13,9 @@ import EnemyTurnScene       from './scenes/EnemyTurnScene.jsx';
 import PartyScene           from './scenes/PartyScene.jsx';
 import ItemsScene           from './scenes/ItemsScene.jsx';
 import ResearchScene        from './scenes/ResearchScene.jsx';
+import TheaterScene         from './scenes/TheaterScene.jsx';
 import SaveScene            from './scenes/SaveScene.jsx';
+import PartnerWidget        from './shared/PartnerWidget.jsx';
 import GameEndScene         from './scenes/GameEndScene.jsx';
 import DungeonScene         from './scenes/DungeonScene.jsx';
 import NewGamePlusScene     from './scenes/NewGamePlusScene.jsx';
@@ -24,7 +28,7 @@ export default function App() {
   const game = useGame();
   const [scene, setScene]             = useState('title');
   const [sceneParams, setSceneParams] = useState({});
-  // defenseFlow: null | { queue, index, phase: 'adv'|'abandon_confirm'|'formation'|'battle', formation? }
+  // defenseFlow: null | { queue, index, phase: 'defense_prompt'|'formation'|'battle', formation? }
   const [defenseFlow, setDefenseFlow] = useState(null);
   const [focusKey, setFocusKey]       = useState(0);
 
@@ -44,6 +48,7 @@ export default function App() {
     currentTurn, playerFaction, playerBases, income,
     bases, factions, characters, availableChars,
     gamePhase, systems, legionAI,
+    actionPoints, maxActionPoints,
   } = game;
 
   // defenseFlow の最新値を非同期コールバックから参照するための ref
@@ -57,6 +62,8 @@ export default function App() {
     meme:   playerFaction?.treasury ?? 0,
     income,
     bases:  `${playerBases.length}/${bases.length}`,
+    actionPoints,
+    maxActionPoints,
   };
 
   // ── ゲームフェーズ変化 → game_end遷移 ──
@@ -106,72 +113,28 @@ export default function App() {
     const nextItem = df.queue[nextIndex];
     navigate('map', { focusBaseId: nextItem?.defenderBase?.id });
     setFocusKey(k => k + 1);
-    setDefenseFlow({ queue: df.queue, index: nextIndex, phase: 'adv' });
+    setDefenseFlow({ queue: df.queue, index: nextIndex, phase: 'defense_prompt' });
   }, [navigate]);
 
-  // ADV の選択肢ハンドラ
-  const handleDefenseAdvChoice = useCallback((value) => {
-    const df = defenseFlowRef.current;
-    if (!df) return;
-    const item = df.queue[df.index];
+  // defensePromptData 計算
+  const currentDefenseItem = defenseFlow?.phase === 'defense_prompt'
+    ? defenseFlow.queue[defenseFlow.index]
+    : null;
 
-    if (value === 'defend') {
-      setDefenseFlow({ ...df, phase: 'formation' });
-    } else if (value === 'abandon') {
-      setDefenseFlow({ ...df, phase: 'abandon_confirm' });
-    } else if (value === 'confirm_abandon') {
-      game.actions.battleEnd({
-        usedCharIds: [], deadCharIds: [], deadMobIds: [], unitResults: [],
-        conquered:      true,
-        defenderBaseId: item.defenderBase?.id ?? item.defenderBase?.baseId,
-        winnerFactionId: item.attackerFactionId,
-      }).then(phase => advanceDefenseQueue(phase ?? null));
-    } else if (value === 'back') {
-      setDefenseFlow({ ...df, phase: 'adv' });
-    }
-  }, [game.actions, advanceDefenseQueue]);
-
-  // ADV シナリオ（phase に応じて切り替え）
-  const defenseAdvConfig = useMemo(() => {
-    if (!defenseFlow) return { scenario: [], cast: [], bg: null, location: '' };
-    const item          = defenseFlow.queue[defenseFlow.index];
-    const attackerFaction = factions.find(f => f.id === item?.attackerFactionId);
-    const defenderBase  = item?.defenderBase;
-
-    if (defenseFlow.phase === 'abandon_confirm') {
-      return {
-        scenario: [{
-          type: 'choice',
-          text: `本当に「${defenderBase?.name ?? '拠点'}」を放棄しますか？`,
-          choices: [
-            { label: 'はい、放棄する', value: 'confirm_abandon' },
-            { label: 'いいえ、戻る',   value: 'back' },
-          ],
-        }],
-        cast: [],
-        bg: null,
-        location: '',
-      };
-    }
-
+  const defensePromptData = useMemo(() => {
+    if (!currentDefenseItem) return null;
+    const attackerChars = (currentDefenseItem.attackerCharIds ?? [])
+      .map(id => characters.find(c => c.id === id))
+      .filter(Boolean);
+    const enemySoldiers = attackerChars.length > 0
+      ? attackerChars.reduce((s, c) => s + (c.soldiers ?? 0), 0)
+      : 0;
     return {
-      scenario: [
-        { type: 'narration', text: `${attackerFaction?.name ?? '敵勢力'}が${defenderBase?.name ?? '拠点'}に侵攻してきた。` },
-        {
-          type: 'choice',
-          text: '迎撃するか？',
-          choices: [
-            { label: '防衛する', value: 'defend' },
-            { label: '放棄する', value: 'abandon' },
-          ],
-        },
-        { type: 'end' },
-      ],
-      cast: [],
-      bg: 'assets/bg_battle.jpg',
-      location: defenderBase?.name ?? '拠点',
+      defenderBase:    currentDefenseItem.defenderBase,
+      attackerFaction: factions.find(f => f.id === currentDefenseItem.attackerFactionId) ?? null,
+      enemySoldiers,
     };
-  }, [defenseFlow, factions]);
+  }, [currentDefenseItem, characters, factions]);
 
   // 防衛キュー全体を state machine で駆動し、完了まで待てる Promise を返す
   const startDefenseQueue = useCallback((queue) => {
@@ -180,7 +143,7 @@ export default function App() {
       const item = queue[0];
       navigate('map', { focusBaseId: item?.defenderBase?.id });
       setFocusKey(k => k + 1);
-      setDefenseFlow({ queue, index: 0, phase: 'adv' });
+      setDefenseFlow({ queue, index: 0, phase: 'defense_prompt' });
     });
   }, [navigate]);
 
@@ -463,7 +426,35 @@ export default function App() {
 
       // ── キャラクター ──
       case 'characters':
-        return <PartyScene onNavigate={navigate} characters={characters} />;
+        return <PartyScene
+          onNavigate={navigate}
+          characters={characters}
+          treasury={playerFaction?.treasury ?? 0}
+          upgradeUnlocks={game.upgradeUnlocks}
+          secretaryId={game.secretaryId}
+          onUpgrade={(charId, commandId) => {
+            const UPGRADE_COSTS = { sp_refill: 100, sp_max_up: 200 };
+            const cost = UPGRADE_COSTS[commandId] ?? 0;
+            const pf = playerFaction;
+            if (!pf || pf.treasury < cost) return;
+            game.actions.setTreasury(pf.id, pf.treasury - cost);
+            game.actions.setActionPoints(game.actionPoints - 1);
+            const char = characters.find(c => c.id === charId);
+            if (!char) return;
+            if (commandId === 'sp_refill') {
+              game.actions.updateChar({
+                ...char,
+                soldiers: Math.min(
+                  char.soldiers + Math.floor((char.maxSoldiers ?? 1000) * 0.5),
+                  char.maxSoldiers ?? 1000
+                ),
+              });
+            } else if (commandId === 'sp_max_up') {
+              game.actions.updateChar({ ...char, maxSoldiers: (char.maxSoldiers ?? 1000) + 200 });
+            }
+          }}
+          onSetSecretary={(charId) => game.actions.setSecretary(charId)}
+        />;
 
       // ── アイテム ──
       case 'items':
@@ -482,7 +473,46 @@ export default function App() {
           buildingSystem={systems?.buildingSystem}
           buildings={game.buildings}
           treasury={playerFaction?.treasury ?? 0}
+          researchQueue={game.researchQueue}
           onResearch={(id) => game.actions.doResearch(id)}
+          onStartResearch={(id) => game.actions.startResearch(id)}
+        />;
+
+      // ── 劇場 ──
+      case 'theater':
+        return <TheaterScene
+          onNavigate={navigate}
+          events={eventsData}
+          factions={factions}
+          bases={bases}
+          characters={characters}
+          eventFlags={game.eventFlags}
+          currentTurn={currentTurn}
+          playerFaction={playerFaction}
+          playerBases={playerBases}
+          actionPoints={game.actionPoints}
+          onStartTheater={(eventId) => {
+            const ev = eventsData.find(e => e.id === eventId);
+            if (!ev) return;
+            game.actions.setActionPoints(game.actionPoints - 1);
+            const scenario = [
+              { type: 'narration', text: `【${ev.title}】` },
+              { type: 'narration', text: ev.description },
+              { type: 'end' },
+            ];
+            navigate('adv', {
+              scenario,
+              cast: [],
+              bg: null,
+              location: ev.title,
+              returnTo: 'theater',
+              _onComplete: () => {
+                (ev.onComplete ?? []).forEach(eff => {
+                  if (eff.type === 'setFlag') game.actions.setFlag(eff.flag, true);
+                });
+              },
+            });
+          }}
         />;
 
       // ── セーブ/ロード ──
@@ -561,20 +591,27 @@ export default function App() {
   return (
     <div id="app-root" style={{ position:'relative', width:'100vw', height:'100vh' }}>
       {renderScene()}
-      {(defenseFlow?.phase === 'adv' || defenseFlow?.phase === 'abandon_confirm') && scene === 'map' && (
-        <div style={{ position:'absolute', inset:0, zIndex:100 }}>
-          <ADVScene
-            key={`defense-adv-${defenseFlow.phase}`}
-            scenario={defenseAdvConfig.scenario}
-            cast={defenseAdvConfig.cast}
-            bg={defenseAdvConfig.bg}
-            location={defenseAdvConfig.location}
-            transparent={true}
-            onExit={() => {}}
-            onChoice={handleDefenseAdvChoice}
-          />
-        </div>
-      )}
+      <PartnerWidget
+        secretaryId={game.secretaryId}
+        characters={characters}
+        secretaryLines={secretaryLinesData}
+        defensePrompt={defensePromptData}
+        onDefend={() => {
+          const df = defenseFlowRef.current;
+          if (df) setDefenseFlow({ ...df, phase: 'formation' });
+        }}
+        onAbandon={() => {
+          const df = defenseFlowRef.current;
+          if (!df) return;
+          const item = df.queue[df.index];
+          game.actions.battleEnd({
+            usedCharIds: [], deadCharIds: [], deadMobIds: [], unitResults: [],
+            conquered:      true,
+            defenderBaseId: item.defenderBase?.id ?? item.defenderBase?.baseId,
+            winnerFactionId: item.attackerFactionId,
+          }).then(phase => advanceDefenseQueue(phase ?? null));
+        }}
+      />
     </div>
   );
 }

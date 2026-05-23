@@ -132,6 +132,33 @@ delete base.battleBgId;
   `fb_bgField` / `fb_bgCastle` で `saveBase()` から参照する
 - BattleFullQAScene（QAモード）は `isDefense=false` で固定でよい
 
+## ⚠️ tab-map.js バグ修正（最優先）
+
+`_appendBgSection` の末尾:
+
+```js
+const btnRow = container.querySelector('.btn-row');
+container.insertBefore(section, btnRow);
+```
+
+`container` = `formArea`（`div#mapFormArea`）。
+`.btn-row` は `formArea` の直接の子ではなく、`buildBaseForm` が返した `wrap` の内部にある。
+`insertBefore` の第2引数は呼び出し元の直接の子でなければならないため `HierarchyRequestError` が発生する。
+catchで握りつぶされているためエラーも出ず、セクションが挿入されない。
+
+**修正:**
+```js
+// 誤
+const btnRow = container.querySelector('.btn-row');
+container.insertBefore(section, btnRow);
+
+// 正（wrap末尾に追加。保存・削除ボタンより上に背景セクションが入る）
+const wrap = container.querySelector('div');
+wrap.appendChild(section);
+```
+
+---
+
 ## ⚠️ パス問題（重要）
 
 画像ファイルの保存先は `public/battle_backgrounds/`。

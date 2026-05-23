@@ -1,0 +1,14 @@
+[
+  {
+    "id": "theater_sample_001",
+    "type": "theater",
+    "category": "recurring",
+    "title": "テストイベント",
+    "description": "動作確認用の繰り返しイベント",
+    "conditions": { "chars": [], "flags": [], "notFlags": [], "ownedBase": null, "minTurn": null },
+    "cost": { "actionPoints": 1 },
+    "script": "event_sample_001",
+    "onComplete": [],
+    "repeatable": true
+  }
+]
