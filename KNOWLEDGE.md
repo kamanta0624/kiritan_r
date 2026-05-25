@@ -347,9 +347,10 @@ glass(extra={})
 
 ## 16. セーブキー
 
-`kiritan_save_{slot}`（slot: 1|2|3）。SAVE_VERSION = **8**（Phase A で 7→8 更新）。
+`kiritan_save_{slot}`（slot: 1|2|3）。SAVE_VERSION = **9**（研究システム全面改修で 8→9 更新）。
 
 旧セーブ（v7以前）は後方互換: actionPoints=5, researchQueue=null, upgradeUnlocks=['sp_refill','sp_max_up'], secretaryId=null がデフォルト補填される。
+旧セーブ（v8以前）は後方互換: purchasedUpgrades=[] をデフォルト補填される。
 
 ---
 

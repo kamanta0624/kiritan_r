@@ -5,7 +5,7 @@
       "isTemplate": true,
       "displayName": "歩兵部隊",
       "nameVariants": [
-        "カルス",
+        "更迭はう",
         "ベルン",
         "ドラン",
         "フォーグ",
@@ -61,7 +61,9 @@
       "battleCapacity": 30,
       "charDefense": 0,
       "attackCount": 8,
-      "recoveryRate": null
+      "recoveryRate": null,
+      "specialType": null,
+      "talkEventId": null
     },
     {
       "id": "mob_002",
