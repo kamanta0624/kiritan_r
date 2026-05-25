@@ -3,6 +3,7 @@ import './App.css';
 import { useGame } from './context/GameContext.jsx';
 import secretaryLinesData from './game/data/secretary_lines.json';
 import eventsData         from './game/data/events.json';
+import dungeonsData       from './game/data/dungeons.json';
 
 import TitleScene           from './scenes/TitleScene.jsx';
 import MapScene             from './scenes/MapScene.jsx';
@@ -30,12 +31,43 @@ export default function App() {
   const [sceneParams, setSceneParams] = useState({});
   // defenseFlow: null | { queue, index, phase: 'defense_prompt'|'formation'|'battle', formation? }
   const [defenseFlow, setDefenseFlow] = useState(null);
+  // dungeonFlow: null | { dungeonId, explorerCharId, floor, baseNode }
+  const [dungeonFlow, setDungeonFlow] = useState(null);
   const [focusKey, setFocusKey]       = useState(0);
 
   const navigate = useCallback((dest, params = {}) => {
     setSceneParams(params);
     setScene(dest);
   }, []);
+
+  function buildDungeonEnemy(enemy) {
+    return {
+      id:           `dungeon_enemy_${Date.now()}`,
+      name:         enemy.name,
+      factionId:    '__dungeon__',
+      isLeader:     true,
+      role:         'attacker',
+      attackType:   'melee',
+      charHp:       enemy.charHp,
+      charMaxHp:    enemy.charHp,
+      charAttack:   enemy.charAttack,
+      charSong:     0,
+      charDefense:  0,
+      soldiers:     enemy.soldiers,
+      maxSoldiers:  enemy.soldiers,
+      soldierAtk:   enemy.soldierAtk,
+      soldierDef:   enemy.soldierDef,
+      strategyRate: 30,
+      penaltyTurns: 0,
+      usedThisTurn: false,
+      skillId:      null,
+      battleBonus: {
+        attack:  { soldierAtk:0, soldierDef:0, charAttack:0, charSong:0 },
+        defense: { soldierAtk:0, soldierDef:0, charAttack:0, charSong:0 },
+        dungeon: { soldierAtk:0, soldierDef:0, charAttack:0, charSong:0 },
+      },
+    };
+  }
 
   useEffect(() => {
     game.setStartDialogHandler((script, onComplete) => {
@@ -364,9 +396,11 @@ export default function App() {
       case 'battle': {
         const targetBase     = sceneParams.targetNode;
         const enemyFactionId = targetBase?.factionId;
-        const enemyChars     = enemyFactionId && legionAI
-          ? legionAI.getDefenders(enemyFactionId, targetBase, characters).slice(0, 4)
-          : [];
+        const enemyChars     = sceneParams._dungeonEnemy
+          ? [buildDungeonEnemy(sceneParams._dungeonEnemy)]
+          : (enemyFactionId && legionAI
+              ? legionAI.getDefenders(enemyFactionId, targetBase, characters).slice(0, 4)
+              : []);
 
         return (
           <div style={{ width:'100vw', height:'100vh', background:'#000' }}>
@@ -376,6 +410,32 @@ export default function App() {
               isDefense={false}
               enemyChars={enemyChars}
               onComplete={async (result) => {
+                // ── ダンジョン戦闘の場合 ──
+                if (dungeonFlow) {
+                  const { dungeonId, explorerCharId, floor, baseNode } = dungeonFlow;
+                  setDungeonFlow(null);
+
+                  const isWin = result?.conquered === true;
+                  await game.actions.battleEnd({
+                    usedCharIds:     [explorerCharId],
+                    deadCharIds:     isWin ? [] : [explorerCharId],
+                    deadMobIds:      [],
+                    unitResults:     result?.unitResults ?? [],
+                    conquered:       false,
+                    defenderBaseId:  null,
+                    winnerFactionId: null,
+                  });
+
+                  navigate('dungeon', {
+                    baseNode,
+                    _battleResult: isWin ? 'win' : 'lose',
+                    _resumeFloor:  floor,
+                    _resumeCharId: explorerCharId,
+                  });
+                  return;
+                }
+
+                // ── 通常戦闘ロジック ──
                 // D-03: 攻撃戦で制圧した場合、battleEnd前に宣戦布告（制圧前のfactionIdを使う）
                 if (result?.conquered) {
                   game.actions.declareWar(targetBase?.factionId);
@@ -428,18 +488,22 @@ export default function App() {
       case 'characters':
         return <PartyScene
           onNavigate={navigate}
-          characters={characters}
+          characters={characters.filter(c => c.factionId === playerFaction?.id)}
           treasury={playerFaction?.treasury ?? 0}
           upgradeUnlocks={game.upgradeUnlocks}
           secretaryId={game.secretaryId}
+          buildings={game.buildings}
+          buildingSystem={systems?.buildingSystem}
           onUpgrade={(charId, commandId) => {
             const UPGRADE_COSTS = { sp_refill: 100, sp_max_up: 200 };
-            const cost = UPGRADE_COSTS[commandId] ?? 0;
+            const baseCost = UPGRADE_COSTS[commandId] ?? 0;
+            const char = characters.find(c => c.id === charId);
+            const mult = commandId === 'sp_max_up' ? (char?._spMaxUpCostMult ?? 1.0) : 1.0;
+            const cost = Math.floor(baseCost * Math.max(0.2, mult));
             const pf = playerFaction;
             if (!pf || pf.treasury < cost) return;
             game.actions.setTreasury(pf.id, pf.treasury - cost);
             game.actions.setActionPoints(game.actionPoints - 1);
-            const char = characters.find(c => c.id === charId);
             if (!char) return;
             if (commandId === 'sp_refill') {
               game.actions.updateChar({
@@ -454,6 +518,7 @@ export default function App() {
             }
           }}
           onSetSecretary={(charId) => game.actions.setSecretary(charId)}
+          onPurchaseUpgrade={(charId, cmdId) => game.actions.purchaseUpgrade(charId, cmdId)}
         />;
 
       // ── アイテム ──
@@ -543,8 +608,41 @@ export default function App() {
         />;
 
       // ── 迷宮 ──
-      case 'dungeon':
-        return <DungeonScene onNavigate={navigate} baseNode={sceneParams.baseNode} />;
+      case 'dungeon': {
+        const baseNode  = sceneParams.baseNode;
+        const dungeonId = baseNode?.dungeonId;
+        const dungeon   = dungeonsData.dungeons.find(d => d.id === dungeonId);
+        if (!dungeon) return <div>迷宮データが見つかりません</div>;
+
+        const progress = game.dungeonProgress?.[dungeonId]
+          ?? { clearedFloors: 0, isFullyCleared: false };
+
+        return (
+          <DungeonScene
+            dungeon={dungeon}
+            progress={progress}
+            availableChars={availableChars}
+            dungeonExploredThisTurn={game.dungeonExploredThisTurn}
+            battleResult={sceneParams._battleResult ?? null}
+            resumeFloor={sceneParams._resumeFloor ?? null}
+            resumeCharId={sceneParams._resumeCharId ?? null}
+            onStartBattle={(explorerCharId, floor, floorData) => {
+              setDungeonFlow({ dungeonId, explorerCharId, floor, baseNode });
+              game.actions.dungeonExplored();
+              navigate('battle', {
+                mode:           'dungeon',
+                formation:      characters.filter(c => c.id === explorerCharId),
+                targetNode:     { name: dungeon.name, battleCapacity: 99999 },
+                _dungeonEnemy:  floorData.enemy,
+                battleCapacity: 99999,
+              });
+            }}
+            onFloorClear={(payload) => game.actions.dungeonFloorClear(payload)}
+            onDefeat={(charId)      => game.actions.dungeonDefeat(charId)}
+            onNavigate={navigate}
+          />
+        );
+      }
 
       // ── 周回選択 ──
       case 'new_game_plus':

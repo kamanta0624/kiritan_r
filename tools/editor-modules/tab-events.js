@@ -1,6 +1,7 @@
 /**
  * tools/editor-modules/tab-events.js
  * v5: UX大改修 - チャプターフィルタ/フラグ補完/キャラ勢力別/右ペイン拡大/依存グラフ
+ * v6: UI refresh - DOM構築のスタイル指定をCSSクラスに集約（ロジック変更なし）
  */
 
 import { showToast } from './shared.js';
@@ -182,18 +183,17 @@ function _flagInput(obj, key, placeholder = 'フラグ名') {
   inp.setAttribute('list', 'ev-flag-list');
   inp.value       = obj[key] ?? '';
   inp.placeholder = placeholder;
-  inp.style.cssText = 'flex:1;min-width:100px;padding:3px 5px;border-radius:4px;border:1px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);font-size:12px';
   inp.oninput = () => { obj[key] = inp.value || undefined; _updateFlagDatalist(); };
   return inp;
 }
 
 // ----------------------------------------------------------------
-// メインレンダリング (Task 4: 右ペイン 300px → 420px)
+// メインレンダリング
 // ----------------------------------------------------------------
 
 function _render() {
   _container.innerHTML = '';
-  _container.style.cssText = 'display:flex;flex-direction:column;height:100%;overflow:hidden';
+  _container.className = 'ev-tab';
 
   // datalist（フラグ補完用）
   const dl = document.createElement('datalist');
@@ -203,45 +203,57 @@ function _render() {
   _updateFlagDatalist();
 
   const layout = document.createElement('div');
-  layout.style.cssText = 'display:grid;grid-template-columns:260px 1fr 420px;gap:12px;flex:1;min-height:0;padding:12px';
+  layout.className = 'ev-layout';
 
-  const left   = _buildList();
+  // ---- left pane ----
+  const left = document.createElement('div');
+  left.className = 'ev-pane ev-pane-list';
+  _buildList(left);
+
+  // ---- center pane ----
   const center = document.createElement('div');
-  center.id = 'ev-editor-pane';
-  center.style.cssText = 'overflow-y:auto;padding-right:4px';
+  center.className = 'ev-pane ev-pane-center';
+  const centerScroll = document.createElement('div');
+  centerScroll.className = 'ev-pane-scroll ev-pad';
+  centerScroll.id = 'ev-editor-pane';
+  center.appendChild(centerScroll);
 
+  // ---- right pane ----
   const right = document.createElement('div');
+  right.className = 'ev-pane ev-pane-right';
   right.id = 'ev-conv-pane';
-  right.style.cssText = 'overflow-y:auto;border-left:1px solid var(--color-border-tertiary);padding-left:12px;min-width:0';
 
   if (_selIdx >= 0 && _events[_selIdx]) {
-    _buildEditor(center, _events[_selIdx]);
+    _buildEditor(centerScroll, _events[_selIdx]);
     _buildConvPane(right, _events[_selIdx]);
   } else {
-    center.innerHTML = '<p style="color:var(--color-text-secondary);margin-top:24px">左のリストからイベントを選択してください</p>';
+    const empty = document.createElement('div');
+    empty.className = 'ev-empty-center';
+    empty.textContent = '← 左のリストからイベントを選択してください';
+    centerScroll.appendChild(empty);
+
+    const emptyR = document.createElement('div');
+    emptyR.className = 'ev-conv-header';
+    emptyR.innerHTML = '<div class="ev-conv-header-title">会話一括入力</div><div class="ev-conv-header-sub">イベントを選択すると、会話ステップをまとめて編集できます</div>';
+    right.appendChild(emptyR);
   }
 
-  layout.appendChild(left);
-  layout.appendChild(center);
-  layout.appendChild(right);
+  layout.append(left, center, right);
   _container.appendChild(layout);
 }
 
 // ----------------------------------------------------------------
-// 左ペイン (Task 1: アコーディオン + フィルタ, Task 2: フラグパネル, Task 5: グラフボタン)
+// 左ペイン
 // ----------------------------------------------------------------
 
-function _buildList() {
-  const wrap = document.createElement('div');
-  wrap.style.cssText = 'display:flex;flex-direction:column;gap:6px;height:100%;min-height:0';
-
+function _buildList(wrap) {
   // ---- ツールバー ----
   const toolbar = document.createElement('div');
-  toolbar.style.cssText = 'display:flex;gap:4px';
+  toolbar.className = 'ev-toolbar';
 
   const addBtn = document.createElement('button');
+  addBtn.className = 'ev-btn ev-btn-primary';
   addBtn.textContent = '+ 新規';
-  addBtn.style.cssText = 'flex:1;padding:5px 4px;background:var(--color-background-info);color:var(--color-text-info);border:1px solid var(--color-border-info);border-radius:6px;cursor:pointer;font-size:12px';
   addBtn.onclick = () => {
     const newId = `ev_${String(Date.now()).slice(-6)}`;
     _events.push({
@@ -259,31 +271,25 @@ function _buildList() {
   };
 
   const graphBtn = document.createElement('button');
+  graphBtn.className = 'ev-btn ev-btn-ghost';
   graphBtn.textContent = 'グラフ';
   graphBtn.title = 'イベント依存関係グラフ表示';
-  graphBtn.style.cssText = 'padding:5px 8px;background:transparent;color:var(--color-text-secondary);border:1px solid var(--color-border-secondary);border-radius:6px;cursor:pointer;font-size:12px';
   graphBtn.onclick = () => _showGraph();
 
   const flagToggle = document.createElement('button');
+  flagToggle.className = `ev-btn ev-btn-ghost${_showFlagPanel ? ' active' : ''}`;
   flagToggle.textContent = 'フラグ';
   flagToggle.title = 'フラグ管理パネル';
-  flagToggle.style.cssText = `padding:5px 8px;border:1px solid var(--color-border-secondary);border-radius:6px;cursor:pointer;font-size:12px;background:${_showFlagPanel ? 'var(--color-background-secondary)' : 'transparent'};color:var(--color-text-secondary)`;
   flagToggle.onclick = () => { _showFlagPanel = !_showFlagPanel; _render(); };
 
   toolbar.append(addBtn, graphBtn, flagToggle);
   wrap.appendChild(toolbar);
 
-  // ---- フラグ管理パネル ----
-  if (_showFlagPanel) {
-    wrap.appendChild(_buildFlagPanel());
-  }
-
   // ---- フィルターバー ----
   const filterBar = document.createElement('div');
-  filterBar.style.cssText = 'display:flex;flex-direction:column;gap:3px';
+  filterBar.className = 'ev-filter';
 
   const chapSel = document.createElement('select');
-  chapSel.style.cssText = 'width:100%;padding:3px;border-radius:4px;border:1px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);font-size:11px';
   [{ value: 'all', label: '全チャプター' }, ...CHAPTER_ORDER.map(c => ({ value: c, label: CHAPTER_LABELS[c] ?? c }))].forEach(({ value, label }) => {
     const o = document.createElement('option'); o.value = value; o.textContent = label;
     if (_filterChapter === value) o.selected = true;
@@ -292,7 +298,6 @@ function _buildList() {
   chapSel.onchange = () => { _filterChapter = chapSel.value; _render(); };
 
   const trigSel = document.createElement('select');
-  trigSel.style.cssText = chapSel.style.cssText;
   [{ value: 'all', label: '全タイミング' }, ...TRIGGER_OPTIONS].forEach(({ value, label }) => {
     const o = document.createElement('option'); o.value = value; o.textContent = label;
     if (_filterTrigger === value) o.selected = true;
@@ -303,9 +308,14 @@ function _buildList() {
   filterBar.append(chapSel, trigSel);
   wrap.appendChild(filterBar);
 
+  // ---- フラグ管理パネル ----
+  if (_showFlagPanel) {
+    wrap.appendChild(_buildFlagPanel());
+  }
+
   // ---- アコーディオンリスト ----
   const listWrap = document.createElement('div');
-  listWrap.style.cssText = 'display:flex;flex-direction:column;gap:4px;overflow-y:auto;flex:1';
+  listWrap.className = 'ev-list';
 
   const filtered = _events
     .map((ev, i) => ({ ev, i }))
@@ -331,42 +341,44 @@ function _buildList() {
     if (!items || items.length === 0) return;
 
     const details = document.createElement('details');
+    details.className = 'ev-group';
     details.open = true;
-    details.style.cssText = 'border:1px solid var(--color-border-tertiary);border-radius:6px;overflow:hidden';
 
     const summary = document.createElement('summary');
-    summary.style.cssText = 'padding:5px 8px;font-size:11px;font-weight:600;color:var(--color-text-secondary);background:var(--color-background-secondary);cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center';
-    summary.innerHTML = `<span>${CHAPTER_LABELS[ch] ?? ch}</span><span style="font-weight:400;opacity:0.7">${items.length}</span>`;
+    summary.innerHTML = `<span class="ev-group-title">${CHAPTER_LABELS[ch] ?? ch}</span><span class="ev-group-count">${items.length}</span>`;
 
     const itemList = document.createElement('div');
-    itemList.style.cssText = 'display:flex;flex-direction:column;gap:2px;padding:4px';
+    itemList.className = 'ev-group-body';
 
     items.forEach(({ ev, i }) => {
       const isSelected = i === _selIdx;
       const item = document.createElement('div');
-      item.style.cssText = `padding:6px 8px;border-radius:5px;cursor:pointer;font-size:12px;border:1px solid ${isSelected ? 'var(--color-border-primary)' : 'transparent'};background:${isSelected ? 'var(--color-background-secondary)' : 'transparent'}`;
+      item.className = `ev-item${isSelected ? ' active' : ''}`;
 
       const trigLabel = TRIGGER_OPTIONS.find(t => t.value === ev.trigger)?.label ?? ev.trigger;
-      const typeLabel = ev.type ? `<span style="padding:1px 4px;border-radius:3px;background:#1a2a1a;color:#88ffaa;font-size:9px;margin-right:3px">[${ev.type}]</span>` : '';
-      const trigBadge = `<span style="padding:1px 4px;border-radius:3px;background:var(--color-background-secondary);color:var(--color-text-secondary);font-size:9px;border:1px solid var(--color-border-tertiary)">${trigLabel}</span>`;
+      const typeBadge = ev.type ? `<span class="ev-item-type">${ev.type}</span>` : '';
 
       item.innerHTML = `
-        <div style="font-weight:500;color:var(--color-text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:3px">${typeLabel}${ev.name}</div>
-        <div style="display:flex;gap:4px;align-items:center">${trigBadge}<span style="font-size:10px;color:var(--color-text-secondary)">p=${ev.probability} pri=${ev.priority}</span></div>
+        <div class="ev-item-title-row">
+          <span class="ev-item-title">${ev.name}</span>
+          <button class="ev-item-del" title="削除">✕</button>
+        </div>
+        <div class="ev-item-meta">
+          ${typeBadge}
+          <span class="ev-item-trigger">${trigLabel}</span>
+          <span class="ev-item-num"><em>p</em>${ev.probability} <em>pri</em>${ev.priority}</span>
+        </div>
       `;
-      item.onclick = () => { _selIdx = i; _render(); };
+      item.onclick = (e) => { if (!e.target.closest('.ev-item-del')) { _selIdx = i; _render(); } };
 
-      const del = document.createElement('span');
-      del.textContent = '✕';
-      del.style.cssText = 'float:right;color:var(--color-text-danger);cursor:pointer;font-size:11px;margin-left:4px;padding:0 2px';
-      del.onclick = async e => {
+      item.querySelector('.ev-item-del').onclick = (e) => {
         e.stopPropagation();
         if (!confirm(`「${ev.name}」を削除しますか？`)) return;
         _events.splice(i, 1);
         if (_selIdx >= _events.length) _selIdx = _events.length - 1;
         _render();
       };
-      item.prepend(del);
+
       itemList.appendChild(item);
     });
 
@@ -376,31 +388,33 @@ function _buildList() {
 
   if (filtered.length === 0) {
     const empty = document.createElement('div');
+    empty.className = 'ev-empty-list';
     empty.textContent = 'フィルター条件に一致するイベントがありません';
-    empty.style.cssText = 'font-size:11px;color:var(--color-text-secondary);padding:12px;text-align:center';
     listWrap.appendChild(empty);
   }
 
   wrap.appendChild(listWrap);
 
+  // ---- フッター（保存ボタン） ----
+  const footer = document.createElement('div');
+  footer.className = 'ev-list-footer';
   const saveBtn = document.createElement('button');
+  saveBtn.className = 'ev-btn ev-btn-success';
   saveBtn.textContent = '保存';
-  saveBtn.style.cssText = 'padding:8px;background:var(--color-background-success);color:var(--color-text-success);border:1px solid var(--color-border-success);border-radius:6px;cursor:pointer;font-weight:500';
   saveBtn.onclick = _save;
-  wrap.appendChild(saveBtn);
-
-  return wrap;
+  footer.appendChild(saveBtn);
+  wrap.appendChild(footer);
 }
 
-// ---- フラグ管理パネル (Task 2) ----
+// ---- フラグ管理パネル ----
 
 function _buildFlagPanel() {
   const panel = document.createElement('div');
-  panel.style.cssText = 'background:var(--color-background-secondary);border:1px solid var(--color-border-secondary);border-radius:6px;padding:8px;max-height:160px;overflow-y:auto;flex-shrink:0';
+  panel.className = 'ev-flag-panel';
 
   const title = document.createElement('div');
+  title.className = 'ev-flag-panel-title';
   title.textContent = 'フラグ一覧（クリックでコピー）';
-  title.style.cssText = 'font-size:10px;font-weight:600;color:var(--color-text-secondary);margin-bottom:5px';
   panel.appendChild(title);
 
   const flagUsage = {};
@@ -421,23 +435,26 @@ function _buildFlagPanel() {
 
   const flags = Object.keys(flagUsage).sort();
   if (flags.length === 0) {
-    panel.innerHTML += '<div style="font-size:11px;color:var(--color-text-secondary)">フラグなし</div>';
+    const empty = document.createElement('div');
+    empty.className = 'ev-empty-list';
+    empty.textContent = 'フラグなし';
+    panel.appendChild(empty);
     return panel;
   }
 
   flags.forEach(flag => {
     const row = document.createElement('div');
-    row.style.cssText = 'display:flex;align-items:center;gap:4px;padding:2px 0;cursor:pointer';
+    row.className = 'ev-flag-row';
     row.title = 'クリックでコピー';
     row.onclick = () => { navigator.clipboard?.writeText(flag); showToast(`コピー: ${flag}`); };
 
     const name = document.createElement('span');
+    name.className = 'ev-flag-name';
     name.textContent = flag;
-    name.style.cssText = 'flex:1;font-size:10px;color:var(--color-text-primary);font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
 
     const count = document.createElement('span');
+    count.className = 'ev-flag-count';
     count.textContent = `${flagUsage[flag].size}`;
-    count.style.cssText = 'font-size:10px;color:var(--color-text-secondary);min-width:20px;text-align:right';
 
     row.append(name, count);
     panel.appendChild(row);
@@ -459,7 +476,6 @@ function _buildEditor(pane, ev) {
   _field(pane, '名前', _text(ev, 'name'));
 
   const trigSel = document.createElement('select');
-  trigSel.style.cssText = 'width:100%;padding:4px;border-radius:4px;border:1px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);font-size:13px';
   TRIGGER_OPTIONS.forEach(t => {
     const o = document.createElement('option'); o.value = t.value; o.textContent = t.label;
     if (ev.trigger === t.value) o.selected = true;
@@ -472,7 +488,7 @@ function _buildEditor(pane, ev) {
   _field(pane, '優先度', _num(ev, 'priority', 0, 999, 1));
   _field(pane, '最大発生回数 (-1=無制限)', _num(ev, 'maxOccurrences', -1, 999, 1));
 
-  _section(pane, '発生条件 (AND結合)');
+  _section(pane, '発生条件', 'AND結合');
   _buildConditions(pane, ev);
 
   _section(pane, 'スクリプト');
@@ -482,23 +498,23 @@ function _buildEditor(pane, ev) {
     k => k !== 'default' || (ev.effects[k] && ev.effects[k].length > 0)
   );
   if (hasLegacyEffects) {
-    _section(pane, 'エフェクト（旧方式キー）');
+    _section(pane, 'エフェクト', '旧方式キー');
     _buildEffects(pane, ev);
   }
 }
 
-// ---- 条件 (Task 2: flag → _flagInput, Task 3: charId → _charSelectWithGroup) ----
+// ---- 条件 ----
 
 function _buildConditions(pane, ev) {
   const wrap = document.createElement('div');
-  wrap.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-bottom:8px';
+  wrap.className = 'ev-cond-list';
 
   ev.conditions.forEach((cond, i) => {
     const row = document.createElement('div');
-    row.style.cssText = 'display:flex;gap:6px;align-items:flex-start;padding:6px;background:var(--color-background-secondary);border-radius:6px';
+    row.className = 'ev-cond-row';
 
     const typeSel = document.createElement('select');
-    typeSel.style.cssText = 'flex:0 0 130px;padding:4px;border-radius:4px;border:1px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);font-size:12px';
+    typeSel.className = 'ev-cond-type';
     CONDITION_TYPES.forEach(ct => {
       const o = document.createElement('option'); o.value = ct.value; o.textContent = ct.label;
       if (cond.type === ct.value) o.selected = true;
@@ -511,7 +527,7 @@ function _buildConditions(pane, ev) {
     };
 
     const paramsWrap = document.createElement('div');
-    paramsWrap.style.cssText = 'flex:1;display:flex;gap:4px;flex-wrap:wrap';
+    paramsWrap.className = 'ev-cond-params';
     const ctDef = CONDITION_TYPES.find(ct => ct.value === cond.type);
     (ctDef?.params ?? []).forEach(paramStr => {
       const [key, hint] = paramStr.split(':');
@@ -519,7 +535,6 @@ function _buildConditions(pane, ev) {
       if (key === 'flag')   { paramsWrap.appendChild(_flagInput(cond, key, hint ?? key)); return; }
       const inp = document.createElement('input');
       inp.placeholder = hint ?? key; inp.value = cond[key] ?? '';
-      inp.style.cssText = 'flex:1;min-width:80px;padding:3px 6px;border-radius:4px;border:1px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);font-size:12px';
       inp.oninput = () => {
         const v = inp.value.trim();
         if (key === 'value' || key === 'delta') cond[key] = isNaN(v) ? v : Number(v);
@@ -530,8 +545,9 @@ function _buildConditions(pane, ev) {
     });
 
     const del = document.createElement('button');
+    del.className = 'ev-btn ev-btn-icon ev-btn-danger';
     del.textContent = '✕';
-    del.style.cssText = 'flex:0 0 24px;height:24px;border:none;background:transparent;color:var(--color-text-danger);cursor:pointer;font-size:14px';
+    del.title = 'この条件を削除';
     del.onclick = () => { ev.conditions.splice(i, 1); _buildConditions(pane, ev); wrap.remove(); };
 
     row.append(typeSel, paramsWrap, del);
@@ -539,8 +555,8 @@ function _buildConditions(pane, ev) {
   });
 
   const addBtn = document.createElement('button');
+  addBtn.className = 'ev-btn ev-btn-add';
   addBtn.textContent = '+ 条件追加';
-  addBtn.style.cssText = 'align-self:flex-start;padding:4px 10px;border-radius:4px;border:1px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;font-size:12px';
   addBtn.onclick = () => {
     ev.conditions.push({ type: 'turn', op: 'gte', value: 1 });
     _buildConditions(pane, ev); wrap.remove();
@@ -549,25 +565,25 @@ function _buildConditions(pane, ev) {
   pane.appendChild(wrap);
 }
 
-// ---- スクリプト (Task 3: _charSelect → _charSelectWithGroup) ----
+// ---- スクリプト ----
 
 function _buildScript(pane, ev) {
   const wrap = document.createElement('div');
-  wrap.style.cssText = 'display:flex;flex-direction:column;gap:4px;margin-bottom:8px';
+  wrap.className = 'ev-step-list';
 
   ev.script.forEach((step, i) => {
     const card = document.createElement('div');
-    card.style.cssText = 'padding:8px;background:var(--color-background-secondary);border-radius:6px;border:1px solid var(--color-border-tertiary)';
+    card.className = `ev-step-card${step.type === 'conversation' ? ' is-conv' : ''}`;
 
     const header = document.createElement('div');
-    header.style.cssText = 'display:flex;gap:6px;align-items:center;margin-bottom:6px';
+    header.className = 'ev-step-header';
 
     const idxLabel = document.createElement('span');
+    idxLabel.className = 'ev-step-idx';
     idxLabel.textContent = `#${i}`;
-    idxLabel.style.cssText = 'min-width:28px;font-size:11px;color:var(--color-text-secondary)';
 
     const typeSel = document.createElement('select');
-    typeSel.style.cssText = 'padding:3px;border-radius:4px;border:1px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);font-size:12px';
+    typeSel.className = 'ev-step-type';
     SCRIPT_STEP_TYPES.forEach(st => {
       const o = document.createElement('option'); o.value = st.value; o.textContent = st.label;
       if (step.type === st.value) o.selected = true;
@@ -586,26 +602,33 @@ function _buildScript(pane, ev) {
       if (rightPane && _events[_selIdx]) _buildConvPane(rightPane, _events[_selIdx]);
     };
 
+    const actions = document.createElement('div');
+    actions.className = 'ev-step-actions';
+
     const up = document.createElement('button');
+    up.className = 'ev-btn ev-btn-icon';
     up.textContent = '↑'; up.disabled = i === 0;
-    up.style.cssText = 'padding:2px 5px;border-radius:4px;border:1px solid var(--color-border-secondary);background:transparent;cursor:pointer;font-size:11px;color:var(--color-text-secondary)';
+    up.title = '上へ移動';
     up.onclick = () => { [ev.script[i-1], ev.script[i]] = [ev.script[i], ev.script[i-1]]; _buildScript(pane, ev); wrap.remove(); };
 
     const dn = document.createElement('button');
+    dn.className = 'ev-btn ev-btn-icon';
     dn.textContent = '↓'; dn.disabled = i === ev.script.length - 1;
-    dn.style.cssText = up.style.cssText;
+    dn.title = '下へ移動';
     dn.onclick = () => { [ev.script[i], ev.script[i+1]] = [ev.script[i+1], ev.script[i]]; _buildScript(pane, ev); wrap.remove(); };
 
     const del = document.createElement('button');
+    del.className = 'ev-btn ev-btn-icon ev-btn-danger';
     del.textContent = '✕';
-    del.style.cssText = 'margin-left:auto;padding:2px 6px;border:none;background:transparent;color:var(--color-text-danger);cursor:pointer;font-size:13px';
+    del.title = 'このステップを削除';
     del.onclick = () => {
       ev.script.splice(i, 1); _buildScript(pane, ev); wrap.remove();
       const rightPane = document.getElementById('ev-conv-pane');
       if (rightPane && _events[_selIdx]) _buildConvPane(rightPane, _events[_selIdx]);
     };
 
-    header.append(idxLabel, typeSel, up, dn, del);
+    actions.append(up, dn, del);
+    header.append(idxLabel, typeSel, actions);
     card.appendChild(header);
 
     if (step.type === 'text') {
@@ -620,7 +643,7 @@ function _buildScript(pane, ev) {
     }
     if (step.type === 'conversation') {
       const summary = document.createElement('div');
-      summary.style.cssText = 'font-size:11px;color:var(--color-text-secondary);padding:4px 0';
+      summary.className = 'ev-step-summary';
       summary.textContent = `${step.lines?.length ?? 0} 件のセリフ — 詳細は右パネルで編集`;
       card.appendChild(summary);
     }
@@ -640,8 +663,8 @@ function _buildScript(pane, ev) {
   });
 
   const addBtn = document.createElement('button');
+  addBtn.className = 'ev-btn ev-btn-add';
   addBtn.textContent = '+ ステップ追加';
-  addBtn.style.cssText = 'align-self:flex-start;padding:4px 10px;border-radius:4px;border:1px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;font-size:12px';
   addBtn.onclick = () => {
     ev.script.push({ type: 'conversation', lines: [{ characterId: null, position: 'center', text: '' }] });
     _buildScript(pane, ev); wrap.remove();
@@ -652,58 +675,67 @@ function _buildScript(pane, ev) {
   pane.appendChild(wrap);
 }
 
-// ---- 選択肢インラインエフェクト (Task 2: flag effects → _flagInput) ----
+// ---- 選択肢インラインエフェクト ----
 
 function _buildChoicesInline(card, step, stepIdx) {
   if (!step.choices) step.choices = [];
   const choiceWrap = document.createElement('div');
-  choiceWrap.style.cssText = 'margin-top:8px;display:flex;flex-direction:column;gap:6px';
+  choiceWrap.className = 'ev-choice-block';
 
   step.choices.forEach((choice, ci) => {
     const choiceCard = document.createElement('div');
-    choiceCard.style.cssText = 'padding:8px;background:var(--color-background-primary);border-radius:5px;border:1px solid var(--color-border-secondary)';
+    choiceCard.className = 'ev-choice-card';
 
     const labelRow = document.createElement('div');
-    labelRow.style.cssText = 'display:flex;gap:6px;align-items:center;margin-bottom:6px';
+    labelRow.className = 'ev-choice-header';
+
     const badge = document.createElement('span');
+    badge.className = 'ev-choice-badge';
     badge.textContent = `選択肢${ci + 1}`;
-    badge.style.cssText = 'font-size:10px;padding:1px 6px;border-radius:3px;background:var(--color-background-info);color:var(--color-text-info);white-space:nowrap';
+
     const labelInp = document.createElement('input');
+    labelInp.type = 'text';
     labelInp.value = choice.label ?? ''; labelInp.placeholder = '選択肢ラベル';
-    labelInp.style.cssText = 'flex:1;padding:3px 6px;border-radius:4px;border:1px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);font-size:12px';
     labelInp.oninput = () => { choice.label = labelInp.value; };
+
+    const arrow = document.createElement('span');
+    arrow.className = 'ev-choice-arrow';
+    arrow.textContent = '→ #';
+
     const nextInp = document.createElement('input');
-    nextInp.type = 'number'; nextInp.value = choice.next ?? 0; nextInp.placeholder = 'next#';
-    nextInp.style.cssText = 'width:54px;padding:3px;border-radius:4px;border:1px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);font-size:12px';
+    nextInp.type = 'number'; nextInp.className = 'ev-choice-next';
+    nextInp.value = choice.next ?? 0; nextInp.placeholder = 'next#';
     nextInp.oninput = () => { choice.next = parseInt(nextInp.value) || 0; };
+
     const delChoice = document.createElement('button');
+    delChoice.className = 'ev-btn ev-btn-icon ev-btn-danger';
     delChoice.textContent = '✕';
-    delChoice.style.cssText = 'border:none;background:transparent;color:var(--color-text-danger);cursor:pointer;font-size:13px';
+    delChoice.title = 'この選択肢を削除';
     delChoice.onclick = () => { step.choices.splice(ci, 1); _buildChoicesInline(card, step, stepIdx); choiceWrap.remove(); };
-    labelRow.append(badge, labelInp, document.createTextNode('→#'), nextInp, delChoice);
+
+    labelRow.append(badge, labelInp, arrow, nextInp, delChoice);
     choiceCard.appendChild(labelRow);
 
     const keyRow = document.createElement('div');
-    keyRow.style.cssText = 'display:flex;gap:6px;align-items:center;margin-bottom:6px';
+    keyRow.className = 'ev-choice-key-row';
     const keyLbl = document.createElement('span');
-    keyLbl.textContent = 'effectsKey（上級）:';
-    keyLbl.style.cssText = 'font-size:11px;color:var(--color-text-secondary);white-space:nowrap';
+    keyLbl.textContent = 'effectsKey（上級）';
     const keyInp = document.createElement('input');
     keyInp.type = 'text'; keyInp.value = choice.effectsKey ?? ''; keyInp.placeholder = 'effectsKeyを使う場合のみ';
-    keyInp.style.cssText = 'flex:1;padding:3px 6px;border-radius:4px;border:1px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);font-size:12px';
     keyInp.oninput = () => { choice.effectsKey = keyInp.value || undefined; };
     keyRow.append(keyLbl, keyInp);
     choiceCard.appendChild(keyRow);
 
     const effSection = document.createElement('div');
-    effSection.style.cssText = 'padding:6px;background:var(--color-background-secondary);border-radius:4px;border:1px solid var(--color-border-tertiary)';
+    effSection.className = 'ev-choice-effects';
     const effTitle = document.createElement('div');
+    effTitle.className = 'ev-choice-effects-title';
     effTitle.textContent = 'この選択肢のエフェクト';
-    effTitle.style.cssText = 'font-size:10px;color:var(--color-text-secondary);margin-bottom:4px;font-weight:500';
     effSection.appendChild(effTitle);
+
     if (!choice.effects) choice.effects = [];
     const effList = document.createElement('div');
-    effList.style.cssText = 'display:flex;flex-direction:column;gap:3px';
+    effList.style.cssText = 'display:flex;flex-direction:column;gap:6px';
     const rebuildEffects = () => {
       effList.innerHTML = '';
       choice.effects.forEach((eff, ei) => {
@@ -712,9 +744,10 @@ function _buildChoicesInline(card, step, stepIdx) {
       });
     };
     rebuildEffects();
+
     const addEffBtn = document.createElement('button');
+    addEffBtn.className = 'ev-btn ev-btn-add ev-btn-sm';
     addEffBtn.textContent = '+ エフェクト追加';
-    addEffBtn.style.cssText = 'align-self:flex-start;margin-top:4px;padding:2px 8px;border-radius:4px;border:1px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;font-size:11px';
     addEffBtn.onclick = () => { choice.effects.push({ type: 'setFlag', flag: '' }); rebuildEffects(); };
     effSection.append(effList, addEffBtn);
     choiceCard.appendChild(effSection);
@@ -722,24 +755,36 @@ function _buildChoicesInline(card, step, stepIdx) {
   });
 
   const addChoiceBtn = document.createElement('button');
+  addChoiceBtn.className = 'ev-btn ev-btn-add';
   addChoiceBtn.textContent = '+ 選択肢追加';
-  addChoiceBtn.style.cssText = 'align-self:flex-start;padding:3px 10px;border-radius:4px;border:1px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;font-size:11px';
   addChoiceBtn.onclick = () => { step.choices.push({ label: '', next: 0, effects: [] }); _buildChoicesInline(card, step, stepIdx); choiceWrap.remove(); };
   choiceWrap.appendChild(addChoiceBtn);
   card.appendChild(choiceWrap);
 }
 
 // ----------------------------------------------------------------
-// 右ペイン: 会話一括入力 (Task 3: optgroup, Task 4: rows=3)
+// 右ペイン: 会話一括入力
 // ----------------------------------------------------------------
 
 function _buildConvPane(pane, ev) {
   pane.innerHTML = '';
 
-  const title = document.createElement('div');
-  title.textContent = '会話一括入力';
-  title.style.cssText = 'font-size:12px;font-weight:500;color:var(--color-text-secondary);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--color-border-tertiary)';
-  pane.appendChild(title);
+  // ---- ヘッダ ----
+  const header = document.createElement('div');
+  header.className = 'ev-conv-header';
+  const ht = document.createElement('div');
+  ht.className = 'ev-conv-header-title';
+  ht.textContent = '会話一括入力';
+  const hs = document.createElement('div');
+  hs.className = 'ev-conv-header-sub';
+  hs.textContent = `${ev.name ?? ev.id} — conversation ステップをまとめて編集`;
+  header.append(ht, hs);
+  pane.appendChild(header);
+
+  // ---- ボディ ----
+  const body = document.createElement('div');
+  body.className = 'ev-conv-body';
+  pane.appendChild(body);
 
   const convSteps = ev.script
     .map((s, i) => ({ step: s, idx: i }))
@@ -747,51 +792,51 @@ function _buildConvPane(pane, ev) {
 
   if (convSteps.length === 0) {
     const empty = document.createElement('div');
+    empty.className = 'ev-conv-empty';
     empty.textContent = 'conversation ステップがありません。スクリプトに「会話（複数セリフ）」ステップを追加してください。';
-    empty.style.cssText = 'font-size:11px;color:var(--color-text-secondary);padding:12px;background:var(--color-background-secondary);border-radius:6px';
-    pane.appendChild(empty);
+    body.appendChild(empty);
     return;
   }
 
-  convSteps.forEach(({ step, idx }) => {
-    const groupLabel = document.createElement('div');
-    groupLabel.textContent = `#${idx} 会話ブロック`;
-    groupLabel.style.cssText = 'font-size:11px;font-weight:500;color:var(--color-text-primary);margin:10px 0 6px';
-    pane.appendChild(groupLabel);
+  convSteps.forEach(({ step, idx }, blockI) => {
+    const block = document.createElement('div');
+    block.className = 'ev-conv-block';
+
+    const blockTitle = document.createElement('div');
+    blockTitle.className = 'ev-conv-block-title';
+    blockTitle.innerHTML = `<span class="ev-conv-block-idx">#${idx}</span><span>会話ブロック</span>`;
+    block.appendChild(blockTitle);
 
     if (!step.lines) step.lines = [];
     const tableContainer = document.createElement('div');
-    pane.appendChild(tableContainer);
+    block.appendChild(tableContainer);
 
     const buildTable = () => {
       tableContainer.innerHTML = '';
 
+      const table = document.createElement('div');
+      table.className = 'ev-conv-table';
+
       const headerRow = document.createElement('div');
-      headerRow.style.cssText = 'display:grid;grid-template-columns:130px 1fr 58px 22px;gap:3px;margin-bottom:3px';
+      headerRow.className = 'ev-conv-table-header';
       ['キャラ', 'テキスト', '位置', ''].forEach(h => {
         const cell = document.createElement('div');
         cell.textContent = h;
-        cell.style.cssText = 'font-size:10px;color:var(--color-text-secondary);padding:0 2px';
         headerRow.appendChild(cell);
       });
-      tableContainer.appendChild(headerRow);
+      table.appendChild(headerRow);
 
       step.lines.forEach((line, li) => {
         const row = document.createElement('div');
-        row.style.cssText = 'display:grid;grid-template-columns:130px 1fr 58px 22px;gap:3px;margin-bottom:3px;align-items:start';
+        row.className = 'ev-conv-row';
 
-        // Task 3: optgroup キャラセレクト
         const charSel = _charSelectWithGroupRaw(line, 'characterId', true);
-        charSel.style.cssText = 'width:100%;padding:3px;border-radius:3px;border:1px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);font-size:11px';
 
-        // Task 4: rows=3
         const textArea = document.createElement('textarea');
         textArea.value = line.text ?? ''; textArea.placeholder = 'セリフ'; textArea.rows = 3;
-        textArea.style.cssText = 'width:100%;padding:3px 4px;border-radius:3px;border:1px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);font-size:11px;resize:vertical';
         textArea.oninput = () => { line.text = textArea.value; };
 
         const posSel = document.createElement('select');
-        posSel.style.cssText = 'width:100%;padding:3px 2px;border-radius:3px;border:1px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);font-size:11px';
         ['left','center','right'].forEach(pos => {
           const o = document.createElement('option'); o.value = pos; o.textContent = pos;
           if ((line.position ?? 'center') === pos) o.selected = true;
@@ -800,17 +845,20 @@ function _buildConvPane(pane, ev) {
         posSel.onchange = () => { line.position = posSel.value; };
 
         const delBtn = document.createElement('button');
+        delBtn.className = 'ev-btn ev-btn-icon ev-btn-danger';
         delBtn.textContent = '✕';
-        delBtn.style.cssText = 'border:none;background:transparent;color:var(--color-text-danger);cursor:pointer;font-size:12px;padding:0;margin-top:4px';
         delBtn.onclick = () => { step.lines.splice(li, 1); buildTable(); };
 
         row.append(charSel, textArea, posSel, delBtn);
-        tableContainer.appendChild(row);
+        table.appendChild(row);
       });
 
+      tableContainer.appendChild(table);
+
       const addRowBtn = document.createElement('button');
+      addRowBtn.className = 'ev-btn ev-btn-add ev-btn-sm';
+      addRowBtn.style.marginTop = '6px';
       addRowBtn.textContent = '+ セリフ追加';
-      addRowBtn.style.cssText = 'width:100%;padding:4px;border-radius:3px;border:1px dashed var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;font-size:11px;margin-top:2px';
       addRowBtn.onclick = () => { step.lines.push({ characterId: null, position: 'center', text: '' }); buildTable(); };
       tableContainer.appendChild(addRowBtn);
     };
@@ -818,18 +866,16 @@ function _buildConvPane(pane, ev) {
     buildTable();
 
     const applyBtn = document.createElement('button');
+    applyBtn.className = 'ev-btn ev-btn-info ev-conv-apply';
     applyBtn.textContent = 'スクリプトに反映';
-    applyBtn.style.cssText = 'width:100%;margin-top:8px;padding:5px;border-radius:4px;border:1px solid var(--color-border-info);background:var(--color-background-info);color:var(--color-text-info);cursor:pointer;font-size:12px;font-weight:500';
     applyBtn.onclick = () => {
       const centerPane = document.getElementById('ev-editor-pane');
       if (centerPane && _events[_selIdx]) _buildEditor(centerPane, _events[_selIdx]);
       showToast('スクリプトに反映しました');
     };
-    pane.appendChild(applyBtn);
+    block.appendChild(applyBtn);
 
-    const divider = document.createElement('hr');
-    divider.style.cssText = 'border:none;border-top:1px solid var(--color-border-tertiary);margin:12px 0';
-    pane.appendChild(divider);
+    body.appendChild(block);
   });
 }
 
@@ -850,20 +896,20 @@ function _buildEffects(pane, ev) {
   keys.forEach(key => {
     if (!ev.effects[key]) ev.effects[key] = [];
     const groupDiv = document.createElement('div');
-    groupDiv.style.cssText = 'padding:8px;background:var(--color-background-secondary);border-radius:6px;border:1px solid var(--color-border-tertiary)';
+    groupDiv.className = 'ev-eff-group';
     const groupLabel = document.createElement('div');
+    groupLabel.className = 'ev-eff-group-title';
     groupLabel.textContent = `エフェクトキー: ${key}`;
-    groupLabel.style.cssText = 'font-size:12px;font-weight:600;color:var(--color-text-primary);margin-bottom:6px';
     groupDiv.appendChild(groupLabel);
     const effList = document.createElement('div');
-    effList.style.cssText = 'display:flex;flex-direction:column;gap:4px';
+    effList.style.cssText = 'display:flex;flex-direction:column;gap:6px';
     ev.effects[key].forEach((eff, ei) => {
       const erow = _buildEffectRow(eff, () => { ev.effects[key].splice(ei, 1); _buildEffects(pane, ev); wrap.remove(); }, () => { _buildEffects(pane, ev); wrap.remove(); });
       effList.appendChild(erow);
     });
     const addEff = document.createElement('button');
+    addEff.className = 'ev-btn ev-btn-add ev-btn-sm';
     addEff.textContent = '+ エフェクト追加';
-    addEff.style.cssText = 'align-self:flex-start;margin-top:4px;padding:3px 10px;border-radius:4px;border:1px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;font-size:12px';
     addEff.onclick = () => { ev.effects[key].push({ type: 'setFlag', flag: '' }); _buildEffects(pane, ev); wrap.remove(); };
     effList.appendChild(addEff);
     groupDiv.appendChild(effList);
@@ -875,9 +921,9 @@ function _buildEffects(pane, ev) {
 
 function _buildEffectRow(eff, onDelete, onTypeChange) {
   const erow = document.createElement('div');
-  erow.style.cssText = 'display:flex;gap:6px;align-items:flex-start;padding:6px;background:var(--color-background-primary);border-radius:4px;border:1px solid var(--color-border-secondary)';
+  erow.className = 'ev-eff-row';
   const typeSel = document.createElement('select');
-  typeSel.style.cssText = 'flex:0 0 140px;padding:3px;border-radius:4px;border:1px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);font-size:12px';
+  typeSel.className = 'ev-eff-type';
   EFFECT_TYPES.forEach(et => {
     const o = document.createElement('option'); o.value = et.value; o.textContent = et.label;
     if (eff.type === et.value) o.selected = true;
@@ -890,18 +936,17 @@ function _buildEffectRow(eff, onDelete, onTypeChange) {
     onTypeChange();
   };
   const paramsWrap = _buildEffectParams(eff);
+  paramsWrap.className = 'ev-eff-params';
   const del = document.createElement('button');
+  del.className = 'ev-btn ev-btn-icon ev-btn-danger';
   del.textContent = '✕';
-  del.style.cssText = 'flex:0 0 22px;border:none;background:transparent;color:var(--color-text-danger);cursor:pointer;font-size:13px;padding:0';
   del.onclick = onDelete;
   erow.append(typeSel, paramsWrap, del);
   return erow;
 }
 
-// Task 2: setFlag/clearFlag/setFlagWithTurn → _flagInput
 function _buildEffectParams(eff) {
   const wrap = document.createElement('div');
-  wrap.style.cssText = 'flex:1;display:flex;gap:6px;flex-wrap:wrap;align-items:center';
 
   const factions = _data?.factions?.factions ?? [];
   const bases    = _data?.bases?.bases ?? [];
@@ -911,7 +956,6 @@ function _buildEffectParams(eff) {
 
   const sel = (obj, key, options, allowEmpty = false) => {
     const s = document.createElement('select');
-    s.style.cssText = 'flex:1;min-width:120px;padding:3px;border-radius:4px;border:1px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);font-size:12px';
     if (allowEmpty) { const o = document.createElement('option'); o.value = ''; o.textContent = '（自軍）'; s.appendChild(o); }
     options.forEach(({ value, label }) => {
       const o = document.createElement('option'); o.value = value; o.textContent = label;
@@ -925,14 +969,12 @@ function _buildEffectParams(eff) {
     const inp = document.createElement('input');
     inp.type = 'number'; inp.placeholder = placeholder; inp.value = obj[key] !== undefined ? obj[key] : '';
     if (min !== null) inp.min = min;
-    inp.style.cssText = 'width:80px;padding:3px 5px;border-radius:4px;border:1px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);font-size:12px';
     inp.oninput = () => { const v = parseFloat(inp.value); obj[key] = isNaN(v) ? undefined : v; };
     return inp;
   };
   const lbl = (text) => {
     const s = document.createElement('span');
     s.textContent = text;
-    s.style.cssText = 'font-size:11px;color:var(--color-text-secondary);white-space:nowrap';
     return s;
   };
 
@@ -945,7 +987,6 @@ function _buildEffectParams(eff) {
       wrap.append(lbl('キャラ:'), sel(eff, 'charId', chars.map(c => ({ value: c.id, label: `${c.name}(${c.id})` })))); break;
     case 'charParam': {
       const fieldSel = document.createElement('select');
-      fieldSel.style.cssText = 'flex:0 0 130px;padding:3px;border-radius:4px;border:1px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);font-size:12px';
       CHAR_PARAM_FIELDS.forEach(f => {
         const o = document.createElement('option'); o.value = f.value; o.textContent = f.label;
         if (eff.field === f.value) o.selected = true;
@@ -962,7 +1003,6 @@ function _buildEffectParams(eff) {
       wrap.append(lbl('拠点:'), sel(eff, 'baseId', bases.map(b => ({ value: b.id, label: `${b.name}(${b.id})` })))); break;
     case 'warFlag': {
       const atWarSel = document.createElement('select');
-      atWarSel.style.cssText = 'flex:0 0 80px;padding:3px;border-radius:4px;border:1px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);font-size:12px';
       [{ value: 'true', label: '交戦' }, { value: 'false', label: '停戦' }].forEach(opt => {
         const o = document.createElement('option'); o.value = opt.value; o.textContent = opt.label;
         if (String(eff.atWar) === opt.value) o.selected = true;
@@ -996,12 +1036,12 @@ function _buildEffectParams(eff) {
     case 'actionPointsBonus':
       wrap.append(lbl('増減:'), numInp(eff, 'delta', '増減値（+1 など）')); break;
     case 'legionUpdate': {
-      const freqInp = numInp(eff, 'attackFrequency', '頻度(省略可)', 0); freqInp.style.width = '90px';
+      const freqInp = numInp(eff, 'attackFrequency', '頻度(省略可)', 0);
       wrap.append(lbl('軍団:'), sel(eff, 'legionId', legions.map(l => ({ value: l.id, label: l.name ?? l.id }))), lbl('勢力(省略可):'), sel(eff, 'factionId', factions.map(f => ({ value: f.id, label: f.name })), true), lbl('頻度:'), freqInp); break;
     }
     default: {
       const ta = document.createElement('textarea');
-      ta.rows = 2; ta.style.cssText = 'flex:1;padding:4px;border-radius:4px;border:1px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);font-size:11px;font-family:monospace';
+      ta.rows = 2;
       try { ta.value = JSON.stringify(eff, null, 2); } catch { ta.value = '{}'; }
       ta.oninput = () => { try { const parsed = JSON.parse(ta.value); Object.assign(eff, parsed); } catch {} };
       wrap.appendChild(ta);
@@ -1011,18 +1051,15 @@ function _buildEffectParams(eff) {
 }
 
 // ----------------------------------------------------------------
-// Task 3: キャラセレクト 勢力別 optgroup
+// キャラセレクト 勢力別 optgroup
 // ----------------------------------------------------------------
 
 function _charSelectWithGroup(obj, key, allowNone = true) {
-  const sel = _charSelectWithGroupRaw(obj, key, allowNone);
-  sel.style.cssText = 'flex:1;padding:3px;border-radius:4px;border:1px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);font-size:12px';
-  return sel;
+  return _charSelectWithGroupRaw(obj, key, allowNone);
 }
 
 function _charSelectWithGroupRaw(obj, key, allowNone = true) {
   const sel = document.createElement('select');
-  sel.style.cssText = 'flex:1;min-width:120px;padding:3px;border-radius:4px;border:1px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);font-size:12px';
 
   if (allowNone) {
     const noneOpt = document.createElement('option');
@@ -1068,7 +1105,7 @@ function _charSelectWithGroupRaw(obj, key, allowNone = true) {
 }
 
 // ----------------------------------------------------------------
-// Task 5: 依存関係グラフ
+// 依存関係グラフ
 // ----------------------------------------------------------------
 
 function _buildDependencyGraph() {
@@ -1082,10 +1119,9 @@ function _buildDependencyGraph() {
 
   const nodeMap = Object.fromEntries(nodes.map(n => [n.id, n]));
 
-  // フラグ別に setter / requirer / blocker を収集
-  const setters   = {}; // flag → Set<evId>
-  const requirers = {}; // flag → Set<evId>
-  const blockers  = {}; // flag → Set<evId>
+  const setters   = {};
+  const requirers = {};
+  const blockers  = {};
 
   const addToMap = (map, flag, evId) => {
     if (!flag || typeof flag !== 'string') return;
@@ -1130,37 +1166,33 @@ function _buildDependencyGraph() {
 
 function _showGraph() {
   const overlay = document.createElement('div');
-  // CSS変数が未定義の場合のフォールバックとして editor.css の body 背景色を使用
-  const bgColor = getComputedStyle(document.body).backgroundColor || '#0d1117';
-  overlay.style.cssText = `position:fixed;inset:0;z-index:2147483647;background:${bgColor || '#0d1117'};display:flex;flex-direction:column`;
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:#0d1117;display:flex;flex-direction:column';
 
-  // ヘッダ
   const header = document.createElement('div');
-  header.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--color-border-tertiary);flex-shrink:0';
+  header.style.cssText = 'display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid #30363d;flex-shrink:0;background:#161b22';
 
   const headerTitle = document.createElement('div');
   headerTitle.textContent = 'イベント依存関係グラフ';
-  headerTitle.style.cssText = 'font-size:14px;font-weight:600;color:var(--color-text-primary);flex:1';
+  headerTitle.style.cssText = 'font-size:14px;font-weight:600;color:#c9d1d9;flex:1';
 
   const flagFilterLbl = document.createElement('span');
   flagFilterLbl.textContent = 'フラグ絞り込み:';
-  flagFilterLbl.style.cssText = 'font-size:12px;color:var(--color-text-secondary)';
+  flagFilterLbl.style.cssText = 'font-size:12px;color:#8b949e';
 
   const flagFilterInp = document.createElement('input');
   flagFilterInp.type = 'text';
   flagFilterInp.setAttribute('list', 'ev-flag-list');
   flagFilterInp.placeholder = 'フラグ名を入力...';
-  flagFilterInp.style.cssText = 'padding:4px 8px;border-radius:4px;border:1px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);font-size:12px;width:220px';
+  flagFilterInp.style.cssText = 'padding:5px 9px;border-radius:5px;border:1px solid #30363d;background:#0d1117;color:#c9d1d9;font-size:12px;width:220px;font-family:inherit';
 
   const closeBtn = document.createElement('button');
+  closeBtn.className = 'ev-btn';
   closeBtn.textContent = '✕ 閉じる';
-  closeBtn.style.cssText = 'padding:5px 12px;border:1px solid var(--color-border-secondary);border-radius:6px;background:transparent;color:var(--color-text-secondary);cursor:pointer;font-size:12px';
   closeBtn.onclick = () => overlay.remove();
 
   header.append(headerTitle, flagFilterLbl, flagFilterInp, closeBtn);
   overlay.appendChild(header);
 
-  // SVGコンテナ
   const svgContainer = document.createElement('div');
   svgContainer.style.cssText = 'flex:1;overflow:auto;position:relative';
   overlay.appendChild(svgContainer);
@@ -1183,19 +1215,17 @@ function _showGraph() {
     if (visibleNodes.length === 0) {
       const msg = document.createElement('div');
       msg.textContent = filterFlag ? `フラグ "${filterFlag}" に関係するイベントが見つかりません` : 'イベントがありません';
-      msg.style.cssText = 'padding:48px;text-align:center;color:var(--color-text-secondary);font-size:13px';
+      msg.style.cssText = 'padding:48px;text-align:center;color:#8b949e;font-size:13px';
       svgContainer.appendChild(msg);
       return;
     }
 
-    // レイアウト: チャプター列 × triggerグループ行
     const NODE_W = 170; const NODE_H = 48;
     const GAP_X = 50;   const GAP_Y = 16;
 
     const chapCols = {};
     CHAPTER_ORDER.forEach((ch, ci) => { chapCols[ch] = ci; });
 
-    // 各チャプター内でtrigger順にソート
     const triggerOrder = TRIGGER_OPTIONS.map(t => t.value);
     const sorted = [...visibleNodes].sort((a, b) => {
       const ca = chapCols[a.chapter] ?? 99;
@@ -1204,7 +1234,6 @@ function _showGraph() {
       return (triggerOrder.indexOf(a.trigger) ?? 99) - (triggerOrder.indexOf(b.trigger) ?? 99);
     });
 
-    // チャプター内のY位置を計算
     const chapCount = {};
     const nodePos = {};
     sorted.forEach(n => {
@@ -1224,7 +1253,6 @@ function _showGraph() {
     svg.setAttribute('height', String(maxY));
     svg.style.cssText = 'display:block;min-width:100%';
 
-    // arrowhead markers
     const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
     const mkMarker = (id, color) => {
       const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
@@ -1234,11 +1262,10 @@ function _showGraph() {
       path.setAttribute('d', 'M0,0 L0,6 L8,3 z'); path.setAttribute('fill', color);
       marker.appendChild(path); return marker;
     };
-    defs.appendChild(mkMarker('arrow-requires', '#4a9eff'));
-    defs.appendChild(mkMarker('arrow-blocks',   '#ff6b6b'));
+    defs.appendChild(mkMarker('arrow-requires', '#58a6ff'));
+    defs.appendChild(mkMarker('arrow-blocks',   '#f85149'));
     svg.appendChild(defs);
 
-    // チャプターラベル背景列
     const chapXSet = {};
     sorted.forEach(n => {
       const col = chapCols[n.chapter] ?? CHAPTER_ORDER.length;
@@ -1258,7 +1285,6 @@ function _showGraph() {
       svg.appendChild(text);
     });
 
-    // エッジ
     visibleEdges.forEach(edge => {
       const fp = nodePos[edge.from]; const tp = nodePos[edge.to];
       if (!fp || !tp) return;
@@ -1271,18 +1297,17 @@ function _showGraph() {
       const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       path.setAttribute('d', `M${x1},${y1} C${cx1},${y1} ${cx2},${y2} ${x2},${y2}`);
       path.setAttribute('fill', 'none');
-      path.setAttribute('stroke', isRequires ? '#4a9eff' : '#ff6b6b');
+      path.setAttribute('stroke', isRequires ? '#58a6ff' : '#f85149');
       path.setAttribute('stroke-width', '1.5');
       path.setAttribute('stroke-dasharray', isRequires ? 'none' : '5,3');
       path.setAttribute('marker-end', `url(#${isRequires ? 'arrow-requires' : 'arrow-blocks'})`);
       path.setAttribute('opacity', '0.6');
 
-      // フラグラベル（エッジ中央）
       const lx = (x1 + x2) / 2; const ly = (y1 + y2) / 2 - 5;
       const flagText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
       flagText.setAttribute('x', String(lx)); flagText.setAttribute('y', String(ly));
       flagText.setAttribute('text-anchor', 'middle'); flagText.setAttribute('font-size', '9');
-      flagText.setAttribute('fill', isRequires ? '#4a9eff' : '#ff6b6b');
+      flagText.setAttribute('fill', isRequires ? '#58a6ff' : '#f85149');
       flagText.setAttribute('font-family', 'monospace'); flagText.setAttribute('opacity', '0.8');
       flagText.textContent = edge.flag ?? '';
 
@@ -1290,7 +1315,6 @@ function _showGraph() {
       svg.appendChild(flagText);
     });
 
-    // ノード
     sorted.forEach(n => {
       const p = nodePos[n.id];
       if (!p) return;
@@ -1306,8 +1330,8 @@ function _showGraph() {
       rect.setAttribute('x', String(p.x)); rect.setAttribute('y', String(p.y));
       rect.setAttribute('width', String(NODE_W)); rect.setAttribute('height', String(NODE_H));
       rect.setAttribute('rx', '6'); rect.setAttribute('ry', '6');
-      rect.setAttribute('fill', n.idx === _selIdx ? 'rgba(74,158,255,0.2)' : 'rgba(255,255,255,0.07)');
-      rect.setAttribute('stroke', n.idx === _selIdx ? '#4a9eff' : 'rgba(255,255,255,0.2)');
+      rect.setAttribute('fill', n.idx === _selIdx ? 'rgba(88,166,255,0.2)' : 'rgba(255,255,255,0.07)');
+      rect.setAttribute('stroke', n.idx === _selIdx ? '#58a6ff' : 'rgba(255,255,255,0.2)');
       rect.setAttribute('stroke-width', n.idx === _selIdx ? '2' : '1');
 
       const nameText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
@@ -1342,43 +1366,41 @@ function _showGraph() {
 
 function _posRow(step, stepIdx) {
   const posRow = document.createElement('div');
-  posRow.style.cssText = 'display:flex;gap:6px';
+  posRow.className = 'ev-pos-row';
   ['left','center','right'].forEach(pos => {
     const lbl = document.createElement('label');
-    lbl.style.cssText = 'display:flex;gap:3px;align-items:center;font-size:12px;cursor:pointer;color:var(--color-text-primary)';
     const radio = document.createElement('input');
     radio.type = 'radio'; radio.name = `pos_${stepIdx}`; radio.value = pos;
     if ((step.position ?? 'center') === pos) radio.checked = true;
     radio.onchange = () => { step.position = pos; };
-    lbl.append(radio, pos);
+    lbl.append(radio, document.createTextNode(pos));
     posRow.appendChild(lbl);
   });
   return posRow;
 }
 
-function _section(pane, title) {
+function _section(pane, title, hint = '') {
   const h = document.createElement('div');
-  h.textContent = title;
-  h.style.cssText = 'font-size:13px;font-weight:500;color:var(--color-text-secondary);border-bottom:1px solid var(--color-border-tertiary);padding-bottom:4px;margin:12px 0 6px';
+  h.className = 'ev-section-head';
+  h.innerHTML = `<span>${title}</span>${hint ? `<span class="ev-section-hint">${hint}</span>` : ''}`;
   pane.appendChild(h);
 }
 
 function _field(pane, label, input) {
   const row = document.createElement('div');
-  row.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:6px';
+  row.className = 'ev-field-row';
   const lbl = document.createElement('label');
   lbl.textContent = label;
-  lbl.style.cssText = 'min-width:130px;font-size:12px;color:var(--color-text-secondary)';
   row.append(lbl, input);
   pane.appendChild(row);
 }
 
 function _row(label, input) {
   const row = document.createElement('div');
-  row.style.cssText = 'display:flex;align-items:flex-start;gap:6px;margin-bottom:4px';
+  row.className = 'ev-sub-row';
   const lbl = document.createElement('span');
+  lbl.className = 'ev-sub-label';
   lbl.textContent = label;
-  lbl.style.cssText = 'min-width:60px;font-size:11px;color:var(--color-text-secondary);padding-top:4px';
   row.append(lbl, input);
   return row;
 }
@@ -1386,7 +1408,6 @@ function _row(label, input) {
 function _text(obj, key, readonly = false) {
   const inp = document.createElement('input');
   inp.type = 'text'; inp.value = obj[key] ?? ''; inp.readOnly = readonly;
-  inp.style.cssText = `flex:1;padding:4px 8px;border-radius:4px;border:1px solid var(--color-border-secondary);background:var(--color-background-${readonly ? 'tertiary' : 'primary'});color:var(--color-text-${readonly ? 'secondary' : 'primary'});font-size:13px`;
   if (!readonly) inp.oninput = () => { obj[key] = inp.value; };
   return inp;
 }
@@ -1394,7 +1415,6 @@ function _text(obj, key, readonly = false) {
 function _inp(obj, key, placeholder = '') {
   const inp = document.createElement('input');
   inp.type = 'text'; inp.value = obj[key] ?? ''; inp.placeholder = placeholder;
-  inp.style.cssText = 'flex:1;padding:3px 6px;border-radius:4px;border:1px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);font-size:12px';
   inp.oninput = () => {
     if (['label','text','flag','effectsKey'].includes(key)) obj[key] = inp.value;
     else obj[key] = inp.value || undefined;
@@ -1405,7 +1425,6 @@ function _inp(obj, key, placeholder = '') {
 function _area(obj, key, placeholder = '') {
   const ta = document.createElement('textarea');
   ta.value = obj[key] ?? ''; ta.placeholder = placeholder; ta.rows = 2;
-  ta.style.cssText = 'flex:1;padding:4px;border-radius:4px;border:1px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);font-size:12px;resize:vertical;width:100%';
   ta.oninput = () => { obj[key] = ta.value; };
   return ta;
 }
@@ -1413,7 +1432,6 @@ function _area(obj, key, placeholder = '') {
 function _num(obj, key, min, max, step) {
   const inp = document.createElement('input');
   inp.type = 'number'; inp.value = obj[key] ?? 0; inp.min = min; inp.max = max; inp.step = step;
-  inp.style.cssText = 'width:90px;padding:4px;border-radius:4px;border:1px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px';
   inp.oninput = () => { obj[key] = parseFloat(inp.value); };
   return inp;
 }

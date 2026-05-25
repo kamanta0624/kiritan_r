@@ -237,7 +237,7 @@ function AreaNameOverlay({areaName, areaEn, triggerKey}) {
 }
 
 // ── Node popup ─────────────────────────────────────────────
-function NodePopup({node, onClose, onAttack}) {
+function NodePopup({node, onClose, onAttack, onNodeInfo}) {
   const fc = node.factionColor;
   const typeLabel = {city:'都市',town:'街',village:'村',fort:'砦'}[node.type]||node.type;
   return (
@@ -270,11 +270,19 @@ function NodePopup({node, onClose, onAttack}) {
           </div>
         ))}
       </div>
+      <button
+        onClick={() => { onClose(); onNodeInfo?.(node); }}
+        style={{
+          width:'100%', padding:'9px', borderRadius:7, marginTop:10,
+          background:'rgba(0,0,0,.06)',
+          border:'1px solid rgba(0,0,0,.12)', color:'#444', cursor:'pointer',
+          fontFamily:"'Noto Sans JP'", fontSize:12, fontWeight:700,
+        }}>詳細を見る</button>
       {node.canAttack && (
         <button
           onClick={() => { onClose(); onAttack(node); }}
           style={{
-            width:'100%', padding:'9px', borderRadius:7, marginTop:10,
+            width:'100%', padding:'9px', borderRadius:7, marginTop:6,
             background:`linear-gradient(135deg,${PK},${PK2})`,
             border:'none', color:'#fff', cursor:'pointer',
             fontFamily:"'Noto Sans JP'", fontSize:12, fontWeight:700,

@@ -22,11 +22,17 @@ import {
   saveLegion, addLegion, deleteLegion,
 } from './tab-legions.js';
 import { initEventsTab } from './tab-events.js';
+import {
+  renderResearchTab,
+  addResearchNode, deleteResearchNode, editResearchNode, _saveResearchNodeModal,
+  addUpgradeCmd, deleteUpgradeCmd, editUpgradeCmd, _saveUpgradeCmdModal,
+  saveResearch, _closeModal,
+} from './tab-research.js';
 
 // ----------------------------------------------------------------
 // タブ切替
 // ----------------------------------------------------------------
-const TAB_ORDER = ['characters', 'items', 'factions', 'map', 'legions', 'events'];
+const TAB_ORDER = ['characters', 'items', 'factions', 'map', 'legions', 'events', 'research'];
 
 function switchTab(tab) {
   state.tab        = tab;
@@ -55,6 +61,7 @@ function renderAll() {
       main.style.padding  = '0';
       initEventsTab(main, state.data);
     }
+    else if (state.tab === 'research') renderResearchTab(main);
   } catch (err) {
     main.innerHTML = `<div class="error-box"><p style="color:#f85149">描画エラー</p><pre>${err.stack}</pre></div>`;
     console.error(err);
@@ -115,6 +122,10 @@ window.EditorApp = {
   addAttackPriority, removeAttackPriority, movePriority,
   addRetreatOverride, removeRetreatOverride,
   saveLegion, addLegion, deleteLegion,
+  // research
+  addResearchNode, deleteResearchNode, editResearchNode, _saveResearchNodeModal,
+  addUpgradeCmd, deleteUpgradeCmd, editUpgradeCmd, _saveUpgradeCmdModal,
+  saveResearch, _closeModal,
 };
 
 init();

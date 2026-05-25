@@ -16,21 +16,21 @@
       "status": "standby",
       "joinCondition": null,
       "hireCost": 0,
-      "attack": 60,
+      "attack": 4,
       "defense": 60,
-      "soldiers": 500,
-      "maxSoldiers": 1000,
+      "soldiers": 20,
+      "maxSoldiers": 20,
       "isLeader": false,
       "usedThisTurn": false,
       "role": "attacker",
       "attackType": "melee",
-      "charHp": 150,
-      "charMaxHp": 150,
-      "charAttack": 60,
-      "charSong": 15,
+      "charHp": 4,
+      "charMaxHp": 4,
+      "charAttack": 4,
+      "charSong": 0,
       "soldierName": "一般兵",
-      "soldierAtk": 9,
-      "soldierDef": 9,
+      "soldierAtk": 7,
+      "soldierDef": 4,
       "description": "各地で見られる標準的な歩兵部隊。",
       "equipment": {
         "item": null
@@ -57,7 +57,11 @@
       },
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "mob_002",
@@ -75,21 +79,21 @@
       "status": "standby",
       "joinCondition": null,
       "hireCost": 0,
-      "attack": 65,
+      "attack": 3,
       "defense": 50,
-      "soldiers": 400,
-      "maxSoldiers": 800,
+      "soldiers": 15,
+      "maxSoldiers": 15,
       "isLeader": false,
       "usedThisTurn": false,
       "role": "attacker",
       "attackType": "ranged",
-      "charHp": 130,
-      "charMaxHp": 130,
-      "charAttack": 65,
-      "charSong": 18,
+      "charHp": 3,
+      "charMaxHp": 3,
+      "charAttack": 3,
+      "charSong": 0,
       "soldierName": "弓兵",
-      "soldierAtk": 12,
-      "soldierDef": 6,
+      "soldierAtk": 5,
+      "soldierDef": 3,
       "description": "遠距離から敵を射抜く弓兵部隊。",
       "equipment": {
         "item": null
@@ -116,7 +120,11 @@
       },
       "skillId": null,
       "strategyRate": 25,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "mob_003",
@@ -175,7 +183,11 @@
       },
       "skillId": null,
       "strategyRate": 15,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_004",
@@ -186,8 +198,8 @@
       "isTemplate": false,
       "attack": 22,
       "defense": 70,
-      "soldiers": 5000,
-      "maxSoldiers": 5000,
+      "soldiers": 100,
+      "maxSoldiers": 120,
       "isLeader": true,
       "usedThisTurn": false,
       "role": "attacker",
@@ -231,7 +243,8 @@
       "attackCount": 8,
       "specialType": null,
       "recoveryRate": null,
-      "talkEventId": null
+      "talkEventId": null,
+      "battleCapacity": 30
     },
     {
       "id": "char_005",
@@ -283,7 +296,10 @@
       "charDefense": 4,
       "skillId": null,
       "strategyRate": 55,
-      "kana": "おとまちうな"
+      "kana": "おとまちうな",
+      "battleCapacity": 30,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_006",
@@ -335,7 +351,10 @@
       "charDefense": 4,
       "skillId": null,
       "strategyRate": 35,
-      "kana": "あやすみしゅお"
+      "kana": "あやすみしゅお",
+      "battleCapacity": 30,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_008",
@@ -386,7 +405,11 @@
       },
       "skillId": null,
       "strategyRate": 50,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_009",
@@ -437,7 +460,11 @@
       },
       "skillId": null,
       "strategyRate": 48,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_010",
@@ -488,7 +515,11 @@
       },
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_011",
@@ -540,7 +571,10 @@
       "charDefense": 0,
       "skillId": null,
       "strategyRate": 60,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_012",
@@ -592,7 +626,10 @@
       "charDefense": 0,
       "skillId": null,
       "strategyRate": 45,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_013",
@@ -640,7 +677,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_014",
@@ -688,7 +729,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_015",
@@ -736,7 +781,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_016",
@@ -784,7 +833,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 30,
-      "kana": "ずんだもん"
+      "kana": "ずんだもん",
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_017",
@@ -832,7 +885,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": "しこくめたん"
+      "kana": "しこくめたん",
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_018",
@@ -880,7 +937,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": "きゅうしゅうそら"
+      "kana": "きゅうしゅうそら",
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_019",
@@ -928,7 +989,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": "ちゅうごくうさぎ"
+      "kana": "ちゅうごくうさぎ",
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_020",
@@ -976,7 +1041,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_021",
@@ -1024,7 +1093,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_022",
@@ -1038,16 +1111,16 @@
       "usedThisTurn": false,
       "role": "attacker",
       "attackType": "melee",
-      "charHp": 150,
-      "charMaxHp": 150,
-      "charAttack": 70,
-      "attack": 70,
+      "charHp": 6,
+      "charMaxHp": 6,
+      "charAttack": 10,
+      "attack": 10,
       "defense": 70,
       "soldierName": "一般兵",
-      "soldiers": 500,
-      "maxSoldiers": 1000,
-      "soldierAtk": 10,
-      "soldierDef": 8,
+      "soldiers": 100,
+      "maxSoldiers": 100,
+      "soldierAtk": 8,
+      "soldierDef": 5,
       "description": "",
       "equipment": {
         "item": null
@@ -1071,8 +1144,12 @@
       },
       "charSong": 20,
       "skillId": null,
-      "strategyRate": 20,
-      "kana": null
+      "strategyRate": 0,
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 4,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_023",
@@ -1120,7 +1197,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_024",
@@ -1168,7 +1249,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_025",
@@ -1216,7 +1301,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_026",
@@ -1264,7 +1353,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_027",
@@ -1312,7 +1405,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_028",
@@ -1360,7 +1457,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_029",
@@ -1408,7 +1509,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_030",
@@ -1456,7 +1561,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_031",
@@ -1504,7 +1613,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_032",
@@ -1552,7 +1665,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_033",
@@ -1600,7 +1717,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_034",
@@ -1648,7 +1769,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_035",
@@ -1696,7 +1821,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_036",
@@ -1744,7 +1873,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_037",
@@ -1792,7 +1925,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_038",
@@ -1840,7 +1977,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_039",
@@ -1892,7 +2033,10 @@
       "skillId": null,
       "charDefense": 0,
       "strategyRate": 20,
-      "kana": "かさねてと"
+      "kana": "かさねてと",
+      "battleCapacity": 30,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_040",
@@ -1940,7 +2084,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_041",
@@ -1988,7 +2136,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_042",
@@ -2036,7 +2188,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_043",
@@ -2084,7 +2240,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_044",
@@ -2132,7 +2292,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_045",
@@ -2180,7 +2344,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_046",
@@ -2228,7 +2396,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_047",
@@ -2276,7 +2448,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_048",
@@ -2324,7 +2500,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_049",
@@ -2372,7 +2552,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_050",
@@ -2420,7 +2604,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_051",
@@ -2468,7 +2656,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_052",
@@ -2516,7 +2708,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_053",
@@ -2564,7 +2760,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_054",
@@ -2612,7 +2812,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_055",
@@ -2660,7 +2864,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_056",
@@ -2708,7 +2916,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_057",
@@ -2756,7 +2968,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_058",
@@ -2804,7 +3020,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_059",
@@ -2852,7 +3072,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_060",
@@ -2900,7 +3124,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_061",
@@ -2948,7 +3176,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_062",
@@ -2996,7 +3228,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_063",
@@ -3044,7 +3280,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_064",
@@ -3092,7 +3332,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_065",
@@ -3140,7 +3384,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_066",
@@ -3188,7 +3436,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_067",
@@ -3236,7 +3488,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_068",
@@ -3284,7 +3540,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_069",
@@ -3332,7 +3592,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_070",
@@ -3380,7 +3644,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_071",
@@ -3428,7 +3696,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_072",
@@ -3476,7 +3748,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_073",
@@ -3524,7 +3800,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_074",
@@ -3572,7 +3852,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_075",
@@ -3620,7 +3904,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_076",
@@ -3668,7 +3956,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_077",
@@ -3716,7 +4008,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_078",
@@ -3764,7 +4060,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_079",
@@ -3812,7 +4112,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_080",
@@ -3860,7 +4164,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_081",
@@ -3908,7 +4216,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_082",
@@ -3956,7 +4268,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_083",
@@ -4004,7 +4320,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_084",
@@ -4052,7 +4372,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_085",
@@ -4100,7 +4424,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_086",
@@ -4148,7 +4476,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_087",
@@ -4196,7 +4528,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_088",
@@ -4244,7 +4580,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_089",
@@ -4292,7 +4632,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_090",
@@ -4340,7 +4684,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_091",
@@ -4388,7 +4736,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_092",
@@ -4436,7 +4788,11 @@
       "charSong": 20,
       "skillId": null,
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "charDefense": 0,
+      "attackCount": 8,
+      "recoveryRate": null
     },
     {
       "id": "char_093",
@@ -4488,7 +4844,10 @@
         }
       },
       "strategyRate": 20,
-      "kana": null
+      "kana": null,
+      "battleCapacity": 30,
+      "attackCount": 8,
+      "recoveryRate": null
     }
   ]
 }

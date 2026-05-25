@@ -28,6 +28,7 @@ import itemsData      from '../game/data/items.json';
 import skillsData     from '../game/data/skills.json';
 import legionsData    from '../game/data/legions.json';
 import researchData   from '../game/data/facilities.json';
+import dungeonsData   from '../game/data/dungeons.json';
 
 // ─────────────────────────────────────────────────────────────
 // 初期状態生成
@@ -40,6 +41,7 @@ function createInitialState() {
       ...c,
       penaltyTurns: c.penaltyTurns ?? 0,
       usedThisTurn: false,
+      purchasedUpgrades: c.purchasedUpgrades ?? [],
     }));
 
   const factions = factionsData.factions.map(f => ({
@@ -63,7 +65,10 @@ function createInitialState() {
       return inv;
     })(),
     buildings:         [],          // 研究済みID配列（kiritan: worldScene.buildings）
-    dungeonProgress:   {},          // { dungeonId: { clearedFloors, isFullyCleared } }
+    dungeonProgress:   Object.fromEntries(
+      dungeonsData.dungeons.map(d => [d.id, { clearedFloors: 0, isFullyCleared: false }])
+    ),
+    dungeonExploredThisTurn: false,
     eventFlags:        {},
     occurredEvents:    {},
     flagTimestamps:    {},
@@ -142,6 +147,7 @@ function gameReducer(state, action) {
       let researchQueue  = state.researchQueue  ?? null;
       let upgradeUnlocks = [...(state.upgradeUnlocks ?? [])];
       let eventFlags     = { ...(state.eventFlags ?? {}) };
+      let buildings      = [...(state.buildings ?? [])];
 
       if (researchQueue !== null) {
         const remaining = researchQueue.turnsRemaining - 1;
@@ -154,6 +160,7 @@ function gameReducer(state, action) {
             researchDef.unlocks.flags.forEach(f => { eventFlags[f] = true; });
           }
           eventFlags[`${researchQueue.id}_done`] = true;
+          buildings = [...buildings, researchQueue.id];
           researchQueue = null;
         } else {
           researchQueue = { ...researchQueue, turnsRemaining: remaining };
@@ -166,10 +173,12 @@ function gameReducer(state, action) {
         factions,
         characters,
         conqueredThisTurn: false,
+        dungeonExploredThisTurn: false,
         actionPoints,
         researchQueue,
         upgradeUnlocks,
         eventFlags,
+        buildings,
       };
     }
 
@@ -357,6 +366,37 @@ function gameReducer(state, action) {
       return { ...state, characters: [...baseChars, ...savedMobs] };
     }
 
+    case 'DUNGEON_FLOOR_CLEAR': {
+      const { dungeonId, clearedFloors, isFullyCleared, rewardItem } = action.payload;
+      return {
+        ...state,
+        dungeonProgress: {
+          ...state.dungeonProgress,
+          [dungeonId]: { clearedFloors, isFullyCleared },
+        },
+        inventory: rewardItem ? [...state.inventory, rewardItem] : state.inventory,
+      };
+    }
+
+    case 'DUNGEON_EXPLORED':
+      return { ...state, dungeonExploredThisTurn: true };
+
+    case 'DUNGEON_DEFEAT': {
+      const { charId } = action.payload;
+      return {
+        ...state,
+        characters: state.characters.map(c =>
+          c.id !== charId ? c : {
+            ...c,
+            charHp:       1,
+            soldiers:     0,
+            penaltyTurns: 2,
+            usedThisTurn: true,
+          }
+        ),
+      };
+    }
+
     default:
       return state;
   }
@@ -484,7 +524,7 @@ function applyEffectToState(state, eff) {
 // セーブ・シリアライズ（SaveSystem v7互換）
 // ─────────────────────────────────────────────────────────────
 
-const SAVE_VERSION  = 8;
+const SAVE_VERSION  = 9;
 const STORAGE_KEY   = slot => `kiritan_save_${slot}`;
 
 function serializeState(state, legionAI) {
@@ -507,16 +547,19 @@ function serializeState(state, legionAI) {
     buildings:  [...(state.buildings ?? [])],
     characters: state.characters.map(c => {
       const base = {
-        id:           c.id,
-        factionId:    c.factionId,
-        status:       c.status ?? 'active',
-        soldiers:     c.soldiers,
-        maxSoldiers:  c.maxSoldiers,
-        usedThisTurn: c.usedThisTurn,
-        charHp:       c.charHp,
-        charMaxHp:    c.charMaxHp,
-        penaltyTurns: c.penaltyTurns ?? 0,
-        equipment:    { item: c.equipment?.item ?? null },
+        id:                c.id,
+        factionId:         c.factionId,
+        status:            c.status ?? 'active',
+        soldiers:          c.soldiers,
+        maxSoldiers:       c.maxSoldiers,
+        usedThisTurn:      c.usedThisTurn,
+        charHp:            c.charHp,
+        charMaxHp:         c.charMaxHp,
+        penaltyTurns:      c.penaltyTurns ?? 0,
+        equipment:         { item: c.equipment?.item ?? null },
+        purchasedUpgrades: c.purchasedUpgrades ?? [],
+        charSong:          c.charSong,
+        _spMaxUpCostMult:  c._spMaxUpCostMult,
       };
       if (c._isMobInstance) {
         return {
@@ -576,15 +619,18 @@ function deserializeToState(data, itemSystem) {
     if (!def) return;
     restoredChars.push({
       ...JSON.parse(JSON.stringify(def)),
-      factionId:    saved.factionId,
-      status:       saved.status       ?? 'active',
-      soldiers:     saved.soldiers,
-      maxSoldiers:  saved.maxSoldiers,
-      usedThisTurn: saved.usedThisTurn ?? false,
-      charHp:       saved.charHp       ?? def.charMaxHp,
-      charMaxHp:    saved.charMaxHp    ?? def.charMaxHp,
-      penaltyTurns: saved.penaltyTurns ?? 0,
-      equipment:    { item: saved.equipment?.item ?? null },
+      factionId:         saved.factionId,
+      status:            saved.status            ?? 'active',
+      soldiers:          saved.soldiers,
+      maxSoldiers:       saved.maxSoldiers,
+      usedThisTurn:      saved.usedThisTurn      ?? false,
+      charHp:            saved.charHp            ?? def.charMaxHp,
+      charMaxHp:         saved.charMaxHp         ?? def.charMaxHp,
+      penaltyTurns:      saved.penaltyTurns      ?? 0,
+      equipment:         { item: saved.equipment?.item ?? null },
+      purchasedUpgrades: saved.purchasedUpgrades ?? [],
+      charSong:          saved.charSong          ?? def.charSong,
+      _spMaxUpCostMult:  saved._spMaxUpCostMult,
     });
   });
 
@@ -617,7 +663,10 @@ function deserializeToState(data, itemSystem) {
     characters:     restoredChars,
     inventory,
     buildings:      data.buildings      ?? [],
-    dungeonProgress: data.dungeonProgress ?? {},
+    dungeonProgress: data.dungeonProgress ?? Object.fromEntries(
+      dungeonsData.dungeons.map(d => [d.id, { clearedFloors: 0, isFullyCleared: false }])
+    ),
+    dungeonExploredThisTurn: false,
     eventFlags:     data.eventFlags     ?? {},
     occurredEvents: data.occurredEvents ?? {},
     flagTimestamps: data.flagTimestamps ?? {},
@@ -880,24 +929,43 @@ export function GameProvider({ children }) {
   // ─────────────────────────────────────
 
   const doResearch = useCallback((researchId) => {
-    const bs = systemsRef.current.buildingSystem;
-    const s  = stateRef.current;
-    const pf = s.factions.find(f => f.isPlayer);
+    const bs  = systemsRef.current.buildingSystem;
+    const s   = stateRef.current;
+    const pf  = s.factions.find(f => f.isPlayer);
     const def = bs.getDef(researchId);
     if (!def || !pf || pf.treasury < def.cost) return false;
     if (s.buildings.includes(researchId)) return false;
 
-    // 収入・recruitment系はcharacterEffects不要
-    const characterEffects = [];
-    if (def.effect.type === 'maxSoldiersBonus') {
-      characterEffects.push({ field: 'maxSoldiers', delta: def.effect.value });
-    } else if (def.effect.type === 'charSongBonus') {
-      characterEffects.push({ field: 'charSong', delta: def.effect.value });
-    }
-
-    // treasury減算
     dispatch({ type: 'SET_TREASURY', payload: { factionId: pf.id, amount: pf.treasury - def.cost } });
-    dispatch({ type: 'ADD_RESEARCH', payload: { id: researchId, characterEffects } });
+    dispatch({ type: 'ADD_RESEARCH', payload: { id: researchId, characterEffects: [] } });
+    return true;
+  }, []);
+
+  const purchaseUpgrade = useCallback((charId, cmdId) => {
+    const bs  = systemsRef.current.buildingSystem;
+    const cmd = bs.upgradeCommands?.find(c => c.id === cmdId);
+    if (!cmd) return false;
+    const s  = stateRef.current;
+    const pf = s.factions.find(f => f.isPlayer);
+    if (!pf || pf.treasury < cmd.cost) return false;
+    const char = s.characters.find(c => c.id === charId);
+    if (!char) return false;
+
+    const purchased = (char.purchasedUpgrades ?? []).filter(id => id === cmdId).length;
+    if (cmd.maxPurchase != null && purchased >= cmd.maxPurchase) return false;
+
+    dispatch({ type: 'SET_TREASURY', payload: { factionId: pf.id, amount: pf.treasury - cmd.cost } });
+
+    const updatedChar = {
+      ...char,
+      purchasedUpgrades: [...(char.purchasedUpgrades ?? []), cmdId],
+    };
+    cmd.effects.forEach(eff => {
+      if (eff.type === 'charSong')        updatedChar.charSong        = (updatedChar.charSong ?? 0) + eff.delta;
+      if (eff.type === 'maxSoldiers')     updatedChar.maxSoldiers     = (updatedChar.maxSoldiers ?? 1000) + eff.delta;
+      if (eff.type === 'spMaxUpCostMult') updatedChar._spMaxUpCostMult = ((updatedChar._spMaxUpCostMult ?? 1.0) + eff.delta);
+    });
+    dispatch({ type: 'UPDATE_CHAR', payload: updatedChar });
     return true;
   }, []);
 
@@ -985,8 +1053,7 @@ export function GameProvider({ children }) {
   const availableChars = state.characters.filter(c =>
     c.factionId === playerFaction?.id &&
     !(c.penaltyTurns > 0) &&
-    !c.usedThisTurn &&
-    c.soldiers > 0
+    !c.usedThisTurn
   );
 
   // ─────────────────────────────────────
@@ -1001,6 +1068,8 @@ export function GameProvider({ children }) {
     playerBases,
     income,
     availableChars,
+    dungeonProgress:         state.dungeonProgress,
+    dungeonExploredThisTurn: state.dungeonExploredThisTurn,
     // systems（直接アクセス用）
     systems: systemsRef.current,
     legionAI: legionAIRef.current,
@@ -1014,6 +1083,7 @@ export function GameProvider({ children }) {
       battleEnd,
       beforeAttack,
       doResearch,
+      purchaseUpgrade,
       declareWar,
       isAtWar,
       updateChar:  (char)       => dispatch({ type: 'UPDATE_CHAR',   payload: char }),
@@ -1040,6 +1110,9 @@ export function GameProvider({ children }) {
         dispatch({ type: 'SET_RESEARCH_QUEUE', payload: { id, turnsRemaining: turns } });
       },
       setSecretary: (charId) => dispatch({ type: 'SET_SECRETARY', payload: charId }),
+      dungeonFloorClear: (payload) => dispatch({ type: 'DUNGEON_FLOOR_CLEAR', payload }),
+      dungeonExplored:   ()        => dispatch({ type: 'DUNGEON_EXPLORED' }),
+      dungeonDefeat:     (charId)  => dispatch({ type: 'DUNGEON_DEFEAT', payload: { charId } }),
     },
     buildBattleUnit: BattleEngineV3.buildUnit,
     checkVictory:    () => checkVictoryCondition(stateRef.current),

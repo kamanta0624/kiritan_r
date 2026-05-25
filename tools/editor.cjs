@@ -106,7 +106,7 @@ const server = http.createServer(async (req, res) => {
       }
 
       if (pathname === '/bulk-input.html') {
-        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache, no-store, must-revalidate' });
         res.end(fs.readFileSync(path.join(__dirname, 'bulk-input.html')));
         return;
       }
@@ -145,11 +145,12 @@ const server = http.createServer(async (req, res) => {
         const factions       = readJSON(path.join(DATA, 'factions.json'));
         const bases          = readJSON(path.join(DATA, 'bases.json'));
         const companionLines = readJSON(path.join(DATA, 'companion_lines.json'));
-        const skills         = readJSONSafe(path.join(DATA, 'skills.json'),   { skills: [] });
-        const dungeons       = readJSONSafe(path.join(DATA, 'dungeons.json'), { dungeons: [] });
-        const legions        = readJSONSafe(path.join(DATA, 'legions.json'),  { legions: [] });
-        const payload = JSON.stringify({ characters, items, factions, bases, companionLines, skills, dungeons, legions });
-        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        const skills         = readJSONSafe(path.join(DATA, 'skills.json'),     { skills: [] });
+        const dungeons       = readJSONSafe(path.join(DATA, 'dungeons.json'),   { dungeons: [] });
+        const legions        = readJSONSafe(path.join(DATA, 'legions.json'),    { legions: [] });
+        const facilities     = readJSONSafe(path.join(DATA, 'facilities.json'), { research: [], upgradeCommands: [] });
+        const payload = JSON.stringify({ characters, items, factions, bases, companionLines, skills, dungeons, legions, facilities });
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-cache, no-store, must-revalidate' });
         res.end(payload);
         return;
       }
@@ -224,6 +225,14 @@ const server = http.createServer(async (req, res) => {
       if (pathname === '/api/save/characters') {
         const body = await readBody(req);
         writeJSON(path.join(DATA, 'characters.json'), JSON.parse(body.toString()));
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true }));
+        return;
+      }
+
+      if (pathname === '/api/save/facilities') {
+        const body = await readBody(req);
+        writeJSON(path.join(DATA, 'facilities.json'), JSON.parse(body.toString()));
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ok: true }));
         return;

@@ -130,12 +130,16 @@ function renderCharsTab(main) {
     <th class="col-sel">勢力</th>
     <th class="col-num">HP</th>
     <th class="col-num">攻撃力</th>
+    <th class="col-num">防御力</th>
+    <th class="col-num" title="attackCount">攻回</th>
     <th class="col-num">歌</th>
+    <th class="col-num" title="recoveryRate">回復率</th>
+    <th class="col-num" title="strategyRate">作戦率</th>
+    <th class="col-name" style="width:80px">ミームタイプ</th>
     <th class="col-num">ミーム数</th>
     <th class="col-num">上限</th>
     <th class="col-num">攻</th>
     <th class="col-num">守</th>
-    <th class="col-num">戦闘域</th>
     <th class="col-sel">特技</th>
     <th style="width:50px">テンプレ</th>
     <th class="col-del"></th>
@@ -159,8 +163,8 @@ function buildCharRow(c, idx, factionOpts, skillOpts) {
   const tr = document.createElement('tr');
   tr.dataset.idx = idx;
   tr.innerHTML = `
-    <td><input type="text"   class="c_id"     value="${esc(c.id)}" /></td>
-    <td><input type="text"   class="c_name"   value="${esc(dispName)}" placeholder="${isTemplate?'displayName':'name'}" /></td>
+    <td><input type="text"   class="c_id"           value="${esc(c.id)}" /></td>
+    <td><input type="text"   class="c_name"         value="${esc(dispName)}" placeholder="${isTemplate?'displayName':'name'}" /></td>
     <td><select class="c_status">
       ${['active','recruitable','standby','dead'].map(s=>`<option value="${s}" ${c.status===s?'selected':''}>${s}</option>`).join('')}
     </select></td>
@@ -174,14 +178,18 @@ function buildCharRow(c, idx, factionOpts, skillOpts) {
       <option value="" ${!c.factionId?'selected':''}>(なし)</option>
       ${factionOpts.replace(`value="${esc(c.factionId??'')}"`,`value="${esc(c.factionId??'')}" selected`)}
     </select></td>
-    <td><input type="number" class="c_charMaxHp"       value="${c.charMaxHp??150}"          min="1"   max="9999" /></td>
-    <td><input type="number" class="c_charAttack"      value="${c.charAttack??70}"           min="1"   max="9999" /></td>
-    <td><input type="number" class="c_charSong"        value="${c.charSong??20}"             min="0"   max="200"  /></td>
-    <td><input type="number" class="c_soldiers"        value="${c.soldiers??500}"            min="0"   max="99999" /></td>
-    <td><input type="number" class="c_maxSoldiers"     value="${c.maxSoldiers??1000}"        min="1"   max="99999" /></td>
-    <td><input type="number" class="c_soldierAtk"      value="${c.soldierAtk??9}"            min="1"   max="100"  /></td>
-    <td><input type="number" class="c_soldierDef"      value="${c.soldierDef??9}"            min="1"   max="100"  /></td>
-    <td><input type="number" class="c_battleCapacity"  value="${c.battleCapacity??30}"       min="0"   max="99999" /></td>
+    <td><input type="number" class="c_charMaxHp"    value="${c.charMaxHp||150}"      min="1"    max="9999" /></td>
+    <td><input type="number" class="c_charAttack"   value="${c.charAttack||60}"      min="1"    max="9999" /></td>
+    <td><input type="number" class="c_charDefense"  value="${c.charDefense??0}"      min="0"    max="9999" /></td>
+    <td><input type="number" class="c_attackCount"  value="${c.attackCount??8}"      min="1"    max="80"   /></td>
+    <td><input type="number" class="c_charSong"     value="${c.charSong??20}"        min="0"    max="200"  /></td>
+    <td><input type="number" class="c_recoveryRate" value="${c.recoveryRate??''}"    step="0.01" min="0" max="1" placeholder="未指定" /></td>
+    <td><input type="number" class="c_strategyRate" value="${c.strategyRate??0}"     min="0"    max="100"  /></td>
+    <td><input type="text"   class="c_soldierName"  value="${esc(c.soldierName||'一般兵')}" /></td>
+    <td><input type="number" class="c_soldiers"     value="${c.soldiers||500}"       min="0"    max="99999" /></td>
+    <td><input type="number" class="c_maxSoldiers"  value="${c.maxSoldiers||1000}"   min="1"    max="99999" /></td>
+    <td><input type="number" class="c_soldierAtk"   value="${c.soldierAtk||9}"       min="1"    max="100"  /></td>
+    <td><input type="number" class="c_soldierDef"   value="${c.soldierDef||9}"       min="1"    max="100"  /></td>
     <td><select class="c_skillId">
       ${skillOpts.replace(`value="${esc(c.skillId??'')}"`,`value="${esc(c.skillId??'')}" selected`)}
     </select></td>
@@ -203,10 +211,9 @@ function addCharRow() {
     factionId: factions[0]?.id ?? 'player', status: 'standby',
     isTemplate: false, isLeader: false, usedThisTurn: false,
     role: 'attacker', attackType: 'melee',
-    kana: '', recoveryRate: 0.3, strategyRate: 0.5,
-    charHp: 150, charMaxHp: 150, charAttack: 70, charDefense: 0, charSong: 20,
-    soldiers: 500, maxSoldiers: 1000, soldierName: '一般兵', soldierAtk: 9, soldierDef: 9,
-    battleCapacity: 30,
+    kana: null, recoveryRate: null, strategyRate: 0,
+    charHp: 150, charMaxHp: 150, charAttack: 70, charDefense: 0, attackCount: 8, charSong: 20,
+    soldiers: 500, maxSoldiers: 1000, soldierName: '一般兵', soldierAtk: 10, soldierDef: 8,
     description: '', hireCost: 0, skillId: null, equipment: { item: null },
     battleBonus: {
       attack:  { soldierAtk:0, soldierDef:0, charAttack:0, charSong:0 },
@@ -237,10 +244,9 @@ function addCharRowTemplate() {
     statVariance: 0.15, nameVariants: [],
     isLeader: false, usedThisTurn: false,
     role: 'attacker', attackType: 'melee',
-    kana: '', recoveryRate: 0.3, strategyRate: 0.5,
-    charHp: 120, charMaxHp: 120, charAttack: 50, charDefense: 0, charSong: 15,
+    kana: null, recoveryRate: null, strategyRate: 0,
+    charHp: 120, charMaxHp: 120, charAttack: 50, charDefense: 0, attackCount: 8, charSong: 15,
     soldiers: 400, maxSoldiers: 800, soldierName: '一般兵', soldierAtk: 8, soldierDef: 7,
-    battleCapacity: 30,
     description: '', hireCost: 0, skillId: null, equipment: { item: null },
     battleBonus: {
       attack:  { soldierAtk:0, soldierDef:0, charAttack:0, charSong:0 },
@@ -274,23 +280,29 @@ function collectCharsFromTable() {
   document.querySelectorAll('#charBulkTable tbody tr').forEach((tr, i) => {
     const c = chars[i]; if (!c) return;
     const isTemplate = tr.querySelector('.c_isTemplate').checked;
-    c.id             = tr.querySelector('.c_id').value.trim();
-    c.isTemplate     = isTemplate;
-    c.status         = tr.querySelector('.c_status').value;
-    c.role           = tr.querySelector('.c_role').value;
-    c.attackType     = tr.querySelector('.c_attackType').value;
-    c.factionId      = tr.querySelector('.c_factionId').value || null;
-    c.charMaxHp      = Number(tr.querySelector('.c_charMaxHp').value);
-    c.charHp         = c.charMaxHp;
-    c.charAttack     = Number(tr.querySelector('.c_charAttack').value);
-    c.charSong       = Number(tr.querySelector('.c_charSong').value);
-    c.soldiers       = Number(tr.querySelector('.c_soldiers').value);
-    c.maxSoldiers    = Number(tr.querySelector('.c_maxSoldiers').value);
-    c.soldierAtk     = Number(tr.querySelector('.c_soldierAtk').value);
-    c.soldierDef     = Number(tr.querySelector('.c_soldierDef').value);
-    c.battleCapacity = Number(tr.querySelector('.c_battleCapacity').value);
-    c.skillId        = tr.querySelector('.c_skillId').value || null;
-    const rawName = tr.querySelector('.c_name').value.trim();
+    c.id           = tr.querySelector('.c_id').value.trim();
+    c.isTemplate   = isTemplate;
+    c.status       = tr.querySelector('.c_status').value;
+    c.role         = tr.querySelector('.c_role').value;
+    c.attackType   = tr.querySelector('.c_attackType').value;
+    c.factionId    = tr.querySelector('.c_factionId').value || null;
+    c.charMaxHp    = Number(tr.querySelector('.c_charMaxHp').value);
+    c.charHp       = c.charMaxHp;
+    c.charAttack   = Number(tr.querySelector('.c_charAttack').value);
+    c.attack       = c.charAttack;
+    c.charDefense  = Number(tr.querySelector('.c_charDefense').value);
+    c.attackCount  = Number(tr.querySelector('.c_attackCount').value);
+    c.charSong     = Number(tr.querySelector('.c_charSong').value);
+    const rrVal    = tr.querySelector('.c_recoveryRate').value;
+    c.recoveryRate = rrVal !== '' ? parseFloat(rrVal) : null;
+    c.strategyRate = Number(tr.querySelector('.c_strategyRate').value);
+    c.soldierName  = tr.querySelector('.c_soldierName').value.trim() || '一般兵';
+    c.soldiers     = Number(tr.querySelector('.c_soldiers').value);
+    c.maxSoldiers  = Number(tr.querySelector('.c_maxSoldiers').value);
+    c.soldierAtk   = Number(tr.querySelector('.c_soldierAtk').value);
+    c.soldierDef   = Number(tr.querySelector('.c_soldierDef').value);
+    c.skillId      = tr.querySelector('.c_skillId').value || null;
+    const rawName  = tr.querySelector('.c_name').value.trim();
     if (isTemplate) { c.displayName = rawName; delete c.name; }
     else            { c.name = rawName; delete c.displayName; }
   });

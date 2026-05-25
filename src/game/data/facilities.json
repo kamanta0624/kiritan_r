@@ -1,54 +1,60 @@
 {
   "research": [
+    { "id": "voice_1",      "name": "ボイス",        "category": "engine",  "cost": 200, "turns": 2, "description": "東北きりたんの基本ボイスライブラリ。全研究の起点。",      "prerequisites": [],              "unlocks": { "upgradeCommands": [], "flags": [] } },
+    { "id": "voice_plus",   "name": "ボイス＋",      "category": "engine",  "cost": 300, "turns": 2, "description": "ボイスライブラリの拡張版。表現力が向上。",               "prerequisites": ["voice_1"],     "unlocks": { "upgradeCommands": [], "flags": [] } },
+    { "id": "voice_2",      "name": "ボイス２",      "category": "engine",  "cost": 400, "turns": 3, "description": "第2世代ボイスライブラリ。品質が大幅改善。",              "prerequisites": ["voice_plus"],  "unlocks": { "upgradeCommands": [], "flags": [] } },
+    { "id": "aiv",          "name": "AIV",           "category": "engine",  "cost": 600, "turns": 3, "description": "AIボイス技術の導入。きりたんの歌声がAI合成可能に。",       "prerequisites": ["voice_2"],     "unlocks": { "upgradeCommands": ["kiritan_aiv"],    "flags": [] } },
+    { "id": "aiv_2",        "name": "AIV2",          "category": "engine",  "cost": 800, "turns": 4, "description": "AIVの第2世代。精度と表現力がさらに向上。",               "prerequisites": ["aiv"],         "unlocks": { "upgradeCommands": ["kiritan_aiv_2"],  "flags": [] } },
+    { "id": "vocal_1",      "name": "ボーカル１",    "category": "engine",  "cost": 300, "turns": 2, "description": "ボーカルスタイルの最初の拡張パック。",                    "prerequisites": ["voice_1"],     "unlocks": { "upgradeCommands": [], "flags": [] } },
+    { "id": "vocal_2",      "name": "ボーカル２",    "category": "engine",  "cost": 400, "turns": 2, "description": "ボーカルスタイル第2弾。",                              "prerequisites": ["vocal_1"],     "unlocks": { "upgradeCommands": [], "flags": [] } },
+    { "id": "vocal_nt",     "name": "ボーカルNT",    "category": "engine",  "cost": 600, "turns": 3, "description": "Natural Tone技術によるボーカル強化。",                  "prerequisites": ["vocal_2"],     "unlocks": { "upgradeCommands": [], "flags": [] } },
+    { "id": "studio_1",     "name": "スタジオ１",    "category": "engine",  "cost": 300, "turns": 2, "description": "レコーディング環境の整備。",                            "prerequisites": ["voice_1"],     "unlocks": { "upgradeCommands": [], "flags": [] } },
+    { "id": "studio_2",     "name": "スタジオ２",    "category": "engine",  "cost": 400, "turns": 2, "description": "スタジオ設備の強化。",                                  "prerequisites": ["studio_1"],    "unlocks": { "upgradeCommands": [], "flags": [] } },
+    { "id": "studio_ai",    "name": "スタジオAI",    "category": "engine",  "cost": 700, "turns": 4, "description": "AI制御のスタジオシステム導入。",                         "prerequisites": ["studio_2"],    "unlocks": { "upgradeCommands": [], "flags": [] } },
+    { "id": "vox_dorm",     "name": "VOX寮",         "category": "engine",  "cost": 400, "turns": 2, "description": "VOICEROIDたちの共同生活拠点。連携が深まる。",            "prerequisites": ["voice_plus"],  "unlocks": { "upgradeCommands": [], "flags": [] } },
+    { "id": "hybrid_v",     "name": "ハイブリッドV", "category": "engine",  "cost": 500, "turns": 3, "description": "従来型ボイスとAIの融合技術。",                          "prerequisites": ["voice_2"],     "unlocks": { "upgradeCommands": [], "flags": [] } },
+    { "id": "hybrid_v2",    "name": "ハイブリッドV2","category": "engine",  "cost": 700, "turns": 3, "description": "ハイブリッド技術の第2世代。",                           "prerequisites": ["hybrid_v"],    "unlocks": { "upgradeCommands": [], "flags": [] } },
+    { "id": "nu_tori",      "name": "νトリ",         "category": "engine",  "cost": 800, "turns": 4, "description": "次世代トリル技術。ボーカルNTの発展系。",                 "prerequisites": ["vocal_nt"],    "unlocks": { "upgradeCommands": [], "flags": [] } },
+    { "id": "uta",          "name": "UTA",           "category": "engine",  "cost": 900, "turns": 4, "description": "スタジオAIが生み出した究極の歌唱システム。",              "prerequisites": ["studio_ai"],   "unlocks": { "upgradeCommands": [], "flags": [] } },
+    { "id": "font",         "name": "フォント",      "category": "engine",  "cost": 200, "turns": 1, "description": "きりたん専用フォントの開発。",                           "prerequisites": ["voice_1"],     "unlocks": { "upgradeCommands": [], "flags": [] } },
+    { "id": "ink",          "name": "インク",        "category": "engine",  "cost": 300, "turns": 2, "description": "フォントを活かした印刷・デザイン展開。",                  "prerequisites": ["font"],        "unlocks": { "upgradeCommands": [], "flags": [] } },
+    { "id": "peak",         "name": "ピーク",        "category": "engine",  "cost": 1000,"turns": 5, "description": "全技術の頂点。AIV2が切り拓く最高峰。",                  "prerequisites": ["aiv_2"],       "unlocks": { "upgradeCommands": [], "flags": [] } },
+    { "id": "ex_voice_1",   "name": "EXボイス",      "category": "produce", "cost": 400, "turns": 2, "description": "ボイス＋を活かした追加収録。",                           "prerequisites": ["voice_plus"],  "unlocks": { "upgradeCommands": [], "flags": [] } },
+    { "id": "ex_voice_2",   "name": "EXボイス２",    "category": "produce", "cost": 500, "turns": 3, "description": "ボイス２品質でのEX追加収録。",                           "prerequisites": ["voice_2"],     "unlocks": { "upgradeCommands": [], "flags": [] } },
+    { "id": "public_assets","name": "公式素材",      "category": "produce", "cost": 300, "turns": 2, "description": "公式配布素材セットの整備。",                            "prerequisites": ["voice_1"],     "unlocks": { "upgradeCommands": [], "flags": [] } },
+    { "id": "collab",       "name": "コラボ",        "category": "produce", "cost": 500, "turns": 3, "description": "他キャラ・他作品とのコラボ企画。",                       "prerequisites": ["public_assets"],"unlocks": { "upgradeCommands": [], "flags": [] } },
+    { "id": "md",           "name": "MD展開",        "category": "produce", "cost": 600, "turns": 3, "description": "グッズ・マーチャンダイズの展開。",                       "prerequisites": ["ex_voice_1"],  "unlocks": { "upgradeCommands": [], "flags": [] } },
+    { "id": "terms",        "name": "利用規約",      "category": "produce", "cost": 200, "turns": 1, "description": "ガイドラインの整備で利用者が安心して使える環境に。",      "prerequisites": ["voice_1"],     "unlocks": { "upgradeCommands": [], "flags": [] } },
+    { "id": "crowdfund",    "name": "クラファン",    "category": "produce", "cost": 700, "turns": 3, "description": "クラウドファンディングで大型開発資金を獲得。",             "prerequisites": ["md"],          "unlocks": { "upgradeCommands": [], "flags": [] } }
+  ],
+  "upgradeCommands": [
     {
-      "id": "info_gathering",
-      "name": "情報収集術",
-      "cost": 200,
-      "turns": 2,
-      "description": "収入 +30ミーム/ターン（勢力全体）",
-      "effect": { "type": "income", "value": 30 },
-      "prerequisites": { "research": [], "flags": [] },
-      "unlocks": { "upgradeCommands": [], "flags": [] }
+      "id": "kiritan_aiv",
+      "charId": "kiritan",
+      "requiredResearch": "aiv",
+      "label": "AIVきりたん",
+      "desc": "AIボイス実装。歌パラ +5、SP上限UPコスト -20%",
+      "cost": 300,
+      "repeatable": true,
+      "maxPurchase": 3,
+      "effects": [
+        { "type": "charSong", "delta": 5 },
+        { "type": "spMaxUpCostMult", "delta": -0.2 }
+      ]
     },
     {
-      "id": "trade_network",
-      "name": "交易ネットワーク",
+      "id": "kiritan_aiv_2",
+      "charId": "kiritan",
+      "requiredResearch": "aiv_2",
+      "label": "AIV2きりたん",
+      "desc": "AIV第2世代。歌パラ +8、maxSoldiers +100",
       "cost": 500,
-      "turns": 3,
-      "description": "収入 +60ミーム/ターン（勢力全体）",
-      "effect": { "type": "income", "value": 60 },
-      "prerequisites": { "research": ["info_gathering"], "flags": [] },
-      "unlocks": { "upgradeCommands": [], "flags": [] }
-    },
-    {
-      "id": "calling_allies",
-      "name": "仲間への呼びかけ",
-      "cost": 600,
-      "turns": 3,
-      "description": "キャラクターを仲間にできるようになる",
-      "effect": { "type": "recruitment" },
-      "prerequisites": { "research": [], "flags": [] },
-      "unlocks": { "upgradeCommands": [], "flags": [] }
-    },
-    {
-      "id": "meme_resonance",
-      "name": "ミーム共鳴理論",
-      "cost": 400,
-      "turns": 2,
-      "description": "全キャラのミーム上限 +200",
-      "effect": { "type": "maxSoldiersBonus", "value": 200 },
-      "prerequisites": { "research": [], "flags": [] },
-      "unlocks": { "upgradeCommands": [], "flags": [] }
-    },
-    {
-      "id": "vocal_analysis",
-      "name": "歌唱解析",
-      "cost": 450,
-      "turns": 2,
-      "description": "全キャラの歌パラメータ +5",
-      "effect": { "type": "charSongBonus", "value": 5 },
-      "prerequisites": { "research": [], "flags": [] },
-      "unlocks": { "upgradeCommands": [], "flags": [] }
+      "repeatable": true,
+      "maxPurchase": 3,
+      "effects": [
+        { "type": "charSong", "delta": 8 },
+        { "type": "maxSoldiers", "delta": 100 }
+      ]
     }
   ]
 }

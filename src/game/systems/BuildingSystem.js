@@ -1,12 +1,11 @@
 /**
  * BuildingSystem
- * 研究の定義管理・実行・収入ボーナス・雇用を担当。
+ * 研究の定義管理・実行・強化コマンド取得を担当。
  *
  * 研究は勢力全体バフ。拠点への紐づけなし。
- * worldScene.buildings = ['info_gathering', 'calling_allies', ...] で管理する。
+ * worldScene.buildings = ['voice_1', 'voice_plus', ...] で管理する。
  *
  * 雇用候補は characters.json の status:'recruitable' かつ isTemplate:false のキャラ。
- * characters_pool.json は廃止。
  */
 
 import researchData   from '../data/facilities.json';
@@ -15,6 +14,7 @@ import charactersData from '../data/characters.json';
 export class BuildingSystem {
   constructor() {
     this.defs = researchData.research;
+    this.upgradeCommands = researchData.upgradeCommands ?? [];
   }
 
   // ----------------------------------------------------------------
@@ -39,7 +39,7 @@ export class BuildingSystem {
   getBuildable(buildings, treasury) { return this.getResearchable(buildings, treasury); }
 
   // ----------------------------------------------------------------
-  // 研究実行
+  // 研究実行（後方互換。GameContextが直接管理するため通常は呼ばれない）
   // ----------------------------------------------------------------
   research(buildings, researchId, faction, worldScene) {
     const def = this.getDef(researchId);
@@ -48,17 +48,6 @@ export class BuildingSystem {
     if (faction.treasury < def.cost) return false;
     faction.treasury -= def.cost;
     buildings.push(researchId);
-
-    // 新効果タイプの即時適用
-    if (worldScene) {
-      const effect = def.effect;
-      if (effect.type === 'maxSoldiersBonus') {
-        worldScene.characters.forEach(c => { c.maxSoldiers += effect.value; });
-      } else if (effect.type === 'charSongBonus') {
-        worldScene.characters.forEach(c => { c.charSong = (c.charSong ?? 20) + effect.value; });
-      }
-    }
-
     return true;
   }
 
@@ -66,21 +55,17 @@ export class BuildingSystem {
   build(buildings, buildingId, faction, worldScene) { return this.research(buildings, buildingId, faction, worldScene); }
 
   // ----------------------------------------------------------------
-  // 収入ボーナス計算
+  // 収入ボーナス計算（incomeボーナス研究廃止のため常に0）
   // ----------------------------------------------------------------
   getIncomeBonus(buildings) {
-    return buildings.reduce((sum, id) => {
-      const def = this.getDef(id);
-      if (!def || def.effect.type !== 'income') return sum;
-      return sum + def.effect.value;
-    }, 0);
+    return 0;
   }
 
   // ----------------------------------------------------------------
-  // イベントフラグ用
+  // イベントフラグ用（calling_allies廃止のため常にfalse）
   // ----------------------------------------------------------------
   hasAcademy(buildings) {
-    return buildings.includes('calling_allies');
+    return false;
   }
 
   getResearchNames(buildings) {
@@ -91,9 +76,17 @@ export class BuildingSystem {
   getBuildingNames(buildings) { return this.getResearchNames(buildings); }
 
   // ----------------------------------------------------------------
+  // キャラ固有強化コマンド取得
+  // ----------------------------------------------------------------
+  getUpgradeCommands(charId, buildings) {
+    return (this.upgradeCommands ?? []).filter(cmd =>
+      cmd.charId === charId &&
+      buildings.includes(cmd.requiredResearch)
+    );
+  }
+
+  // ----------------------------------------------------------------
   // 雇用関連
-  // characters.json の status:'recruitable' かつ isTemplate:false のキャラ一覧。
-  // worldScene.characters に加入済みのIDを除外して返す。
   // ----------------------------------------------------------------
   getHirePool(activeCharacters) {
     const activeIds = new Set(activeCharacters.map(c => c.id));
@@ -104,9 +97,6 @@ export class BuildingSystem {
     );
   }
 
-  // ----------------------------------------------------------------
-  // 雇用実行
-  // ----------------------------------------------------------------
   hire(charId, faction, activeCharacters) {
     const activeIds = new Set(activeCharacters.map(c => c.id));
     const template  = charactersData.characters.find(c =>
