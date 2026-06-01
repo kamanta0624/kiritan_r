@@ -46,8 +46,14 @@ export class ItemSystem {
   // ----------------------------------------------------------------
   // 所持アイテム操作
   // ----------------------------------------------------------------
+  // インスタンス生成のみ（配列への追加は行わない・純粋）
+  // GameContext の applyEffects / itemGain や reducer の ADD_ITEM payload 生成に使う
+  createInstance(itemId) {
+    return { id: genId(), itemId };
+  }
+
   addToInventory(inventory, itemId) {
-    const inst = { id: genId(), itemId };
+    const inst = this.createInstance(itemId);
     inventory.push(inst);
     return inst;
   }

@@ -51,8 +51,22 @@ export function TopBar({ scene, areaName, currentArea, breadcrumb, rightSlot, tu
         </>
       )}
 
+      {breadcrumb && (actionPoints != null || meme != null) && (
+        <div style={{marginLeft:'auto', display:'flex', alignItems:'center', gap:8, marginRight:8}}>
+          {actionPoints != null && (
+            <span style={{fontFamily:'Rajdhani', fontWeight:700, fontSize:12, color:AC2, whiteSpace:'nowrap'}}>
+              ⚡ {actionPoints}/{maxActionPoints ?? 5}
+            </span>
+          )}
+          {meme != null && (
+            <span style={{fontFamily:'Rajdhani', fontWeight:700, fontSize:12, color:PK, whiteSpace:'nowrap'}}>
+              ミーム {fmtN(meme)}
+            </span>
+          )}
+        </div>
+      )}
       {rightSlot && (
-        <div style={{marginLeft: breadcrumb ? 'auto' : 16}}>
+        <div style={{marginLeft: breadcrumb && (actionPoints == null && meme == null) ? 'auto' : 0}}>
           {rightSlot}
         </div>
       )}

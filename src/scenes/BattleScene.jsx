@@ -2,24 +2,15 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { BattleEngineV3 } from '../game/systems/BattleEngineV3.js';
 import { BattleAI }       from '../game/systems/BattleAI.js';
 import skillsData          from '../game/data/skills.json';
+import { PK, PK2, AC, AC2, TEAL, TX, TXD, TXF, BR, glass } from '../shared/tokens.js';
 
 const SKILLS = Object.fromEntries((skillsData.skills ?? []).map(s => [s.id, s]));
 
-// ── Design v4 トークン ──────────────────────────────────────
-const PK='#c4427a', PK2='#9e2d5f';
-const AC='#b87010', AC2='#d4a044';
-const TEAL='#1a8a96';
-const TX='#1c1020', TXD='rgba(28,16,32,.55)', TXF='rgba(28,16,32,.24)';
-const BR='rgba(0,0,0,.08)';
+// ── Design v4 トークン（色/glass は tokens.js から import） ──────
 const FONT_DISPLAY="'Zen Maru Gothic',sans-serif";
 const FONT_NUM="'Rajdhani',sans-serif";
-const glass = (extra={}) => ({
-  background:'rgba(255,253,251,.92)',
-  backdropFilter:'blur(16px)', WebkitBackdropFilter:'blur(16px)',
-  border:'1px solid rgba(255,255,255,.8)',
-  boxShadow:'0 2px 18px rgba(0,0,0,.13)',
-  ...extra,
-});
+// 攻撃ストリーム配色（overlay 専用）
+const STREAM_SP='#7fff00', STREAM_HIT='#ff2244', STREAM_GEN='#a06bff';
 const ATK_LABEL = { melee:'近接', ranged:'遠距離', song:'歌', attack:'近接', skill:'特技', focus:'集中', special:'必殺技', defend:'防御', retreat:'撤退' };
 const ATK_COLOR = { melee:PK, ranged:TEAL, song:AC2, attack:PK };
 const POS_LABEL = { front:'前衛', rear:'後衛' };
@@ -31,14 +22,24 @@ const ACTION_MAP = {
 };
 
 // ── ユーティリティ ──────────────────────────────────────────
-function _calcOptions(unit) {
+function _calcOptions(unit, allowRetreat = true, retreatRule = 'hp_any', eng = null) {
   const isFront  = unit.position === 'front';
   const aType    = unit.char?.attackType;
   const isRanged = aType === 'ranged';
   const isSong   = aType === 'song';
-  if (!isFront && !isRanged && !isSong) return ['defend', 'retreat'];
+
+  // P2: 軍団 retreatRule を結線。条件成立時のみ 'retreat' を選択肢に含める（敵AIのみ gate）。
+  const canRetreat = () => {
+    if (!allowRetreat) return false;            // dungeon/duel
+    if (retreatRule === 'never') return false;  // 高崎 base_071 等
+    if (!retreatRule || retreatRule === 'hp_any') return true;
+    // char_dead / loss_50 / loss_25: 自サイド（敵=enemySide）に戦闘不能が出たら許可（v2準拠の簡易判定）
+    return (eng?.enemySide ?? []).some(u => u.charHp <= 0);
+  };
+  const retreatOpt = canRetreat() ? ['retreat'] : [];
+  if (!isFront && !isRanged && !isSong) return ['defend', ...retreatOpt];
   const atk = isSong ? 'song' : isRanged ? 'ranged' : 'attack';
-  return [atk, 'defend', 'retreat'];
+  return [atk, 'defend', ...retreatOpt];
 }
 
 function _calcPool(unit, action, isPlayer, eng) {
@@ -52,7 +53,8 @@ function _calcPool(unit, action, isPlayer, eng) {
 function normalizeChar(c, idx) {
   return {
     id:c.id, name:c.name, position: idx < 2 ? 'front' : 'rear',
-    atk:c.charAttack??c.soldierAtk??10, def:c.soldierDef??8,
+    atk:c.soldierAtk??c.charAttack??10, def:c.soldierDef??8,
+    charAttack:c.charAttack??c.attack??70, attackCount:c.attackCount??8,
     meme:c.soldiers??500, max:c.maxSoldiers??c.soldiers??500, memeMax:c.maxSoldiers??c.soldiers??500,
     hp:c.charHp??200, hpMax:c.charMaxHp??200, portrait:c.portrait??null, _raw:c, status:idx===0?'active':'pending',
   };
@@ -656,7 +658,9 @@ function MessageWindow({ speaker, line }) {
 
 // ── R15: BattleAnimOverlay (V3.2対応 — animStateから実値を参照) ──
 function BattleAnimOverlay({ anim, targetNode, onContinue, bgUrl = 'url(assets/bg_battle.jpg)' }) {
-  const { attacker, defender, atkMem, atkChr, defMem, defChr, N, Nr, actionLabel, attackType='melee', attackerSide='player',
+  const { attacker, defender, atkMem, atkChr, defMem, defChr, actionLabel, attackerSide='player',
+          atkToMeme=0, atkToChar=0, defToMeme=0, defToChar=0,
+          atkSelfMemeHits=0, atkSelfCharHits=0, defSelfMemeHits=0, defSelfCharHits=0,
           atkSolBefore, defSolBefore, atkHpBefore, defHpBefore } = anim;
   const isSpecial   = actionLabel === '必殺技';
   const atkColor    = attackerSide === 'player' ? PK : AC;
@@ -704,25 +708,34 @@ function BattleAnimOverlay({ anim, targetNode, onContinue, bgUrl = 'url(assets/b
     enemyPortrait:{ x:1690, y: 850 },
   };
 
-  // 飛行バッジ用ストリーム (SP→SP / SP→本体)
+  // 飛行バッジ用ストリーム
+  //   BUG-4/5: SP命中(toMeme) と 将軍命中(toChar) を分離表示（toMeme+toChar=N）。HPダメージは別系統(DamageBurst/BottomPortrait)。
+  //   BUG-6: 将軍本人攻撃(selfHits) を兵士突撃とは別ストリームで描画。
   const streams = useMemo(() => {
     const arr = [];
-    const atkN    = N    ?? 0;
-    const defN    = Nr   ?? 0;
-    const atkChr_ = atkChr ?? 0;
-    const defChr_ = defChr ?? 0;
-    if (atkN > 0) {
-      arr.push({ src: POS[allyIsAttacker ? 'allySP' : 'enemySP'], dst: POS[allyIsAttacker ? 'enemySP' : 'allySP'], count: atkN, color:'#7fff00', textColor:'#0a0816', isSP: true });
-    }
-    if (atkChr_ > 0) {
-      arr.push({ src: POS[allyIsAttacker ? 'allySP' : 'enemySP'], dst: POS[allyIsAttacker ? 'enemyPortrait' : 'allyPortrait'], count: atkChr_, color:'#ff2244', textColor:'#fff', isSP: false });
-    }
-    if (defN > 0) {
-      arr.push({ src: POS[allyIsAttacker ? 'enemySP' : 'allySP'], dst: POS[allyIsAttacker ? 'allySP' : 'enemySP'], count: defN, color:'#ff4455', textColor:'#fff', isSP: true });
-    }
-    if (defChr_ > 0) {
-      arr.push({ src: POS[allyIsAttacker ? 'enemySP' : 'allySP'], dst: POS[allyIsAttacker ? 'allyPortrait' : 'enemyPortrait'], count: defChr_, color:'#ff4455', textColor:'#fff', isSP: false });
-    }
+    // 攻撃側/守備側の座標ゾーン（ally/enemy にマップ）
+    const z = allyIsAttacker
+      ? { atkSP: POS.allySP,  atkPort: POS.allyPortrait,  defSP: POS.enemySP, defPort: POS.enemyPortrait }
+      : { atkSP: POS.enemySP, atkPort: POS.enemyPortrait, defSP: POS.allySP,  defPort: POS.allyPortrait  };
+    const push = (src, dst, count, kind) => {
+      if (!count || count <= 0) return;
+      const cfg = {
+        sp:  { color: STREAM_SP,  textColor:'#0a0816', isSP:true,  prefix:'SP'   },
+        hit: { color: STREAM_HIT, textColor:'#fff',    isSP:false, prefix:'本体' },
+        gen: { color: STREAM_GEN, textColor:'#fff',    isSP:false, prefix:'将軍' },
+      }[kind];
+      arr.push({ src, dst, count, ...cfg });
+    };
+    // 攻撃側 → 守備側（兵士突撃 + 将軍本人）
+    push(z.atkSP,   z.defSP,   atkToMeme,       'sp');
+    push(z.atkSP,   z.defPort, atkToChar,       'hit');
+    push(z.atkPort, z.defSP,   atkSelfMemeHits, 'gen');
+    push(z.atkPort, z.defPort, atkSelfCharHits, 'gen');
+    // 反撃（守備側 → 攻撃側）
+    push(z.defSP,   z.atkSP,   defToMeme,       'sp');
+    push(z.defSP,   z.atkPort, defToChar,       'hit');
+    push(z.defPort, z.atkSP,   defSelfMemeHits, 'gen');
+    push(z.defPort, z.atkPort, defSelfCharHits, 'gen');
     return arr;
   }, []);
 
@@ -863,17 +876,10 @@ function BattleAnimOverlay({ anim, targetNode, onContinue, bgUrl = 'url(assets/b
             border: s.isSP ? '2px solid rgba(255,255,255,.55)' : '2px dashed rgba(255,255,255,.55)',
             whiteSpace:'nowrap',
           }}>
-            {s.isSP ? (
-              <>
-                <span style={{ fontSize:12, opacity:.85, fontWeight:700, letterSpacing:'.16em', marginRight:6 }}>SP</span>
-                ×{s.count}
-              </>
-            ) : (
-              <>
-                <span style={{ fontSize:10, opacity:.85, fontWeight:700, letterSpacing:'.16em', marginRight:4 }}>本体</span>
-                −{s.count}
-              </>
-            )}
+            <>
+              <span style={{ fontSize: s.isSP?12:10, opacity:.85, fontWeight:700, letterSpacing:'.16em', marginRight: s.isSP?6:4 }}>{s.prefix}</span>
+              ×{s.count}
+            </>
           </div>
         );
       })}
@@ -1094,7 +1100,7 @@ function getBgUrl(targetNode, isDefense) {
     : 'url(assets/bg_battle.jpg)';
 }
 
-export default function BattleFlow({ formation, targetNode, onComplete, enemyChars = [], battleMode = 'normal', isDefense = false }) {
+export default function BattleFlow({ formation, targetNode, onComplete, onBattleStart, enemyChars = [], battleMode = 'normal', isDefense = false, enemyRetreatRule = 'char_dead' }) {
   const BATTLE_CAP  = targetNode?.battleCapacity ?? 400;
   const slots       = ['front1','front2','rear1','rear2'];
   const rawAllies   = useRef(slots.map(k => formation?.[k]).filter(Boolean)).current;
@@ -1120,6 +1126,9 @@ export default function BattleFlow({ formation, targetNode, onComplete, enemyCha
   // ── オーバーレイ state ──
   const [animState,     setAnimState]     = useState(null);
   const animStateRef = useRef(null);
+  const animSeqRef   = useRef(0);
+  // BUG-3: 交換キュー。単一スロット上書きで先行overlayがスキップされるのを防ぐ。
+  const animQueueRef = useRef([]);
   const [cutinVisible,  setCutinVisible]  = useState(false);
   const [strategyWinner, setStrategyWinner] = useState(null);
   const [strategyBonus,  setStrategyBonus]  = useState(null);
@@ -1167,8 +1176,8 @@ export default function BattleFlow({ formation, targetNode, onComplete, enemyCha
     const eng = engineRef.current;
     unit.action = ACTION_MAP[unit.action] ?? unit.action;
     await eng.executeAction(unit, isPlayer);
-    // アニメーション表示中は待機
-    if (animResolveRef.current === null && animStateRef.current) {
+    // BUG-3: overlay 表示中 or キューに残りがある間は必ず待機（drainされるまで）
+    if (animStateRef.current || animQueueRef.current.length) {
       await new Promise(resolve => { animResolveRef.current = resolve; });
     }
     eng.markActed(unit);
@@ -1179,7 +1188,6 @@ export default function BattleFlow({ formation, targetNode, onComplete, enemyCha
 
   const onRoundEnd = useCallback(() => {
     const eng = engineRef.current;
-    eng.applyRetreatRule('loss_50', eng.enemySide);
     if (eng.checkGameOver()) return;
     if (eng.checkRoundLimit()) return;
     eng.startRound();
@@ -1200,7 +1208,7 @@ export default function BattleFlow({ formation, targetNode, onComplete, enemyCha
       setSpecialPending(false);
       syncDisplay(unit.char.id);
     } else {
-      const opts = _calcOptions(unit);
+      const opts = _calcOptions(unit, eng.allowRetreat, enemyRetreatRule, eng);
       BattleAI.selectAction(unit, opts);
       if (['attack','ranged','song','special'].includes(unit.action)) {
         BattleAI.selectTarget(unit, _calcPool(unit, unit.action, false, eng));
@@ -1214,26 +1222,34 @@ export default function BattleFlow({ formation, targetNode, onComplete, enemyCha
 
   // ── エンジン初期化（一度だけ） ──
   useEffect(() => {
-    const playerUnits = rawAllies.map((c, i) => BattleEngineV3.buildUnit(c, 'attack', i));
+    // BUG-2: 防衛戦ではプレイヤーが守備側・敵が攻撃側
+    const playerUnits = rawAllies.map((c, i) => BattleEngineV3.buildUnit(c, isDefense ? 'defense' : 'attack', i));
     const initEnemies = enemyChars.length > 0
       ? enemyChars.map((c, i) => normalizeChar(c, i))
       : buildDefaultEnemies(targetNode);
-    const enemyUnits = initEnemies.map((e, i) => ({
-      char: {
-        id: e.id, name: e.name, soldiers: e.meme, maxSoldiers: e.max,
-        charHp: 10, charMaxHp: 10, charAttack: e.atk, soldierAtk: e.atk,
-        soldierDef: e.def, charDefense: e.def, attackType: 'melee', factionId: 'enemy',
-      },
-      sideType:'defense', bonus:{ soldierAtk:0, soldierDef:0, charAttack:0, charSong:0 },
-      position: i < 2 ? 'front' : 'rear',
-      soldiers: e.meme, maxSoldiers: e.max, charHp: 10, charMaxHp: 10,
-      action: null, retreated: false, charged: false, skillUsed: false,
-      attackCount: 8, charDefense: e.def, level: 0, targetId: null, _actedThisRound: false,
-    }));
+    const enemyUnits = initEnemies.map((e, i) => {
+      const eHp      = e.hp     ?? 200;
+      const eHpMax   = e.hpMax  ?? eHp;
+      const eCharAtk = e.charAttack ?? e.atk;
+      const eAtkCnt  = e.attackCount ?? 8;
+      return {
+        char: {
+          id: e.id, name: e.name, soldiers: e.meme, maxSoldiers: e.max,
+          charHp: eHp, charMaxHp: eHpMax, charAttack: eCharAtk, soldierAtk: e.atk,
+          soldierDef: e.def, charDefense: e.def, attackType: 'melee', factionId: 'enemy',
+        },
+        sideType: isDefense ? 'attack' : 'defense',
+        bonus:{ soldierAtk:0, soldierDef:0, charAttack:0, charSong:0 },
+        position: i < 2 ? 'front' : 'rear',
+        soldiers: e.meme, maxSoldiers: e.max, charHp: eHp, charMaxHp: eHpMax,
+        action: null, retreated: false, charged: false, skillUsed: false,
+        attackCount: eAtkCnt, charDefense: e.def, level: 0, targetId: null, _actedThisRound: false,
+      };
+    });
 
     const eng = new BattleEngineV3({
       playerSide: playerUnits, enemySide: enemyUnits,
-      mode: 'attack', battleCapacity: BATTLE_CAP, battleMode,
+      mode: isDefense ? 'defense' : 'attack', battleCapacity: BATTLE_CAP, battleMode,
       // M2: 撤退含む全終了をここに一本化
       onBattleEnd: (wins) => {
         const e = engineRef.current;
@@ -1242,18 +1258,24 @@ export default function BattleFlow({ formation, targetNode, onComplete, enemyCha
         const deadIds    = (e?.playerSide ?? []).filter(u => u.charHp <= 0).map(u => u.char.id);
         const deadMobIds = [...(e?.playerSide ?? []), ...(e?.enemySide ?? [])]
           .filter(u => u.charHp <= 0 && u.char._isMobInstance).map(u => u.char.id);
+        // char_defeated 用：撃破された敵側の非モブ将軍ID（プレイヤー側 deadIds とは別系統）
+        const defeatedEnemyCharIds = (e?.enemySide ?? [])
+          .filter(u => u.charHp <= 0 && !u.char._isMobInstance).map(u => u.char.id);
         const unitResults = [...(e?.playerSide ?? []), ...(e?.enemySide ?? [])].map(u => ({
           id:       u.char.id,
           soldiers: Math.max(0, u.char.soldiers),
           charHp:   Math.max(0, u.char.charHp),
         }));
 
-        const playerWins = wins;  // mode:'attack'固定なのでそのまま
+        // BUG-2: engine の wins は「攻撃側勝利」。防衛戦はプレイヤー=守備側なので反転。
+        // conquered は App 側の契約に合わせ「プレイヤーが勝ったか」を返す。
+        const playerWins = isDefense ? !wins : wins;
         battleResultRef.current = {
-          conquered:   wins,
+          conquered:   playerWins,
           usedCharIds: usedIds,
           deadCharIds: deadIds,
           deadMobIds,
+          defeatedEnemyCharIds,
           unitResults,
         };
         setWinner(playerWins ? 'player' : 'enemy');
@@ -1271,6 +1293,16 @@ export default function BattleFlow({ formation, targetNode, onComplete, enemyCha
           defChr:      result.defChr,
           N:           result.N,
           Nr:          result.Nr,
+          // 兵士突撃の命中数内訳（SP命中 + 将軍命中 = N）
+          atkToMeme:   result.atkToMeme,
+          atkToChar:   result.atkToChar,
+          defToMeme:   result.defToMeme,
+          defToChar:   result.defToChar,
+          // 将軍本人攻撃の命中数
+          atkSelfMemeHits: result.atkSelfMemeHits,
+          atkSelfCharHits: result.atkSelfCharHits,
+          defSelfMemeHits: result.defSelfMemeHits,
+          defSelfCharHits: result.defSelfCharHits,
           atkSolBefore: result.atkSolBefore,
           defSolBefore: result.defSolBefore,
           atkHpBefore:  result.atkHpBefore,
@@ -1278,9 +1310,15 @@ export default function BattleFlow({ formation, targetNode, onComplete, enemyCha
           actionLabel: ATK_LABEL[atk.action] ?? atk.action,
           attackType:  atk.char.attackType,
           attackerSide: isPlayerUnit ? 'player' : 'enemy',
+          _seq: ++animSeqRef.current,
         };
-        animStateRef.current = state;
-        setAnimState(state);
+        // BUG-3: キューに積む。表示中overlayが無ければ即先頭を表示。
+        animQueueRef.current.push(state);
+        if (!animStateRef.current) {
+          const next = animQueueRef.current.shift();
+          animStateRef.current = next;
+          setAnimState(next);
+        }
       },
       onLog:       (txt) => setLog(p => [...p, { txt }]),
       onCardUpdate: () => {},
@@ -1300,6 +1338,9 @@ export default function BattleFlow({ formation, targetNode, onComplete, enemyCha
     if (side) {
       setStrategyBonus({ side, bonus });
     }
+
+    // battle_start 通知（初期化フローでの1回のみ）。描画ロジック非変更。
+    onBattleStart?.();
 
     eng.startRound();
     setRoundNum(eng.round);
@@ -1413,10 +1454,17 @@ export default function BattleFlow({ formation, targetNode, onComplete, enemyCha
 
       {/* R15: 戦闘アニメーションオーバーレイ */}
       {animState && (
-        <BattleAnimOverlay anim={animState} targetNode={targetNode} bgUrl={bgUrl} onContinue={() => {
-          animStateRef.current = null;
-          setAnimState(null);
-          if (animResolveRef.current) { animResolveRef.current(); animResolveRef.current = null; }
+        <BattleAnimOverlay key={animState._seq} anim={animState} targetNode={targetNode} bgUrl={bgUrl} onContinue={() => {
+          // BUG-3: キューに残りがあれば次を表示。無ければ待機中の doAction を解放。
+          if (animQueueRef.current.length) {
+            const next = animQueueRef.current.shift();
+            animStateRef.current = next;
+            setAnimState(next);
+          } else {
+            animStateRef.current = null;
+            setAnimState(null);
+            if (animResolveRef.current) { animResolveRef.current(); animResolveRef.current = null; }
+          }
         }}/>
       )}
 

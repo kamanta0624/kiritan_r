@@ -1,0 +1,46 @@
+{
+  "id": "ev_otaru_conquered",
+  "name": "【ダミー】小樽制圧",
+  "trigger": "player_turn",
+  "conditions": [
+    {
+      "type": "baseOwned",
+      "baseId": "base_006"
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_otaru_conquered"
+    }
+  ],
+  "probability": 1,
+  "priority": 1000,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        {
+          "characterId": "char_004",
+          "position": "center",
+          "text": "【ダミー】小樽潮風の本拠地を制圧した。"
+        }
+      ]
+    },
+    {
+      "type": "end"
+    }
+  ],
+  "effects": {
+    "default": [
+      {
+        "type": "baseTransfer",
+        "fromFactionId": "faction_yellow",
+        "toFactionId": "東北家"
+      },
+      {
+        "type": "setFlag",
+        "flag": "flag_otaru_conquered"
+      }
+    ]
+  }
+}

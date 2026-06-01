@@ -38,7 +38,7 @@
         "type": "every_turn"
       },
       "retreatRule": {
-        "onAttack": "hp_any",
+        "onAttack": "char_dead",
         "onDefend": "char_dead",
         "onDefendBase": {
           "base_071": "never"
@@ -206,6 +206,216 @@
       }
     },
     {
+      "id": "legion_faction_red_reserve",
+      "name": "大都会防衛隊",
+      "factionId": "faction_red",
+      "charIds": [],
+      "mobSlots": [
+        {
+          "slotId": "slot_1",
+          "templateId": "mob_001",
+          "charId": null,
+          "respawnIn": null
+        },
+        {
+          "slotId": "slot_2",
+          "templateId": "mob_001",
+          "charId": null,
+          "respawnIn": null
+        }
+      ],
+      "maxMobSlots": 2,
+      "attackPriority": [],
+      "defendBases": [],
+      "attackFrequency": null,
+      "isDefenseReserve": true,
+      "retreatRule": {
+        "onAttack": "never",
+        "onDefend": "char_dead",
+        "onDefendBase": {}
+      }
+    },
+    {
+      "id": "legion_faction_green_reserve",
+      "name": "さいたま防衛隊",
+      "factionId": "faction_green",
+      "charIds": [],
+      "mobSlots": [
+        {
+          "slotId": "slot_1",
+          "templateId": "mob_001",
+          "charId": null,
+          "respawnIn": null
+        },
+        {
+          "slotId": "slot_2",
+          "templateId": "mob_001",
+          "charId": null,
+          "respawnIn": null
+        }
+      ],
+      "maxMobSlots": 2,
+      "attackPriority": [],
+      "defendBases": [],
+      "attackFrequency": null,
+      "isDefenseReserve": true,
+      "retreatRule": {
+        "onAttack": "never",
+        "onDefend": "char_dead",
+        "onDefendBase": {}
+      }
+    },
+    {
+      "id": "legion_faction_yellow_reserve",
+      "name": "小樽潮風防衛隊",
+      "factionId": "faction_yellow",
+      "charIds": [],
+      "mobSlots": [
+        {
+          "slotId": "slot_1",
+          "templateId": "mob_001",
+          "charId": null,
+          "respawnIn": null
+        },
+        {
+          "slotId": "slot_2",
+          "templateId": "mob_001",
+          "charId": null,
+          "respawnIn": null
+        }
+      ],
+      "maxMobSlots": 2,
+      "attackPriority": [],
+      "defendBases": [],
+      "attackFrequency": null,
+      "isDefenseReserve": true,
+      "retreatRule": {
+        "onAttack": "never",
+        "onDefend": "char_dead",
+        "onDefendBase": {}
+      }
+    },
+    {
+      "id": "legion_faction_new01_reserve",
+      "name": "東京防衛隊",
+      "factionId": "faction_new01",
+      "charIds": [],
+      "mobSlots": [
+        {
+          "slotId": "slot_1",
+          "templateId": "mob_001",
+          "charId": null,
+          "respawnIn": null
+        },
+        {
+          "slotId": "slot_2",
+          "templateId": "mob_001",
+          "charId": null,
+          "respawnIn": null
+        }
+      ],
+      "maxMobSlots": 2,
+      "attackPriority": [],
+      "defendBases": [],
+      "attackFrequency": null,
+      "isDefenseReserve": true,
+      "retreatRule": {
+        "onAttack": "never",
+        "onDefend": "char_dead",
+        "onDefendBase": {}
+      }
+    },
+    {
+      "id": "legion_faction_new02_reserve",
+      "name": "自由都市防衛隊",
+      "factionId": "faction_new02",
+      "charIds": [],
+      "mobSlots": [
+        {
+          "slotId": "slot_1",
+          "templateId": "mob_001",
+          "charId": null,
+          "respawnIn": null
+        },
+        {
+          "slotId": "slot_2",
+          "templateId": "mob_001",
+          "charId": null,
+          "respawnIn": null
+        }
+      ],
+      "maxMobSlots": 2,
+      "attackPriority": [],
+      "defendBases": [],
+      "attackFrequency": null,
+      "isDefenseReserve": true,
+      "retreatRule": {
+        "onAttack": "never",
+        "onDefend": "char_dead",
+        "onDefendBase": {}
+      }
+    },
+    {
+      "id": "legion_faction_new03_reserve",
+      "name": "ボーカル界防衛隊",
+      "factionId": "faction_new03",
+      "charIds": [],
+      "mobSlots": [
+        {
+          "slotId": "slot_1",
+          "templateId": "mob_001",
+          "charId": null,
+          "respawnIn": null
+        },
+        {
+          "slotId": "slot_2",
+          "templateId": "mob_001",
+          "charId": null,
+          "respawnIn": null
+        }
+      ],
+      "maxMobSlots": 2,
+      "attackPriority": [],
+      "defendBases": [],
+      "attackFrequency": null,
+      "isDefenseReserve": true,
+      "retreatRule": {
+        "onAttack": "never",
+        "onDefend": "char_dead",
+        "onDefendBase": {}
+      }
+    },
+    {
+      "id": "legion_faction_new04_reserve",
+      "name": "AHS防衛隊",
+      "factionId": "faction_new04",
+      "charIds": [],
+      "mobSlots": [
+        {
+          "slotId": "slot_1",
+          "templateId": "mob_001",
+          "charId": null,
+          "respawnIn": null
+        },
+        {
+          "slotId": "slot_2",
+          "templateId": "mob_001",
+          "charId": null,
+          "respawnIn": null
+        }
+      ],
+      "maxMobSlots": 2,
+      "attackPriority": [],
+      "defendBases": [],
+      "attackFrequency": null,
+      "isDefenseReserve": true,
+      "retreatRule": {
+        "onAttack": "never",
+        "onDefend": "char_dead",
+        "onDefendBase": {}
+      }
+    },
+    {
       "id": "legion_faction_red_02",
       "name": "新規軍団",
       "factionId": "faction_red",
@@ -227,7 +437,7 @@
         "type": "every_turn"
       },
       "retreatRule": {
-        "onAttack": "hp_any",
+        "onAttack": "char_dead",
         "onDefend": "char_dead",
         "onDefendBase": {}
       }

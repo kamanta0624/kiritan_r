@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import './App.css';
 import { useGame } from './context/GameContext.jsx';
 import secretaryLinesData from './game/data/secretary_lines.json';
-import eventsData         from './game/data/events.json';
 import dungeonsData       from './game/data/dungeons.json';
 
 import TitleScene           from './scenes/TitleScene.jsx';
@@ -20,7 +19,7 @@ import PartnerWidget        from './shared/PartnerWidget.jsx';
 import GameEndScene         from './scenes/GameEndScene.jsx';
 import DungeonScene         from './scenes/DungeonScene.jsx';
 import NewGamePlusScene     from './scenes/NewGamePlusScene.jsx';
-import ADVScene, { convertEventScript } from './scenes/ADVScene.jsx';
+import ADVScene             from './scenes/ADVScene.jsx';
 import BattleQAScene        from './scenes/BattleQAScene.jsx';
 import BattleFullQAScene    from './scenes/BattleFullQAScene.jsx';
 import WorldMapQAScene      from './scenes/WorldMapQAScene.jsx';
@@ -70,9 +69,14 @@ export default function App() {
   }
 
   useEffect(() => {
-    game.setStartDialogHandler((script, onComplete) => {
-      const { scenario, cast, bg, location } = convertEventScript(script);
-      navigate('adv', { scenario, cast, bg, location, returnTo: 'map', _onComplete: onComplete });
+    // 新契約: script + effects を ADV に渡す。effects 適用は ADV 内部。
+    // 戻り先（map）と直列化（onComplete=次イベント起動）は onExit に閉じる。
+    game.setStartDialogHandler((script, effects, onComplete) => {
+      navigate('adv', {
+        script,
+        effects,
+        onExit: () => { navigate('map'); onComplete?.(); },
+      });
     });
   }, []);
 
@@ -169,15 +173,21 @@ export default function App() {
   }, [currentDefenseItem, characters, factions]);
 
   // 防衛キュー全体を state machine で駆動し、完了まで待てる Promise を返す
-  const startDefenseQueue = useCallback((queue) => {
+  const startDefenseQueue = useCallback(async (queue) => {
+    const item = queue[0];
+    // base_defense 発火（キュー先頭処理前）。条件 attackerFaction/defenderFaction のため
+    // attackerFactionId を必ず渡す（baseId だけでは attackerFaction 条件が無言でfalseになる）。
+    await game.actions.fireTrigger('base_defense', {
+      attackerFactionId: item?.attackerFactionId,
+      baseId:            item?.defenderBase?.id,
+    });
     return new Promise((resolve) => {
       defenseFlowResolveRef.current = resolve;
-      const item = queue[0];
       navigate('map', { focusBaseId: item?.defenderBase?.id });
       setFocusKey(k => k + 1);
       setDefenseFlow({ queue, index: 0, phase: 'defense_prompt' });
     });
-  }, [navigate]);
+  }, [navigate, game.actions]);
 
   // ── ターン終了 → 勢力ごとに演出→防衛→次勢力 ──────────────────
   const handleNextTurn = useCallback(async () => {
@@ -235,7 +245,7 @@ export default function App() {
       const item        = defenseFlow.queue[defenseFlow.index];
       const attackerIds = item.attackerCharIds ?? [];
       const fEnemyChars = attackerIds.length > 0
-        ? characters.filter(c => attackerIds.includes(c.id)).slice(0, 4)
+        ? characters.filter(c => attackerIds.includes(c.id) && !(c.penaltyTurns > 0) && (c.soldiers ?? 0) > 0).slice(0, 4)
         : characters.filter(c =>
             (c.factionId === item.attackerFactionId || c._legionId === item.legionId) &&
             !(c.penaltyTurns > 0) && (c.soldiers ?? 0) > 0
@@ -264,7 +274,7 @@ export default function App() {
       const item        = defenseFlow.queue[defenseFlow.index];
       const attackerIds = item.attackerCharIds ?? [];
       const enemyChars  = attackerIds.length > 0
-        ? characters.filter(c => attackerIds.includes(c.id)).slice(0, 4)
+        ? characters.filter(c => attackerIds.includes(c.id) && !(c.penaltyTurns > 0) && (c.soldiers ?? 0) > 0).slice(0, 4)
         : characters.filter(c =>
             c.factionId === item.attackerFactionId &&
             !(c.penaltyTurns > 0) && (c.soldiers ?? 0) > 0
@@ -277,11 +287,18 @@ export default function App() {
             targetNode={item.defenderBase}
             isDefense={true}
             enemyChars={enemyChars}
+            enemyRetreatRule={item.retreatRule ?? 'char_dead'}
+            onBattleStart={() => game.actions.fireTrigger('battle_start', {
+              playerCharIds: ['front1','front2','rear1','rear2']
+                .map(k => defenseFlow.formation?.[k]?.id).filter(Boolean),
+              baseId: item.defenderBase?.id ?? item.defenderBase?.baseId,
+            })}
             onComplete={async (result) => {
               const phase = await game.actions.battleEnd({
                 usedCharIds:    result?.usedCharIds  ?? [],
                 deadCharIds:    result?.deadCharIds  ?? [],
                 deadMobIds:     result?.deadMobIds   ?? [],
+                defeatedEnemyCharIds: result?.defeatedEnemyCharIds ?? [],
                 unitResults:    result?.unitResults  ?? [],
                 conquered:      !(result?.conquered  ?? false),
                 defenderBaseId: item.defenderBase?.id ?? item.defenderBase?.baseId,
@@ -396,11 +413,14 @@ export default function App() {
       case 'battle': {
         const targetBase     = sceneParams.targetNode;
         const enemyFactionId = targetBase?.factionId;
-        const enemyChars     = sceneParams._dungeonEnemy
-          ? [buildDungeonEnemy(sceneParams._dungeonEnemy)]
+        // P2: 攻撃戦では AI が守備側 → mode='defense'（onDefend ルール）。撤退ルールも併せて取得。
+        const _def = sceneParams._dungeonEnemy
+          ? { chars: [buildDungeonEnemy(sceneParams._dungeonEnemy)], retreatRule: 'never' }
           : (enemyFactionId && legionAI
-              ? legionAI.getDefenders(enemyFactionId, targetBase, characters).slice(0, 4)
-              : []);
+              ? legionAI.getDefendersWithRule(enemyFactionId, targetBase, characters, 'defense')
+              : { chars: [], retreatRule: 'char_dead' });
+        const enemyChars       = _def.chars.slice(0, 4);
+        const enemyRetreatRule = _def.retreatRule;
 
         return (
           <div style={{ width:'100vw', height:'100vh', background:'#000' }}>
@@ -409,6 +429,12 @@ export default function App() {
               targetNode={targetBase}
               isDefense={false}
               enemyChars={enemyChars}
+              enemyRetreatRule={enemyRetreatRule}
+              onBattleStart={() => game.actions.fireTrigger('battle_start', {
+                playerCharIds: ['front1','front2','rear1','rear2']
+                  .map(k => sceneParams.formation?.[k]?.id).filter(Boolean),
+                baseId: targetBase?.id ?? targetBase?.baseId,
+              })}
               onComplete={async (result) => {
                 // ── ダンジョン戦闘の場合 ──
                 if (dungeonFlow) {
@@ -420,6 +446,7 @@ export default function App() {
                     usedCharIds:     [explorerCharId],
                     deadCharIds:     isWin ? [] : [explorerCharId],
                     deadMobIds:      [],
+                    defeatedEnemyCharIds: result?.defeatedEnemyCharIds ?? [],
                     unitResults:     result?.unitResults ?? [],
                     conquered:       false,
                     defenderBaseId:  null,
@@ -444,6 +471,7 @@ export default function App() {
                   usedCharIds:     result?.usedCharIds    ?? [],
                   deadCharIds:     result?.deadCharIds    ?? [],
                   deadMobIds:      result?.deadMobIds     ?? [],
+                  defeatedEnemyCharIds: result?.defeatedEnemyCharIds ?? [],
                   unitResults:     result?.unitResults    ?? [],
                   conquered:       result?.conquered      ?? false,
                   defenderBaseId:  targetBase?.id ?? targetBase?.baseId,
@@ -491,6 +519,8 @@ export default function App() {
           characters={characters.filter(c => c.factionId === playerFaction?.id)}
           treasury={playerFaction?.treasury ?? 0}
           upgradeUnlocks={game.upgradeUnlocks}
+          actionPoints={game.actionPoints}
+          maxActionPoints={game.maxActionPoints}
           secretaryId={game.secretaryId}
           buildings={game.buildings}
           buildingSystem={systems?.buildingSystem}
@@ -544,38 +574,25 @@ export default function App() {
         />;
 
       // ── 劇場 ──
+      // 候補取得は getTheaterEvents（getAvailableTheaterEvents）に一本化。
+      // 起動は ev.script/ev.effects を直接 ADV に渡し、戻り先（theater）を onExit に閉じる（Phase 2 方針）。
       case 'theater':
         return <TheaterScene
           onNavigate={navigate}
-          events={eventsData}
-          factions={factions}
-          bases={bases}
-          characters={characters}
-          eventFlags={game.eventFlags}
-          currentTurn={currentTurn}
-          playerFaction={playerFaction}
-          playerBases={playerBases}
+          theaterEvents={game.actions.getTheaterEvents()}
           actionPoints={game.actionPoints}
           onStartTheater={(eventId) => {
-            const ev = eventsData.find(e => e.id === eventId);
+            if (game.actionPoints < 1) return;
+            const ev = game.actions.runTheaterEvent(eventId);
             if (!ev) return;
-            game.actions.setActionPoints(game.actionPoints - 1);
-            const scenario = [
-              { type: 'narration', text: `【${ev.title}】` },
-              { type: 'narration', text: ev.description },
-              { type: 'end' },
-            ];
+            game.actions.setActionPoints(game.actionPoints - (ev.cost?.actionPoints ?? 1));
+            // script に meta.location（イベント名）を付与（ADV は script.meta から location を読む）
+            const script = Array.isArray(ev.script) ? [...ev.script] : [{ type: 'end' }];
+            script.meta = { location: ev.title ?? ev.name };
             navigate('adv', {
-              scenario,
-              cast: [],
-              bg: null,
-              location: ev.title,
-              returnTo: 'theater',
-              _onComplete: () => {
-                (ev.onComplete ?? []).forEach(eff => {
-                  if (eff.type === 'setFlag') game.actions.setFlag(eff.flag, true);
-                });
-              },
+              script,
+              effects: ev.effects ?? null,
+              onExit: () => navigate('theater'),
             });
           }}
         />;
@@ -631,7 +648,7 @@ export default function App() {
               game.actions.dungeonExplored();
               navigate('battle', {
                 mode:           'dungeon',
-                formation:      characters.filter(c => c.id === explorerCharId),
+                formation:      { front1: characters.find(c => c.id === explorerCharId) },
                 targetNode:     { name: dungeon.name, battleCapacity: 99999 },
                 _dungeonEnemy:  floorData.enemy,
                 battleCapacity: 99999,
@@ -649,18 +666,13 @@ export default function App() {
         return <NewGamePlusScene onNavigate={navigate} />;
 
       // ── 会話 ──
+      // 契約: { script, effects, onExit }。戻り先は呼び出し元が onExit に閉じる
+      // （未指定時のみ map へ戻る）。effects 適用・choice 分岐は ADV 内部。
       case 'adv':
         return <ADVScene
-          scenario={sceneParams.scenario ?? []}
-          cast={sceneParams.cast ?? []}
-          bg={sceneParams.bg ?? null}
-          location={sceneParams.location ?? ''}
-          transparent={sceneParams.transparent ?? false}
-          onExit={() => {
-            sceneParams._onComplete?.();
-            navigate(sceneParams.returnTo ?? 'map');
-          }}
-          onChoice={(value) => sceneParams._onChoice?.(value)}
+          script={sceneParams.script ?? []}
+          effects={sceneParams.effects ?? null}
+          onExit={sceneParams.onExit ?? (() => navigate('map'))}
         />;
 
       // ── 空実装 ──

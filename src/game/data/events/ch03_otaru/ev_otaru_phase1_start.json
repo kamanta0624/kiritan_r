@@ -1,0 +1,41 @@
+{
+  "id": "ev_otaru_phase1_start",
+  "name": "【ダミー】小樽潮風フェーズ開始",
+  "trigger": "player_turn",
+  "conditions": [
+    {
+      "type": "flag",
+      "flag": "flag_mito_conquest_done"
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_otaru_active"
+    }
+  ],
+  "probability": 1,
+  "priority": 1000,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        {
+          "characterId": "char_004",
+          "position": "center",
+          "text": "【ダミー】水戸を制圧した。北の潮風が動き出すかもしれない。"
+        }
+      ]
+    },
+    {
+      "type": "end"
+    }
+  ],
+  "effects": {
+    "default": [
+      {
+        "type": "setFlagWithTurn",
+        "flag": "flag_otaru_active"
+      }
+    ]
+  }
+}

@@ -3,9 +3,14 @@
   "_schema": {
     "id": "イベントID（ファイル内のidと一致させること）",
     "path": "src/data/events/ からの相対パス",
-    "chapter": "管理用タグ（system / ch01 / ch02 / ... / defeated / placeholder）"
+    "chapter": "管理用タグ（system / ch01 / ch02 / ... / defeated / placeholder / theater）"
   },
   "events": [
+    {
+      "id": "theater_sample_001",
+      "path": "theater/ev_theater_sample.json",
+      "chapter": "theater"
+    },
     {
       "id": "ev_000_opening",
       "path": "system/ev_000_opening.json",
@@ -120,6 +125,91 @@
       "id": "ev_defeated_placeholder_04",
       "path": "placeholder/ev_defeated_placeholder_04.json",
       "chapter": "placeholder"
+    },
+    {
+      "id": "ev_otaru_phase1_start",
+      "path": "ch03_otaru/ev_otaru_phase1_start.json",
+      "chapter": "ch03_otaru"
+    },
+    {
+      "id": "ev_otaru_expand_1",
+      "path": "ch03_otaru/ev_otaru_expand_1.json",
+      "chapter": "ch03_otaru"
+    },
+    {
+      "id": "ev_otaru_expand_2",
+      "path": "ch03_otaru/ev_otaru_expand_2.json",
+      "chapter": "ch03_otaru"
+    },
+    {
+      "id": "ev_otaru_expand_3",
+      "path": "ch03_otaru/ev_otaru_expand_3.json",
+      "chapter": "ch03_otaru"
+    },
+    {
+      "id": "ev_otaru_declare_war",
+      "path": "ch03_otaru/ev_otaru_declare_war.json",
+      "chapter": "ch03_otaru"
+    },
+    {
+      "id": "ev_otaru_war_flag_sync",
+      "path": "ch03_otaru/ev_otaru_war_flag_sync.json",
+      "chapter": "ch03_otaru"
+    },
+    {
+      "id": "ev_otaru_conquered",
+      "path": "ch03_otaru/ev_otaru_conquered.json",
+      "chapter": "ch03_otaru"
+    },
+    {
+      "id": "ev_otaru_max_check",
+      "path": "ch03_otaru/ev_otaru_max_check.json",
+      "chapter": "ch03_otaru"
+    },
+    {
+      "id": "ev_una_joined",
+      "path": "ch04_saitama_tl/ev_una_joined.json",
+      "chapter": "ch04_saitama_tl"
+    },
+    {
+      "id": "ev_una_fled",
+      "path": "ch04_saitama_tl/ev_una_fled.json",
+      "chapter": "ch04_saitama_tl"
+    },
+    {
+      "id": "ev_saitama_absorbed",
+      "path": "ch04_saitama_tl/ev_saitama_absorbed.json",
+      "chapter": "ch04_saitama_tl"
+    },
+    {
+      "id": "ev_tokyo_open",
+      "path": "ch04_saitama_tl/ev_tokyo_open.json",
+      "chapter": "ch04_saitama_tl"
+    },
+    {
+      "id": "ev_tokyo_conquered",
+      "path": "ch04_saitama_tl/ev_tokyo_conquered.json",
+      "chapter": "ch04_saitama_tl"
+    },
+    {
+      "id": "ev_ahs_conquered_flag",
+      "path": "ch05_vocalo/ev_ahs_conquered_flag.json",
+      "chapter": "ch05_vocalo"
+    },
+    {
+      "id": "ev_ahs_absorbed",
+      "path": "ch05_vocalo/ev_ahs_absorbed.json",
+      "chapter": "ch05_vocalo"
+    },
+    {
+      "id": "ev_vocalo_attacks",
+      "path": "ch05_vocalo/ev_vocalo_attacks.json",
+      "chapter": "ch05_vocalo"
+    },
+    {
+      "id": "ev_vocalo_conquered",
+      "path": "ch05_vocalo/ev_vocalo_conquered.json",
+      "chapter": "ch05_vocalo"
     }
   ]
 }

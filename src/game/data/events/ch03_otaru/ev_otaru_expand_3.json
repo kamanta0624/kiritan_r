@@ -1,0 +1,56 @@
+{
+  "id": "ev_otaru_expand_3",
+  "name": "【ダミー】小樽侵食3（苫小牧）",
+  "trigger": "player_turn",
+  "conditions": [
+    {
+      "type": "flag",
+      "flag": "flag_otaru_exp2_done"
+    },
+    {
+      "type": "turnAfterFlag",
+      "flag": "flag_otaru_exp2_done",
+      "op": "gte",
+      "value": 3
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_otaru_exp3_done"
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_otaru_at_war"
+    }
+  ],
+  "probability": 1,
+  "priority": 900,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        {
+          "characterId": "char_004",
+          "position": "center",
+          "text": "【ダミー】小樽潮風が苫小牧にまで進出した。"
+        }
+      ]
+    },
+    {
+      "type": "end"
+    }
+  ],
+  "effects": {
+    "default": [
+      {
+        "type": "baseTransferSingle",
+        "baseId": "base_052",
+        "toFactionId": "faction_yellow"
+      },
+      {
+        "type": "setFlagWithTurn",
+        "flag": "flag_otaru_exp3_done"
+      }
+    ]
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "id": "ev_ahs_absorbed",
+  "name": "【ダミー】AHSがボカロに吸収される",
+  "trigger": "player_turn",
+  "conditions": [
+    {
+      "type": "turn",
+      "op": "gte",
+      "value": 80
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_ahs_conquered_by_player"
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_ahs_absorbed"
+    }
+  ],
+  "probability": 1,
+  "priority": 1000,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        {
+          "characterId": "char_004",
+          "position": "center",
+          "text": "【ダミー】AHSがボーカル界に吸収されてしまった。"
+        }
+      ]
+    },
+    {
+      "type": "end"
+    }
+  ],
+  "effects": {
+    "default": [
+      {
+        "type": "baseTransfer",
+        "fromFactionId": "faction_new04",
+        "toFactionId": "faction_new03"
+      },
+      {
+        "type": "setFlag",
+        "flag": "flag_ahs_absorbed"
+      }
+    ]
+  }
+}

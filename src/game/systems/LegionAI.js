@@ -129,20 +129,63 @@ export class LegionAI {
   // 防衛キャラ選出
   // ----------------------------------------------------------------
   getDefenders(defenderFactionId, defenderBase, allCharacters) {
+    // 1. 拠点指定の防衛軍団
     const legion = this.legions.find(l =>
       l.factionId === defenderFactionId &&
+      !l.isDefenseReserve &&
       l.defendBases?.includes(defenderBase.id)
     );
-
     if (legion) {
       const chars = this._getLegionCombatChars(legion);
       if (chars.length > 0) return chars;
     }
 
-    // フォールバック
-    return allCharacters.filter(c =>
-      c.factionId === defenderFactionId && c.soldiers > 0
+    // 2. 勢力の防衛専用 reserve 軍団（全勢力員フォールバックを廃止）
+    const reserve = this.legions.find(l =>
+      l.factionId === defenderFactionId && l.isDefenseReserve
     );
+    if (reserve) {
+      const chars = this._getLegionCombatChars(reserve);
+      if (chars.length > 0) return chars;
+    }
+
+    // 3. 最終手段: 空配列（BattleScene が buildDefaultEnemies で汎用敵を出す）
+    return [];
+  }
+
+  // ----------------------------------------------------------------
+  // 防衛キャラ選出 + 採用軍団の撤退ルール
+  // getDefenders と同じ解決ロジックで、採用した軍団の retreatRule も返す。
+  // @param mode 'defense'（拠点防衛＝AIが守備側） | 'attack'（プレイヤー防衛戦＝AIが攻撃側）
+  // @returns {{ chars: object[], retreatRule: string }}
+  // ----------------------------------------------------------------
+  getDefendersWithRule(defenderFactionId, defenderBase, allCharacters, mode = 'defense') {
+    // 1. 拠点指定の防衛軍団
+    const legion = this.legions.find(l =>
+      l.factionId === defenderFactionId &&
+      !l.isDefenseReserve &&
+      l.defendBases?.includes(defenderBase.id)
+    );
+    if (legion) {
+      const chars = this._getLegionCombatChars(legion);
+      if (chars.length > 0) {
+        return { chars, retreatRule: this.getRetreatRule(legion.id, defenderBase.id, mode) };
+      }
+    }
+
+    // 2. 勢力の防衛専用 reserve 軍団
+    const reserve = this.legions.find(l =>
+      l.factionId === defenderFactionId && l.isDefenseReserve
+    );
+    if (reserve) {
+      const chars = this._getLegionCombatChars(reserve);
+      if (chars.length > 0) {
+        return { chars, retreatRule: this.getRetreatRule(reserve.id, defenderBase.id, mode) };
+      }
+    }
+
+    // 3. 最終手段: 汎用敵 → char_dead fallback
+    return { chars: [], retreatRule: 'char_dead' };
   }
 
   // ----------------------------------------------------------------

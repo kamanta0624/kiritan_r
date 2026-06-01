@@ -1,0 +1,31 @@
+{
+  "id": "theater_sample_001",
+  "name": "テストイベント",
+  "trigger": "theater",
+  "category": "recurring",
+  "title": "テストイベント",
+  "description": "動作確認用の繰り返しイベント",
+  "cost": {
+    "actionPoints": 1
+  },
+  "conditions": [],
+  "probability": 1,
+  "priority": 0,
+  "maxOccurrences": -1,
+  "script": [
+    {
+      "type": "narration",
+      "text": "【テストイベント】"
+    },
+    {
+      "type": "narration",
+      "text": "動作確認用の繰り返しイベント"
+    },
+    {
+      "type": "end"
+    }
+  ],
+  "effects": {
+    "default": []
+  }
+}

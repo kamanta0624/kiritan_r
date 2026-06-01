@@ -1,12 +1,11 @@
 {
   "id": "ev_mito_conquest",
   "name": "水戸制圧イベント",
-  "trigger": "base_conquered",
+  "trigger": "player_turn",
   "conditions": [
     {
-      "type": "baseConquered",
-      "baseId": "base_045",
-      "factionId": "東北家"
+      "type": "baseOwned",
+      "baseId": "base_045"
     },
     {
       "type": "noFlag",

@@ -27,17 +27,7 @@
         {
           "characterId": "char_016",
           "position": "center",
-          "text": "きりたん、納豆ファクトリーやばいなのだ。オラは助っ人を呼びに行くのだ。"
-        },
-        {
-          "characterId": "char_004",
-          "position": "right",
-          "text": "ずんだもん…ありがとう。誤りなく言って。"
-        },
-        {
-          "characterId": "char_016",
-          "position": "center",
-          "text": "任せるのだ・・・。まず誤りなく戦える子を一人選ぶのだ。"
+          "text": "仲間呼びイベント"
         }
       ]
     },
@@ -48,7 +38,7 @@
       "text": "最初の一人は誰にする？",
       "choices": [
         {
-          "label": "琺葉茹を呼ぶ",
+          "label": "琴葉茜を呼ぶ",
           "next": 2,
           "effects": [
             {
@@ -58,7 +48,7 @@
           ]
         },
         {
-          "label": "琺葉葵を呼ぶ",
+          "label": "琴葉葵を呼ぶ",
           "next": 2,
           "effects": [
             {
@@ -68,7 +58,7 @@
           ]
         },
         {
-          "label": "鎖成あかりを呼ぶ",
+          "label": "絆星あかりを呼ぶ",
           "next": 2,
           "effects": [
             {

@@ -205,6 +205,8 @@ function CharDetail({char, onClose,
   secretaryId, onSetSecretary,
   charUpgrades, onPurchaseUpgrade}) {
   const role = ROLES[char.role] || ROLES.front;
+  const [confirmState, setConfirmState] = useState(null);
+  // confirmState: { type: 'upgrade'|'charUpgrade', cmdId, label, cost, preview, action }
   return (
     <div style={{position:'fixed', inset:0, zIndex:100,
       display:'flex', animation:'fadeIn .18s ease both'}}>
@@ -251,6 +253,15 @@ function CharDetail({char, onClose,
               <StatBar label="攻撃" val={char.atk} max={12} color={PK}/>
               <StatBar label="防御" val={char.def} max={12} color={TEAL}/>
               <MemeBar val={char.meme} max={char.memeMax} color='#6a55b0'/>
+              <div style={{display:'flex', alignItems:'center', gap:8}}>
+                <div style={{width:28, fontSize:9, color:TXD, fontFamily:'Noto Sans JP', flexShrink:0}}>SP上限</div>
+                <div style={{fontFamily:'Rajdhani', fontWeight:700, fontSize:11, color:'#6a55b0'}}>{(char.memeMax ?? 0).toLocaleString()}</div>
+              </div>
+              <StatBar label="HP" val={char.hp} max={char.maxHp || 1} color='#e57373'/>
+              <div style={{display:'flex', alignItems:'center', gap:8}}>
+                <div style={{width:28, fontSize:9, color:TXD, fontFamily:'Noto Sans JP', flexShrink:0}}>HP上限</div>
+                <div style={{fontFamily:'Rajdhani', fontWeight:700, fontSize:11, color:'#e57373'}}>{(char.maxHp ?? 0).toLocaleString()}</div>
+              </div>
             </div>
           </div>
           <div style={{background:`${role.color}0d`, borderRadius:10, padding:'14px 16px',
@@ -283,9 +294,25 @@ function CharDetail({char, onClose,
               {upgradeUnlocks.filter(id => UPGRADE_COMMANDS[id]).map(id => {
                 const cmd = UPGRADE_COMMANDS[id];
                 const affordable = (treasury ?? 0) >= cmd.cost;
+                const getPreview = () => {
+                  if (id === 'sp_refill') {
+                    const cur = char.meme ?? 0;
+                    const next = Math.min(cur + Math.floor((char.memeMax ?? 0) * 0.5), char.memeMax ?? 0);
+                    return `SP: ${cur.toLocaleString()} → ${next.toLocaleString()}`;
+                  }
+                  if (id === 'sp_max_up') {
+                    const cur = char.memeMax ?? 0;
+                    return `SP上限: ${cur.toLocaleString()} → ${(cur + 200).toLocaleString()}`;
+                  }
+                  return '';
+                };
                 return (
                   <button key={id}
-                    onClick={() => onUpgrade(char.id, id)}
+                    onClick={() => affordable && setConfirmState({
+                      type: 'upgrade', label: cmd.label, cost: cmd.cost,
+                      preview: getPreview(),
+                      action: () => onUpgrade(char.id, id),
+                    })}
                     disabled={!affordable}
                     style={{
                       width:'100%', padding:'7px 10px', borderRadius:7,
@@ -330,7 +357,11 @@ function CharDetail({char, onClose,
                     </div>
                     <div style={{fontSize:9, color:TXD, marginBottom:6, lineHeight:1.4}}>{cmd.desc}</div>
                     <button
-                      onClick={() => onPurchaseUpgrade(char.id, cmd.id)}
+                      onClick={() => enabled && setConfirmState({
+                        type: 'charUpgrade', label: cmd.label, cost: cmd.cost,
+                        preview: cmd.desc,
+                        action: () => onPurchaseUpgrade(char.id, cmd.id),
+                      })}
                       disabled={!enabled}
                       style={{
                         width:'100%', padding:'5px 8px', borderRadius:6,
@@ -357,11 +388,60 @@ function CharDetail({char, onClose,
           </div>
         </div>
       </div>
+
+      {/* 確認ポップアップ */}
+      {confirmState && (
+        <div style={{position:'fixed', inset:0, zIndex:200,
+          display:'flex', alignItems:'center', justifyContent:'center',
+          background:'rgba(0,0,0,.45)'}}>
+          <div style={{
+            ...glass({borderRadius:14, border:`1px solid ${BR}`,
+              boxShadow:'0 8px 40px rgba(0,0,0,.18)'}),
+            padding:'24px 28px', minWidth:280, maxWidth:340,
+            display:'flex', flexDirection:'column', gap:14,
+          }}>
+            <div style={{fontSize:13, fontWeight:900, fontFamily:"'Zen Maru Gothic'", color:TX}}>
+              {confirmState.label}
+            </div>
+            <div style={{fontSize:11, color:TXD, fontFamily:'Noto Sans JP', lineHeight:1.6}}>
+              コスト：<span style={{fontFamily:'Rajdhani', fontWeight:700, color:AC}}>
+                {confirmState.cost.toLocaleString()} ミーム
+              </span>
+            </div>
+            {confirmState.preview && (
+              <div style={{background:'rgba(0,0,0,.04)', borderRadius:8, padding:'8px 12px',
+                fontSize:11, color:TX, fontFamily:'Noto Sans JP', lineHeight:1.6,
+                border:`1px solid ${BR}`}}>
+                {confirmState.preview}
+              </div>
+            )}
+            <div style={{display:'flex', gap:8, marginTop:4}}>
+              <button
+                onClick={() => { confirmState.action(); setConfirmState(null); }}
+                style={{flex:1, padding:'9px', borderRadius:8,
+                  background:`linear-gradient(135deg,${AC},${AC}bb)`,
+                  border:'none', color:'#fff', cursor:'pointer',
+                  fontFamily:"'Noto Sans JP'", fontSize:12, fontWeight:700,
+                  boxShadow:`0 2px 12px ${AC}44`}}>
+                実行する
+              </button>
+              <button
+                onClick={() => setConfirmState(null)}
+                style={{flex:1, padding:'9px', borderRadius:8,
+                  background:'rgba(0,0,0,.06)', border:`1px solid ${BR}`,
+                  color:TXD, cursor:'pointer',
+                  fontFamily:"'Noto Sans JP'", fontSize:12, fontWeight:700}}>
+                キャンセル
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-export default function PartyScene({ onNavigate, characters, treasury=0, upgradeUnlocks=[], secretaryId=null, onUpgrade, onSetSecretary, buildings=[], buildingSystem=null, onPurchaseUpgrade }) {
+export default function PartyScene({ onNavigate, characters, treasury=0, upgradeUnlocks=[], secretaryId=null, onUpgrade, onSetSecretary, buildings=[], buildingSystem=null, onPurchaseUpgrade, actionPoints, maxActionPoints }) {
   const [hovered, setHovered] = useState(null);
   const [selected, setSelected] = useState(null);
   const [detail, setDetail] = useState(null);
@@ -400,6 +480,9 @@ export default function PartyScene({ onNavigate, characters, treasury=0, upgrade
       {/* TOP BAR */}
       <TopBar scene="party"
         breadcrumb={['マップ','仲間']}
+        actionPoints={actionPoints}
+        maxActionPoints={maxActionPoints}
+        meme={treasury}
         rightSlot={
           <div style={{padding:'4px 12px', borderRadius:20,
             background:'rgba(26,138,150,.1)', border:'1px solid rgba(26,138,150,.25)',

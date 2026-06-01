@@ -436,7 +436,8 @@
       "income": 50,
       "isCapital": false,
       "adjacentBases": [
-        "base_022"
+        "base_022",
+        "base_029"
       ],
       "battleCapacity": 400,
       "dungeonId": null,
@@ -485,11 +486,14 @@
       "income": 50,
       "isCapital": false,
       "adjacentBases": [
+        "base_026",
         "base_028"
       ],
       "battleCapacity": 400,
       "dungeonId": null,
-      "area": "kanto"
+      "area": "kanto",
+      "bgField": null,
+      "bgCastle": null
     },
     {
       "id": "base_030",

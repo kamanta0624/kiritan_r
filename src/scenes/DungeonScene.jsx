@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { PK, PK2, AC, AC2, TEAL } from '../shared/tokens.js';
-import eventsData from '../game/data/events.json';
-import ADVScene, { convertEventScript } from './ADVScene.jsx';
+import { getEventById } from '../game/systems/EventEngine.js';
+import ADVScene from './ADVScene.jsx';
 
 // ═══════════════════════════════════════════════════════════
 //   DungeonScene — 迷宮探索
@@ -128,7 +128,7 @@ export default function DungeonScene({
             <DungeonBtn label="探索開始" color={TEAL} primary
               disabled={!selectedCharId || blocked}
               onClick={() => setPhase('floor_intro')} />
-            <DungeonBtn label="戻る" color="rgba(255,255,255,.3)"
+            <DungeonBtn label="戻る" color="rgba(255,255,255,.7)"
               onClick={() => onNavigate('map')} />
           </div>
         </div>
@@ -157,7 +157,7 @@ export default function DungeonScene({
           <div style={{ display:'flex', gap:10 }}>
             <DungeonBtn label="戦闘開始" color={PK} primary
               onClick={() => onStartBattle(selectedCharId, currentFloor, floorData)} />
-            <DungeonBtn label="退却" color="rgba(255,255,255,.3)"
+            <DungeonBtn label="退却" color="rgba(255,255,255,.7)"
               onClick={() => onNavigate('map')} />
           </div>
         </div>
@@ -205,19 +205,12 @@ export default function DungeonScene({
 
   // ── adv フェーズ ──
   if (phase === 'adv') {
-    const eventDef = (eventsData.events ?? eventsData)?.find
-      ? (eventsData.events ?? eventsData).find(e => e.id === currentEventId)
-      : null;
-    const { scenario, cast } = eventDef
-      ? convertEventScript(eventDef.script ?? [])
-      : { scenario: [{ type:'end' }], cast: [] };
+    const eventDef = currentEventId ? getEventById(currentEventId) : null;
 
     return (
       <ADVScene
-        scenario={scenario}
-        cast={cast}
-        bg={null}
-        transparent={false}
+        script={eventDef?.script ?? [{ type:'end' }]}
+        effects={eventDef?.effects ?? null}
         onExit={() => {
           const isLastFloor = currentFloor >= dungeon.totalFloors;
           setPhase(isLastFloor ? 'dungeon_cleared' : 'next_or_escape');
@@ -249,7 +242,7 @@ export default function DungeonScene({
                 clearedCalledRef.current = false;
                 setPhase('floor_intro');
               }} />
-            <DungeonBtn label="退却する" color="rgba(255,255,255,.3)"
+            <DungeonBtn label="退却する" color="rgba(255,255,255,.7)"
               onClick={() => onNavigate('map')} />
           </div>
         </div>

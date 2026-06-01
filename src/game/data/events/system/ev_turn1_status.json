@@ -19,22 +19,7 @@
         {
           "characterId": "char_017",
           "position": "left",
-          "text": "きりたん、多そうだよ。納豆ファクトリーが私たちの拠点に目をつけてるわ。"
-        },
-        {
-          "characterId": "char_004",
-          "position": "right",
-          "text": "うん。已経交戦状態に入ってるってことか…。"
-        },
-        {
-          "characterId": "char_017",
-          "position": "left",
-          "text": "戦力が足りない。早急に付走を稺いだほうがいいと思う。"
-        },
-        {
-          "characterId": "char_004",
-          "position": "right",
-          "text": "それはそうだけど。まずは守りを固めなきゃ。"
+          "text": "1ターン目冒頭イベント"
         }
       ]
     },

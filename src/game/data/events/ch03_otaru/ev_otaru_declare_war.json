@@ -1,0 +1,52 @@
+{
+  "id": "ev_otaru_declare_war",
+  "name": "【ダミー】小樽宣戦布告",
+  "trigger": "player_turn",
+  "conditions": [
+    {
+      "type": "flag",
+      "flag": "flag_otaru_exp2_done"
+    },
+    {
+      "type": "turnAfterFlag",
+      "flag": "flag_otaru_exp2_done",
+      "op": "gte",
+      "value": 6
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_otaru_at_war"
+    }
+  ],
+  "probability": 1,
+  "priority": 850,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        {
+          "characterId": "char_004",
+          "position": "center",
+          "text": "【ダミー】小樽潮風が宣戦を布告してきた。"
+        }
+      ]
+    },
+    {
+      "type": "end"
+    }
+  ],
+  "effects": {
+    "default": [
+      {
+        "type": "warFlag",
+        "factionId": "faction_yellow",
+        "atWar": true
+      },
+      {
+        "type": "setFlag",
+        "flag": "flag_otaru_at_war"
+      }
+    ]
+  }
+}

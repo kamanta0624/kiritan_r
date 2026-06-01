@@ -1,0 +1,45 @@
+{
+  "id": "ev_una_joined",
+  "name": "【ダミー】ウナ・しゅお合流",
+  "trigger": "player_turn",
+  "conditions": [
+    {
+      "type": "baseOwned",
+      "baseId": "base_023"
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_una_joined"
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_una_fled"
+    }
+  ],
+  "probability": 1,
+  "priority": 1000,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        {
+          "characterId": "char_004",
+          "position": "center",
+          "text": "【ダミー】秩父でウナとしゅおが合流を申し出てきた。"
+        }
+      ]
+    },
+    {
+      "type": "end"
+    }
+  ],
+  "effects": {
+    "default": [
+      {
+        "type": "setFlag",
+        "flag": "flag_una_joined"
+      }
+    ]
+  }
+}

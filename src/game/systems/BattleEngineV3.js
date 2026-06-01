@@ -336,9 +336,9 @@ export class BattleEngineV3 {
    * 攻撃パラメータを解決する（action基準）
    * @returns {{ atkVal, defMemeVal, defCharVal, mult, isSong, isRanged }}
    */
-  _atkParams(atk, def) {
-    const isSong   = atk.action === 'song';
-    const isRanged = atk.action === 'ranged';
+  _atkParams(atk, def, forceMelee = false) {
+    const isSong   = !forceMelee && atk.action === 'song';
+    const isRanged = !forceMelee && atk.action === 'ranged';
 
     const pierce   = atk._pierce;
     atk._pierce    = false;
@@ -401,8 +401,8 @@ export class BattleEngineV3 {
    * 一方向ダメージを算出する（適用しない）
    * 返り値を _resolveExchange が双方同時適用する
    */
-  _calcOneSide(atk, def, isAtkPlayer) {
-    const p      = this._atkParams(atk, def);
+  _calcOneSide(atk, def, isAtkPlayer, asCounter = false) {
+    const p      = this._atkParams(atk, def, asCounter);
     const N      = Math.min(atk.soldiers, this.battleCapacity);
     const atkSol = N;
     const vicSol = Math.min(def.soldiers, this.battleCapacity);
@@ -425,29 +425,35 @@ export class BattleEngineV3 {
     }
 
     // ③ 将軍本人の攻撃
-    let selfMemeDmg = 0, selfCharDmg = 0;
+    let selfMemeDmg = 0, selfCharDmg = 0, selfMemeHits = 0, selfCharHits = 0;
     if (atk.soldiers < this.battleCapacity && atk.charHp > 0 && def.action !== 'defend') {
       const cp     = this._charParams(atk, def);
       const defSol = Math.min(def.soldiers, this.battleCapacity);
       const extreme = defSol < 50 || defSol === 0 || (defSol > 0 && atkSol / defSol >= 10);
       if (extreme && Math.random() < 1 / (defSol + 1)) {
         if (def.charHp > 0 && !def._fortress) {
-          selfCharDmg = this._calcDamage(atk.attackCount, this._calcRate(cp.charAtk, cp.defCharVal));
+          selfCharDmg  = this._calcDamage(atk.attackCount, this._calcRate(cp.charAtk, cp.defCharVal));
+          selfCharHits = atk.attackCount;
         }
       } else if (def.soldiers > 0 && !def._fortress) {
         const rate = this._calcRate(cp.charAtk, cp.defMemeVal, def.action === 'defend');
-        selfMemeDmg = Math.floor(this._calcDamage(atk.attackCount, rate) * stratMult);
+        selfMemeDmg  = Math.floor(this._calcDamage(atk.attackCount, rate) * stratMult);
+        selfMemeHits = atk.attackCount;
       }
     }
 
-    return { memeDmg, charDmg, selfMemeDmg, selfCharDmg, N };
+    // toMeme/toChar = 兵士突撃の命中数内訳（toMeme+toChar=N）
+    // selfMemeHits/selfCharHits = 将軍本人攻撃の命中数（兵士分とは別系統）
+    return { memeDmg, charDmg, selfMemeDmg, selfCharDmg, N, toMeme, toChar, selfMemeHits, selfCharHits };
   }
 
   /** 攻撃と反撃を同時算出・同時適用 */
   _resolveExchange(atk, def, isPlayer) {
     const ar = this._calcOneSide(atk, def, isPlayer);
-    const dr = (atk.action === 'attack' && def.char.attackType === 'melee' && this._isAlive(def))
-      ? this._calcOneSide(def, atk, !isPlayer)
+    // BUG-1: 反撃成立は「攻撃側が近接」で決まる。守備側タイプは不問。
+    // 反撃は直接攻撃扱い（asCounter=true で mult/間接化を抑止）。
+    const dr = (atk.action === 'attack' && this._isAlive(def))
+      ? this._calcOneSide(def, atk, !isPlayer, true)
       : null;
 
     const atkMem = ar.memeDmg + ar.selfMemeDmg;
@@ -493,6 +499,12 @@ export class BattleEngineV3 {
       atkMem, atkChr, defMem, defChr,
       N:  ar.N,
       Nr: dr ? dr.N : 0,
+      // 兵士突撃の命中数内訳（SP命中 + 将軍命中 = N）
+      atkToMeme: ar.toMeme, atkToChar: ar.toChar,
+      defToMeme: dr ? dr.toMeme : 0, defToChar: dr ? dr.toChar : 0,
+      // 将軍本人攻撃の命中数（兵士分と別系統）
+      atkSelfMemeHits: ar.selfMemeHits, atkSelfCharHits: ar.selfCharHits,
+      defSelfMemeHits: dr ? dr.selfMemeHits : 0, defSelfCharHits: dr ? dr.selfCharHits : 0,
       atkSolBefore,
       defSolBefore,
       atkHpBefore,

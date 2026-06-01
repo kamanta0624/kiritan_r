@@ -13,12 +13,7 @@
         {
           "characterId": "char_005",
           "position": "center",
-          "text": "テスト！！"
-        },
-        {
-          "characterId": null,
-          "position": "center",
-          "text": "テスト２"
+          "text": "ゲーム開始イベント"
         }
       ]
     },

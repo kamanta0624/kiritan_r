@@ -137,6 +137,10 @@ export class BuildingSystem {
       ? template.nameVariants[Math.floor(Math.random() * template.nameVariants.length)]
       : template.displayName;
 
+    // P1: 最大値を1回だけ確定し、現在値はそれ以下に固定（現在値 ≤ 最大値を保証）
+    const maxSol = vary(template.maxSoldiers);
+    const maxHp  = vary(template.charMaxHp);
+
     return {
       id:           `${template.id}_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
       name,
@@ -148,10 +152,10 @@ export class BuildingSystem {
       usedThisTurn: false,
       role:         template.role,
       attackType:   template.attackType,
-      soldiers:     vary(template.soldiers),
-      maxSoldiers:  vary(template.maxSoldiers),
-      charHp:       vary(template.charMaxHp),
-      charMaxHp:    vary(template.charMaxHp),
+      soldiers:     Math.min(vary(template.soldiers), maxSol),
+      maxSoldiers:  maxSol,
+      charHp:       maxHp,   // 生成時は満タン（charHp === charMaxHp）
+      charMaxHp:    maxHp,
       charAttack:   vary(template.charAttack),
       charSong:     template.charSong ?? 15,
       attack:       vary(template.charAttack),

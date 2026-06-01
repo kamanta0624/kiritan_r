@@ -1,0 +1,27 @@
+{
+  "id": "ev_otaru_war_flag_sync",
+  "name": "【ダミー】小樽交戦フラグ同期",
+  "trigger": "player_turn",
+  "conditions": [
+    {
+      "type": "atWar",
+      "factionId": "faction_yellow"
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_otaru_at_war"
+    }
+  ],
+  "probability": 1,
+  "priority": 800,
+  "maxOccurrences": 1,
+  "script": [],
+  "effects": {
+    "default": [
+      {
+        "type": "setFlag",
+        "flag": "flag_otaru_at_war"
+      }
+    ]
+  }
+}

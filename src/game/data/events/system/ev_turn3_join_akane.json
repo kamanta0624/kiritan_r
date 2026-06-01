@@ -7,10 +7,6 @@
       "type": "turn",
       "op": "eq",
       "value": 3
-    },
-    {
-      "type": "flag",
-      "flag": "flag_r1_akane"
     }
   ],
   "probability": 1,

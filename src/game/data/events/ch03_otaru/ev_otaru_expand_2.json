@@ -1,0 +1,56 @@
+{
+  "id": "ev_otaru_expand_2",
+  "name": "【ダミー】小樽侵食2（函館）",
+  "trigger": "player_turn",
+  "conditions": [
+    {
+      "type": "flag",
+      "flag": "flag_otaru_exp1_done"
+    },
+    {
+      "type": "turnAfterFlag",
+      "flag": "flag_otaru_exp1_done",
+      "op": "gte",
+      "value": 3
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_otaru_exp2_done"
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_otaru_at_war"
+    }
+  ],
+  "probability": 1,
+  "priority": 1000,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        {
+          "characterId": "char_004",
+          "position": "center",
+          "text": "【ダミー】小樽潮風が函館まで侵食してきた。"
+        }
+      ]
+    },
+    {
+      "type": "end"
+    }
+  ],
+  "effects": {
+    "default": [
+      {
+        "type": "baseTransferSingle",
+        "baseId": "base_004",
+        "toFactionId": "faction_yellow"
+      },
+      {
+        "type": "setFlagWithTurn",
+        "flag": "flag_otaru_exp2_done"
+      }
+    ]
+  }
+}

@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { PK, PK2, AC, AC2, TEAL, TX, TXD, TXF, BR, glass, GAME_STATE, ROLES, CHARS } from '../shared/tokens.js';
 import { TopBar } from '../shared/SharedUI.jsx';
+import { useGame } from '../context/GameContext.jsx';
 
 // ── Scenario data ────────────────────────────────────────
 // expr: 'normal' (default), 'smile', 'angry', 'surprised', 'thinking'
@@ -568,45 +569,89 @@ function ADVTopBar({ location, onAuto, isAuto, onSkip, onLog, onExit }) {
   );
 }
 
-// ── EventEngineスクリプト → ADVScene scenario 変換 ──────
+// ── 呼び出し元 script → ADV内部 scenario 変換 ──────────
+// characters.json の char_NNN ID を tokens.js CHARS の c-ID に変換するマップ
+const CHAR_ID_MAP = {
+  'char_004': 'c1',  // 東北きりたん
+  'char_005': 'c2',  // 音街ウナ
+  'char_006': 'c3',  // 彩澄しゅお
+  'char_016': 'c4',  // ずんだもん
+  'char_024': 'c5',  // 北海道めろん
+  'char_023': 'c7',  // 沖縄あわも
+};
+const resolveCharId = id => CHAR_ID_MAP[id] ?? id;
+
 /**
- * EventEngine._expandConversation で展開済みの script を ADVScene scenario に変換する。
- * conversation はすでに text ステップに展開されている前提。
+ * 呼び出し元の script（raw: conversation / text / narration / choice / cutin / end）を
+ * ADV内部 scenario（dialog / narration / cutin / choice / end）へ変換する。
+ * conversation の展開もここで行う（EventEngine 側では展開しない）。
+ *
+ * 戻り値の stepIndexMap[origIdx] = その原ステップが scenario 内で始まる index。
+ * choice.next（原 script index 基準）を scenario index に解決するために使う。
  */
-export function convertEventScript(script, { bg = null, location = '' } = {}) {
-  const castMap = new Map(); // position → characterId（先着順）
-  script.forEach(step => {
-    if (step.type === 'text' && step.characterId && step.position) {
-      if (!castMap.has(step.position)) {
-        castMap.set(step.position, step.characterId);
-      }
-    }
-  });
-
-  const cast = Array.from(castMap.entries()).map(([pos, id]) => ({ id, pos }));
+function buildScenario(script = []) {
   const scenario = [];
+  const stepIndexMap = [];
 
-  script.forEach(step => {
-    if (step.type === 'text') {
-      scenario.push({
-        type:    'dialog',
-        speaker: step.characterId,
-        expr:    'normal',
-        text:    step.text,
-      });
-    } else if (step.type === 'narration') {
-      scenario.push({ type: 'narration', text: step.text });
-    } else if (step.type === 'end') {
-      scenario.push({ type: 'end' });
+  script.forEach((step, origIdx) => {
+    stepIndexMap[origIdx] = scenario.length;
+    switch (step.type) {
+      case 'conversation':
+        (step.lines ?? []).forEach(line => scenario.push({
+          type: 'dialog', speaker: resolveCharId(line.characterId),
+          expr: line.expr ?? 'normal', text: line.text,
+        }));
+        break;
+      case 'text':
+        scenario.push({
+          type: 'dialog', speaker: resolveCharId(step.characterId),
+          expr: step.expr ?? 'normal', text: step.text,
+        });
+        break;
+      case 'narration':
+        scenario.push({ type: 'narration', text: step.text });
+        break;
+      case 'cutin':
+        scenario.push({
+          type: 'cutin', speaker: resolveCharId(step.speaker ?? step.characterId),
+          expr: step.expr ?? 'normal', text: step.text, subtext: step.subtext,
+        });
+        break;
+      case 'dialog': // 既に内部形式（DEMO_SCENARIO 等）
+        scenario.push({ ...step, speaker: resolveCharId(step.speaker) });
+        break;
+      case 'choice':
+        scenario.push({
+          type: 'choice', speaker: resolveCharId(step.characterId), text: step.text,
+          choices: (step.choices ?? []).map(c => ({
+            label: c.label, next: c.next ?? null, effects: c.effects ?? null,
+          })),
+        });
+        break;
+      case 'end':
+        scenario.push({ type: 'end' });
+        break;
+      default:
+        break;
     }
-    // choice ステップは ADVScene.jsx の ChoiceUI で処理（EventEngine 経由では未使用）
   });
 
-  if (!scenario.some(s => s.type === 'end')) {
-    scenario.push({ type: 'end' });
-  }
+  if (!scenario.some(s => s.type === 'end')) scenario.push({ type: 'end' });
+  return { scenario, stepIndexMap };
+}
 
-  return { scenario, cast, bg, location };
+/** script の characterId / position から立ち絵 cast（位置→キャラ）を先着順で生成する。 */
+function buildCast(script = []) {
+  const castMap = new Map();
+  const add = (characterId, position) => {
+    const cid = resolveCharId(characterId);
+    if (cid && position && getChar(cid) && !castMap.has(position)) castMap.set(position, cid);
+  };
+  script.forEach(step => {
+    if (step.type === 'conversation') (step.lines ?? []).forEach(l => add(l.characterId, l.position));
+    else if (step.type === 'text' || step.type === 'choice') add(step.characterId, step.position);
+  });
+  return Array.from(castMap.entries()).map(([pos, id]) => ({ id, pos }));
 }
 
 // ── Choice UI ────────────────────────────────────────────
@@ -623,10 +668,10 @@ function ChoiceUI({ entry, onSelect }) {
         textShadow: '0 2px 8px rgba(0,0,0,.8)',
         marginBottom: 4,
       }}>{entry.text}</div>
-      {(entry.choices ?? []).map(c => (
+      {(entry.choices ?? []).map((c, i) => (
         <button
-          key={c.value}
-          onClick={() => onSelect(c.value)}
+          key={i}
+          onClick={() => onSelect(c)}
           style={{
             width: '100%', maxWidth: 400,
             padding: '16px 32px',
@@ -651,28 +696,53 @@ function ChoiceUI({ entry, onSelect }) {
 }
 
 // ── Main ADVScene ───────────────────────────────────────
-export default function ADVScene({ scenario, cast: castProp=[], bg: bgProp=null, location: locationProp='', onExit, onChoice, transparent }) {
-  const [idx, setIdx] = useState(0);
-  const [cast, setCast] = useState(castProp);
-  const [bg, setBg] = useState(bgProp);
-  const [location, setLocation] = useState(locationProp);
-  const [history, setHistory] = useState([]); // dialog/narration only
-  const [isAuto, setIsAuto] = useState(false);
-  const [showLog, setShowLog] = useState(false);
+// 契約: { script, effects, onExit }
+//   script  : 呼び出し元の生スクリプト（conversation/text/narration/choice/cutin/end）。
+//             bg / location / transparent は script.meta から読む。
+//   effects : { default: [...], <key>: [...] }（イベント effects 形式）。end 到達時に
+//             default を applyEffects で適用する。choice の effects は選択時に即時適用。
+//   onExit  : 終了通知。戻り先制御・直列化（次イベント起動）は呼び出し元が onExit に閉じる。
+export default function ADVScene({ script = [], effects = null, onExit, transparent: transparentProp }) {
+  const { actions: { applyEffects } } = useGame();
 
-  useEffect(() => {
-    if (scenario[idx]?.type === 'end') onExit();
-  }, [idx]);
+  const { scenario, cast, indexMap, meta } = useMemo(() => {
+    const { scenario, stepIndexMap } = buildScenario(script);
+    return { scenario, cast: buildCast(script), indexMap: stepIndexMap, meta: script?.meta ?? {} };
+  }, [script]);
+
+  const bg          = meta.bg ?? null;
+  const location    = meta.location ?? '';
+  const transparent = transparentProp ?? meta.transparent ?? false;
+
+  const [idx, setIdx]         = useState(0);
+  const [history, setHistory] = useState([]); // dialog/narration only
+  const [isAuto, setIsAuto]   = useState(false);
+  const [showLog, setShowLog] = useState(false);
+  const finishedRef = useRef(false);
 
   const current = scenario[idx];
 
-  // Add to history when entering a dialog/narration
+  // 終了処理: トップレベル effects.default を適用してから onExit。多重実行は ref でガード。
+  const finish = useCallback(() => {
+    if (finishedRef.current) return;
+    finishedRef.current = true;
+    applyEffects(effects?.default ?? []);
+    onExit?.();
+  }, [applyEffects, effects, onExit]);
+
+  // end ステップ到達で終了
   useEffect(() => {
-    if(!current) return;
-    if(current.type === 'dialog' || current.type === 'narration' || current.type === 'cutin') {
-      setHistory(h => [...h, { speaker: current.speaker, text: current.text }]);
+    if (scenario[idx]?.type === 'end') finish();
+  }, [idx, scenario, finish]);
+
+  // Add to history when entering a dialog/narration/cutin
+  useEffect(() => {
+    const c = scenario[idx];
+    if (!c) return;
+    if (c.type === 'dialog' || c.type === 'narration' || c.type === 'cutin') {
+      setHistory(h => [...h, { speaker: c.speaker, text: c.text }]);
     }
-  }, [idx]);
+  }, [idx, scenario]);
 
   // Auto mode
   const [autoReadyToAdvance, setAutoReadyToAdvance] = useState(false);
@@ -685,20 +755,31 @@ export default function ADVScene({ scenario, cast: castProp=[], bg: bgProp=null,
   const advance = useCallback(() => {
     setAutoReadyToAdvance(false);
     if(idx >= scenario.length - 1 || scenario[idx]?.type === 'end') {
-      onExit();
+      finish();
       return;
     }
     setIdx(i => i + 1);
-  }, [idx, scenario, onExit]);
+  }, [idx, scenario, finish]);
+
+  // choice 選択: その選択肢の effects を即時適用し、next（あれば）へ分岐
+  const selectChoice = useCallback((choice) => {
+    if (choice?.effects && choice.effects.length) applyEffects(choice.effects);
+    const target = choice?.next != null && indexMap[choice.next] != null
+      ? indexMap[choice.next]
+      : idx + 1;
+    if (target >= scenario.length) { finish(); return; }
+    setIdx(target);
+  }, [applyEffects, idx, indexMap, scenario, finish]);
 
   // Skip (right-click)
   const handleContextMenu = (e) => {
     e.preventDefault();
+    if (current?.type === 'choice') return; // choice 中はスキップ無効
     // Skip: jump to next 'narration' break or end
     let next = idx + 1;
     while(next < scenario.length && scenario[next].type === 'dialog') next++;
     if(next >= scenario.length || scenario[next]?.type === 'end') {
-      onExit();
+      finish();
       return;
     }
     setIdx(next);
@@ -713,8 +794,8 @@ export default function ADVScene({ scenario, cast: castProp=[], bg: bgProp=null,
 
   if(!current) return null;
 
-  // For dialog/cutin, lookup char
-  const speakerChar = (current.type === 'dialog' || current.type === 'cutin') && current.speaker
+  // For dialog/cutin/choice, lookup speaking char
+  const speakerChar = (current.type === 'dialog' || current.type === 'cutin' || current.type === 'choice') && current.speaker
     ? getChar(current.speaker) : null;
   const speakerColor = speakerChar
     ? (ROLES[speakerChar.role]?.color || PK)
@@ -752,7 +833,7 @@ export default function ADVScene({ scenario, cast: castProp=[], bg: bgProp=null,
       {cast.map(c => {
         const char = getChar(c.id);
         if(!char) return null;
-        const isSpeaking = current.type === 'dialog' && current.speaker === c.id;
+        const isSpeaking = (current.type === 'dialog' || current.type === 'choice') && current.speaker === c.id;
         // expr: lookup from current entry only if speaker matches
         const expr = isSpeaking ? current.expr : 'normal';
         return (
@@ -785,7 +866,7 @@ export default function ADVScene({ scenario, cast: castProp=[], bg: bgProp=null,
           onAdvance={() => { setAutoReadyToAdvance(true); advance(); }}
           onFinishType={() => setAutoReadyToAdvance(true)}
           transparent={transparent}
-          disabled={showLog || current.type === 'choice'}
+          disabled={showLog}
         />
       )}
 
@@ -793,7 +874,7 @@ export default function ADVScene({ scenario, cast: castProp=[], bg: bgProp=null,
       {current.type === 'choice' && (
         <ChoiceUI
           entry={current}
-          onSelect={(value) => onChoice?.(value)}
+          onSelect={selectChoice}
         />
       )}
 
@@ -802,9 +883,9 @@ export default function ADVScene({ scenario, cast: castProp=[], bg: bgProp=null,
         location={location}
         onAuto={() => setIsAuto(a => !a)}
         isAuto={isAuto}
-        onSkip={() => onExit()}
+        onSkip={finish}
         onLog={() => setShowLog(true)}
-        onExit={onExit}
+        onExit={finish}
       />
 
       {/* Backlog */}

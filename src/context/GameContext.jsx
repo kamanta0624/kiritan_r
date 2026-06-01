@@ -407,6 +407,14 @@ function gameReducer(state, action) {
 // EventEngine._applyEffect の純粋関数移植
 // ─────────────────────────────────────────────────────────────
 
+// applyEffectToState が純粋に畳み込める（=APPLY_EFFECTS に載せられる）エフェクト種別。
+// ここに無い種別（itemGain / legion系）は applyEffects オーケストレータが副作用として個別処理する。
+const PURE_EFFECT_TYPES = new Set([
+  'treasury', 'charJoin', 'charLeave', 'charParam', 'baseIncome', 'battleCap',
+  'baseTransfer', 'warFlag', 'attackUnlock', 'setFlag', 'setFlagWithTurn', 'clearFlag',
+  'actionPointsBonus', 'dungeonUnlock', 'charUsedThisTurn', 'baseTransferSingle', 'itemLose',
+]);
+
 function applyEffectToState(state, eff) {
   const playerFaction = state.factions.find(f => f.isPlayer);
   switch (eff.type) {
@@ -513,6 +521,41 @@ function applyEffectToState(state, eff) {
       return {
         ...state,
         maxActionPoints: (state.maxActionPoints ?? 5) + (eff.delta ?? 1),
+      };
+    }
+    // ── EventEngine._applyEffect からの純粋移植（Phase 1）──
+    case 'dungeonUnlock': {
+      return {
+        ...state,
+        bases: state.bases.map(b =>
+          b.id === eff.baseId ? { ...b, dungeonUnlocked: true } : b
+        ),
+      };
+    }
+    case 'charUsedThisTurn': {
+      return {
+        ...state,
+        characters: state.characters.map(c =>
+          c.id === eff.charId ? { ...c, usedThisTurn: true } : c
+        ),
+      };
+    }
+    case 'baseTransferSingle': {
+      return {
+        ...state,
+        bases: state.bases.map(b =>
+          b.id === eff.baseId ? { ...b, factionId: eff.toFactionId } : b
+        ),
+      };
+    }
+    // itemId指定で先頭1件を除去（EventEngine版と同セマンティクス）。
+    // reduce畳み込みのため、同一バッチ内の複数itemLoseも順次正しく解決される。
+    case 'itemLose': {
+      const idx = state.inventory.findIndex(i => i.itemId === eff.itemId);
+      if (idx === -1) return state;
+      return {
+        ...state,
+        inventory: [...state.inventory.slice(0, idx), ...state.inventory.slice(idx + 1)],
       };
     }
     default:
@@ -690,6 +733,9 @@ function checkVictoryCondition(state) {
   );
   if (playerCapitalLost) return 'defeat';
 
+  // シナリオ勝利条件: ボーカル界制圧フラグ
+  if (state.eventFlags?.flag_vocalo_conquered) return 'victory';
+
   // 全敵首都制圧 → 勝利
   const enemyCapitals = state.bases.filter(
     b => b.isCapital && b._originalFactionId !== playerFaction.id
@@ -752,6 +798,10 @@ export function GameProvider({ children }) {
     startDialogRef.current = fn;
   }, []);
 
+  // applyEffects はこの後方で宣言されるため、buildWsAdapter から直接参照するとTDZになる。
+  // startDialogRef と同じref経由で配線し、useEffectで .current を同期する。
+  const applyEffectsRef = useRef(null);
+
   // LegionAIの参照データを常に最新stateで同期
   // （LegionAIはcharacters配列への参照を内部で保持するため更新が必要）
   const syncLegionAI = useCallback(() => {
@@ -777,17 +827,23 @@ export function GameProvider({ children }) {
       occurredEvents: s.occurredEvents,
       flagTimestamps: s.flagTimestamps,
       legionAI:       legionAIRef.current,
-      // EventEngine.applyEffects が呼ぶメソッド群
+      // EventEngine が委譲するエフェクト適用（Phase 4）。GameContext.applyEffects 経由で
+      // 純粋分=APPLY_EFFECTS dispatch、itemGain/legion系=副作用処理に正規ルーティングされる。
+      applyEffects: (effects) => applyEffectsRef.current?.(effects),
       declareWar: (factionId) => {
         dispatch({ type: 'DECLARE_WAR', payload: { targetFactionId: factionId } });
       },
-      startDialog: (script, onComplete) => {
+      // 新契約: { script, effects } を渡す。effects 適用は ADV 内部（applyEffects）に一本化。
+      // 直列化のため、ダイアログが閉じる（onExit）まで解決しない Promise を返す。
+      startDialog: ({ script, effects } = {}) => new Promise(resolve => {
         if (startDialogRef.current) {
-          startDialogRef.current(script, onComplete);
+          startDialogRef.current(script, effects, resolve);
         } else {
-          onComplete?.();
+          resolve();
         }
-      },
+      }),
+      // scene/refreshMap は旧Phaser名残。委譲後はGameContext applyEffects がReact再レンダを
+      // 起こすため不要だが、wsアダプタ互換のため null のまま残置。
       scene:       null,
       refreshMap:  null,
       itemSystem:  systemsRef.current.itemSystem,
@@ -882,19 +938,35 @@ export function GameProvider({ children }) {
 
     dispatch({ type: 'BATTLE_END', payload: result });
 
-    // 制圧時: EventEngine base_conquered
+    // EventEngine 発火用 ws。制圧フラグを先付けし、base_conquered/battle_end 双方から参照可能にする。
+    const ws = buildWsAdapter();
     if (result.conquered) {
-      const ws = buildWsAdapter();
-      // eventFlagsに制圧フラグを先付け
       ws.eventFlags = {
         ...ws.eventFlags,
         [`conquered_${result.defenderBaseId}`]: true,
       };
+    }
+
+    // 制圧時: EventEngine base_conquered
+    if (result.conquered) {
       await EventEngine.processTrigger(ws, 'base_conquered', {
         baseId:             result.defenderBaseId,
         conquerorFactionId: result.winnerFactionId,
       });
       dispatch({ type: 'SET_FLAG', payload: { key: `conquered_${result.defenderBaseId}`, value: true } });
+    }
+
+    // battle_end（制圧有無に関わらず発火）
+    await EventEngine.processTrigger(ws, 'battle_end', {
+      conquered:       result.conquered ?? false,
+      defenderBaseId:  result.defenderBaseId,
+      winnerFactionId: result.winnerFactionId,
+    });
+
+    // char_defeated（撃破された非モブ敵キャラごとに直列発火）。
+    // ctxキー defeatedCharId は _evalCondition の defeatedChar 判定と厳密一致。
+    for (const defeatedCharId of (result.defeatedEnemyCharIds ?? [])) {
+      await EventEngine.processTrigger(ws, 'char_defeated', { defeatedCharId });
     }
 
     // 勝敗チェック
@@ -922,6 +994,38 @@ export function GameProvider({ children }) {
   const beforeAttack = useCallback(async (defenderBaseId, attackerFactionId) => {
     const ws = buildWsAdapter();
     await EventEngine.processTrigger(ws, 'base_attack', { baseId: defenderBaseId });
+  }, [buildWsAdapter]);
+
+  // ─────────────────────────────────────
+  // 汎用trigger発火口（Phase 3）
+  // App.jsx 等の非公開buildWsAdapterに触れない呼び出し元のための共通口。
+  // 既存5系統と同じ buildWsAdapter 経由（applyEffects委譲済のため副作用も正規経路）。
+  // ─────────────────────────────────────
+  const fireTrigger = useCallback(async (trigger, ctx = {}) => {
+    const ws = buildWsAdapter();
+    await EventEngine.processTrigger(ws, trigger, ctx);
+  }, [buildWsAdapter]);
+
+  // ─────────────────────────────────────
+  // theater イベント（Phase 5）
+  // buildWsAdapter は非公開のまま、ws 取得を GameContext 内に閉じる。
+  // ─────────────────────────────────────
+
+  // 発生可能な theater イベント（条件・出現上限を満たす EventDef 配列、優先度順）を返す。
+  const getTheaterEvents = useCallback(() => {
+    const ws = buildWsAdapter();
+    return EventEngine.getAvailableTheaterEvents(ws);
+  }, [buildWsAdapter]);
+
+  // theater イベントを起動可能な状態にする。出現回数を記録し、起動対象 EventDef を返す。
+  // ADV 起動・戻り先制御は呼び出し元（App）が onExit に閉じる（Phase 2 方針）。
+  const runTheaterEvent = useCallback((eventId) => {
+    const ws = buildWsAdapter();
+    const ev = EventEngine.getAvailableTheaterEvents(ws).find(e => e.id === eventId);
+    if (!ev) return null;
+    // maxOccurrences 判定のため出現回数を加算（_runEvent 相当）
+    dispatch({ type: 'INCREMENT_EVENT', payload: { eventId: ev.id } });
+    return ev;
   }, [buildWsAdapter]);
 
   // ─────────────────────────────────────
@@ -1043,6 +1147,48 @@ export function GameProvider({ children }) {
   }, []);
 
   // ─────────────────────────────────────
+  // イベントエフェクト適用オーケストレータ（Phase 1）
+  // 純粋分は APPLY_EFFECTS 一括dispatchへ、副作用分は専用action / ref直呼びへ振り分ける。
+  // EventEngine._applyEffect の置換先（Phase 4 で EventEngine 側を委譲）。
+  // ─────────────────────────────────────
+  const applyEffects = useCallback((effects) => {
+    if (!effects || effects.length === 0) return;
+
+    // 1. 副作用: itemGain → ItemSystemでインスタンス生成 → ADD_ITEM
+    //    （itemLose より先に行い、同一バッチ内 gain→lose の順序を担保）
+    effects.forEach(eff => {
+      if (eff.type !== 'itemGain') return;
+      const item = systemsRef.current.itemSystem.createInstance(eff.itemId);
+      if (item) dispatch({ type: 'ADD_ITEM', payload: { item } });
+    });
+
+    // 2. 純粋分（applyEffectToState 対応の全種・itemLose含む）→ 一括dispatch
+    //    reduce畳み込みで配列順を保持。reducerを汚さず副作用も持ち込まない。
+    const pure = effects.filter(eff => PURE_EFFECT_TYPES.has(eff.type));
+    if (pure.length) {
+      dispatch({ type: 'APPLY_EFFECTS', payload: { effects: pure } });
+    }
+
+    // 3. 副作用: legion系 → legionAIRef のインスタンスを直接操作（stateに乗らない）
+    const ai = legionAIRef.current;
+    effects.forEach(eff => {
+      if (eff.type === 'legionForceAttack') {
+        ai?.forceAttack?.(eff.factionId, eff.targetFactionId);
+      } else if (eff.type === 'legionUpdate') {
+        const legion = ai?.legions?.find(l => l.id === eff.legionId);
+        if (!legion) return;
+        if (eff.factionId       !== undefined) legion.factionId       = eff.factionId;
+        if (eff.attackFrequency !== undefined) legion.attackFrequency = eff.attackFrequency;
+      }
+    });
+  }, []);
+
+  // buildWsAdapter（前方宣言）からTDZなく参照させるため ref を同期
+  useEffect(() => {
+    applyEffectsRef.current = applyEffects;
+  }, [applyEffects]);
+
+  // ─────────────────────────────────────
   // 派生値
   // ─────────────────────────────────────
 
@@ -1082,10 +1228,14 @@ export function GameProvider({ children }) {
       startPlayerTurn,
       battleEnd,
       beforeAttack,
+      fireTrigger,
       doResearch,
       purchaseUpgrade,
       declareWar,
       isAtWar,
+      applyEffects,
+      getTheaterEvents,
+      runTheaterEvent,
       updateChar:  (char)       => dispatch({ type: 'UPDATE_CHAR',   payload: char }),
       setFlag:     (key, val, withTimestamp = false) =>
         dispatch({ type: 'SET_FLAG', payload: { key, value: val, withTimestamp } }),

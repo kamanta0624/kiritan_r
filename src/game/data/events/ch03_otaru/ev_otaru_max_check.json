@@ -1,0 +1,31 @@
+{
+  "id": "ev_otaru_max_check",
+  "name": "【ダミー】小樽完全制圧チェック",
+  "trigger": "player_turn",
+  "conditions": [
+    {
+      "type": "baseOwned",
+      "baseId": "base_006"
+    },
+    {
+      "type": "flag",
+      "flag": "flag_otaru_exp3_done"
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_chara_unlock_otaru"
+    }
+  ],
+  "probability": 1,
+  "priority": 500,
+  "maxOccurrences": 1,
+  "script": [],
+  "effects": {
+    "default": [
+      {
+        "type": "setFlag",
+        "flag": "flag_chara_unlock_otaru"
+      }
+    ]
+  }
+}

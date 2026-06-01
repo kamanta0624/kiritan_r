@@ -10,50 +10,19 @@ const CATEGORY_LABEL = {
   recurring: '繰り返しイベント',
 };
 
-function evaluateConditions(ev, { characters, eventFlags, bases, currentTurn, playerFaction, playerBases }) {
-  const c = ev.conditions ?? {};
-  if (c.chars?.length) {
-    const ok = c.chars.every(cid =>
-      characters.some(ch => ch.id === cid && ch.factionId === playerFaction?.id)
-    );
-    if (!ok) return false;
-  }
-  if (c.flags?.length && !c.flags.every(f => eventFlags[f])) return false;
-  if (c.notFlags?.length && c.notFlags.some(f => eventFlags[f])) return false;
-  if (c.ownedBase && !playerBases.some(b => b.id === c.ownedBase)) return false;
-  if (c.minTurn != null && currentTurn < c.minTurn) return false;
-  return true;
-}
-
 export default function TheaterScene({
   onNavigate,
-  events,
-  factions,
-  bases,
-  characters,
-  eventFlags,
-  currentTurn,
-  playerFaction,
-  playerBases,
+  theaterEvents,
   actionPoints,
   onStartTheater,
 }) {
-  const theaterEvents = (events ?? []).filter(ev => ev.type === 'theater');
-
-  const visible = theaterEvents.filter(ev => {
-    if (!ev.repeatable && ev.onComplete?.some(e => e.type === 'setFlag' && eventFlags[e.flag])) {
-      return false;
-    }
-    return evaluateConditions(ev, { characters, eventFlags, bases, currentTurn, playerFaction, playerBases });
-  });
-
-  const sorted = [...visible].sort((a, b) =>
-    CATEGORY_ORDER.indexOf(a.category) - CATEGORY_ORDER.indexOf(b.category)
-  );
+  // theaterEvents は getAvailableTheaterEvents で条件・出現上限を満たすよう
+  // 既に絞り込み済み（優先度順）。ここでは表示用にカテゴリ分類するだけ。
+  const visible = theaterEvents ?? [];
 
   // カテゴリ別グループ化
   const groups = {};
-  sorted.forEach(ev => {
+  visible.forEach(ev => {
     const cat = ev.category ?? 'recurring';
     if (!groups[cat]) groups[cat] = [];
     groups[cat].push(ev);

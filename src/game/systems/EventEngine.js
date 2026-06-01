@@ -4,22 +4,28 @@
  * イベントシステムの中核。
  *
  * ---- 責務 ----
- *   条件判定 / 発生抽選 / DialogScene 起動（直列） / エフェクト適用
+ *   条件判定 / 発生抽選 / Dialog 起動（直列） / script + effects の構築
+ *   script を持つイベントの effects 適用は ADVScene 内部（applyEffects）に一本化する。
+ *   script を持たないイベントのみ ws.applyEffects() で default を直接適用する。
  *
  * ---- 呼び出し元 ----
- *   WorldMapScene の以下のタイミングで processTrigger() を await する。
- *     game_start   : create() 末尾
- *     player_turn  : _startNextTurn() 冒頭
- *     enemy_turn   : _endTurn() 冒頭（LegionAI 処理前）
- *     base_visit   : 訪問ボタン押下時
- *     base_attack  : startAttack() 直前
- *     base_defense : startDefense() 直前
+ *   GameContext.jsx が buildWsAdapter() で ws アダプタを生成し、ターン処理／拠点処理の
+ *   各タイミングで processTrigger() を await する（App.jsx がそれらを駆動）。
+ *     game_start          : startNewGame
+ *     player_turn         : startPlayerTurn
+ *     enemy_turn          : runEnemyPhase（LegionAI 処理前）
+ *     before_faction_turn : runEnemyPhaseForFaction
+ *     base_attack         : beforeAttack
+ *     base_conquered      : battleEnd（制圧時）
+ *   theater トリガーは processTrigger を介さず getAvailableTheaterEvents() で候補取得し、
+ *   App が ev.script/ev.effects を直接 ADV に渡して起動する（戻り先は呼び出し元が制御）。
  *
- * ---- worldScene に必要な追加フィールド ----
- *   ws.eventFlags     = {}
- *   ws.occurredEvents = {}
+ * ---- ws アダプタに必要なフィールド（buildWsAdapter 参照）----
+ *   state スナップショット（factions/bases/characters/inventory/eventFlags/occurredEvents 等）
+ *   applyEffects(effects) / declareWar(factionId) / startDialog({ script, effects }) → Promise
+ *   legionAI / itemSystem
  *
- * ---- events.json スキーマ ----
+ * ---- イベントJSONスキーマ（events 配下の個別JSON、_index.json 登録）----
  *   script[] の各ステップ:
  *     { type: 'text', characterId, position, text }
  *     { type: 'narration', text }
@@ -67,6 +73,11 @@ function _loadAllEvents() {
 /** キャッシュを強制クリア（テスト用） */
 export function clearEventCache() { _eventsCache = null; }
 
+/** id から EventDef を取得（_index.json + glob 経由の統一ソース）。無ければ null。 */
+export function getEventById(id) {
+  return _loadAllEvents().find(ev => ev.id === id) ?? null;
+}
+
 export class EventEngine {
 
   static async processTrigger(ws, trigger, ctx = {}) {
@@ -78,8 +89,7 @@ export class EventEngine {
       await EventEngine._processPlayerTurn(ws, candidates, ctx);
     } else {
       const eligible = EventEngine._filterEligible(ws, candidates, ctx);
-      if (eligible.length === 0) return;
-      await EventEngine._runEvent(ws, eligible[0], ctx);
+      for (const ev of eligible) await EventEngine._runEvent(ws, ev, ctx);
     }
   }
 
@@ -176,197 +186,36 @@ export class EventEngine {
       ws.occurredEvents[ev.id] = (ws.occurredEvents[ev.id] ?? 0) + 1;
 
       if (!ev.script || ev.script.length === 0) {
-        EventEngine.applyEffects(ws, ev.effects?.default ?? []);
+        ws.applyEffects(ev.effects?.default ?? []);
         resolve();
         return;
       }
 
       if (typeof ws.startDialog !== 'function') {
         console.error('[EventEngine] ws.startDialog is not a function. ev:', ev.id, 'ws:', ws);
-        EventEngine.applyEffects(ws, ev.effects?.default ?? []);
+        ws.applyEffects(ev.effects?.default ?? []);
         resolve();
         return;
       }
 
-      let pendingEffectsKey = 'default';
-      const expandedScript  = EventEngine._expandConversation(ev.script);
-
-      const scriptWithCallback = expandedScript.map(step => {
-        if (step.type === 'choice' && step.choices) {
-          return {
-            ...step,
-            choices: step.choices.map(c => ({
-              ...c,
-              _onSelect: () => {
-                if (c.effects && c.effects.length > 0) {
-                  EventEngine.applyEffects(ws, c.effects);
-                  pendingEffectsKey = null;
-                } else if (c.effectsKey) {
-                  pendingEffectsKey = c.effectsKey;
-                }
-              },
-            })),
-          };
-        }
-        return step;
-      });
-
-      ws.startDialog(scriptWithCallback, () => {
-        if (pendingEffectsKey !== null) {
-          const endStep = ev.script.find(s => s.type === 'end' && s.effectsKey);
-          if (endStep && pendingEffectsKey === 'default') {
-            pendingEffectsKey = endStep.effectsKey ?? 'default';
-          }
-          EventEngine.applyEffects(ws, ev.effects?.[pendingEffectsKey] ?? []);
-        }
-        resolve();
-      });
+      // 新契約: script と effects を ADV に渡し、effects 適用は ADV 内部に一本化する。
+      //   - choice の effects … 選択時に ADV が即時適用
+      //   - effects.default   … end 到達時に ADV が適用
+      // conversation 展開・choice.next 解決も ADV 側で行う（生スクリプトを渡す）。
+      // startDialog はダイアログが閉じるまで解決しない Promise を返すため、直列化が保たれる。
+      Promise.resolve(
+        ws.startDialog({ script: ev.script, effects: ev.effects ?? {} })
+      ).then(resolve);
     });
   }
 
   /**
-   * conversation ステップを text ステップ列に展開する。
-   * speaker フィールドは含めない（DialogScene が characterId から解決する）。
+   * theater トリガーの発生可能イベントを返す（Phase 5 で使用予定）。
+   * 副作用なし。条件・出現上限を満たす EventDef 配列を優先度順で返す。
    */
-  static _expandConversation(script) {
-    const result = [];
-    for (const step of script) {
-      if (step.type === 'conversation' && Array.isArray(step.lines)) {
-        for (const line of step.lines) {
-          result.push({
-            type:        'text',
-            characterId: line.characterId ?? null,
-            position:    line.position    ?? 'center',
-            text:        line.text        ?? '',
-          });
-        }
-      } else {
-        result.push(step);
-      }
-    }
-    return result;
-  }
-
-  static applyEffects(ws, effects) {
-    if (!effects || effects.length === 0) return;
-    effects.forEach(eff => {
-      try { EventEngine._applyEffect(ws, eff); }
-      catch (e) { console.error('[EventEngine] applyEffect error:', eff, e); }
-    });
-    ws.scene?.get?.('UIScene')?.updateTurn?.(ws.currentTurn, ws.factions);
-    ws.refreshMap?.();
-  }
-
-  static _applyEffect(ws, eff) {
-    const playerFaction = ws.factions?.find(f => f.isPlayer);
-    switch (eff.type) {
-      case 'treasury': {
-        const faction = ws.factions?.find(f => f.id === eff.factionId) ?? playerFaction;
-        if (faction) faction.treasury = Math.max(0, faction.treasury + eff.delta);
-        break;
-      }
-      case 'charJoin': {
-        const char = ws.characters?.find(c => c.id === eff.charId);
-        if (char) { char.factionId = eff.factionId ?? playerFaction?.id; char.status = 'active'; }
-        break;
-      }
-      case 'charLeave': {
-        const char = ws.characters?.find(c => c.id === eff.charId);
-        if (char) { char.factionId = null; char.status = 'standby'; }
-        break;
-      }
-      case 'charParam': {
-        const char = ws.characters?.find(c => c.id === eff.charId);
-        if (!char) break;
-        const next = (char[eff.field] ?? 0) + eff.delta;
-        char[eff.field] = eff.min !== undefined ? Math.max(eff.min, next) : next;
-        if (eff.field === 'charHp') char.charHp = Math.min(char.charHp, char.charMaxHp);
-        break;
-      }
-      case 'baseIncome': {
-        const base = ws.bases?.find(b => b.id === eff.baseId);
-        if (base) base.income = Math.max(0, base.income + eff.delta);
-        break;
-      }
-      case 'battleCap': {
-        const base = ws.bases?.find(b => b.id === eff.baseId);
-        if (base) base.battleCapacity = Math.max(100, base.battleCapacity + eff.delta);
-        break;
-      }
-      case 'dungeonUnlock': {
-        const base = ws.bases?.find(b => b.id === eff.baseId);
-        if (base) base.dungeonUnlocked = true;
-        break;
-      }
-      case 'warFlag': {
-        if (!playerFaction) break;
-        const target = ws.factions?.find(f => f.id === eff.factionId);
-        if (!target) break;
-        if (eff.atWar) {
-          ws.declareWar?.(eff.factionId);
-        } else {
-          playerFaction.atWarWith = (playerFaction.atWarWith ?? []).filter(id => id !== eff.factionId);
-          target.atWarWith        = (target.atWarWith        ?? []).filter(id => id !== playerFaction.id);
-        }
-        break;
-      }
-      case 'itemGain': {
-        if (!ws.itemSystem) break;
-        const item = ws.itemSystem.createInstance?.(eff.itemId);
-        if (item) ws.inventory?.push(item);
-        break;
-      }
-      case 'itemLose': {
-        if (!ws.inventory) break;
-        const idx = ws.inventory.findIndex(i => i.itemId === eff.itemId);
-        if (idx !== -1) ws.inventory.splice(idx, 1);
-        break;
-      }
-      case 'setFlag':   { if (!ws.eventFlags) ws.eventFlags = {}; ws.eventFlags[eff.flag] = true; break; }
-      case 'setFlagWithTurn': {
-        if (!ws.eventFlags)     ws.eventFlags     = {};
-        if (!ws.flagTimestamps) ws.flagTimestamps  = {};
-        ws.eventFlags[eff.flag]     = true;
-        ws.flagTimestamps[eff.flag] = ws.currentTurn;
-        break;
-      }
-      case 'clearFlag': { if (ws.eventFlags) delete ws.eventFlags[eff.flag]; break; }
-      case 'charUsedThisTurn': {
-        const char = ws.characters?.find(c => c.id === eff.charId);
-        if (char) char.usedThisTurn = true;
-        break;
-      }
-      case 'baseTransfer': {
-        const from = eff.fromFactionId;
-        const to   = eff.toFactionId ?? ws.factions?.find(f => f.isPlayer)?.id;
-        ws.bases?.forEach(b => {
-          if (b.factionId === from) b.factionId = to;
-        });
-        const pf      = ws.factions?.find(f => f.isPlayer);
-        const fromFac = ws.factions?.find(f => f.id === from);
-        if (pf && fromFac) {
-          pf.atWarWith      = (pf.atWarWith      ?? []).filter(id => id !== from);
-          fromFac.atWarWith = (fromFac.atWarWith ?? []).filter(id => id !== pf.id);
-        }
-        break;
-      }
-      case 'attackUnlock': {
-        ws.declareWar?.(eff.factionId);
-        break;
-      }
-      case 'legionForceAttack': {
-        ws.legionAI?.forceAttack?.(eff.factionId, eff.targetFactionId);
-        break;
-      }
-      case 'legionUpdate': {
-        const legion = ws.legionAI?.legions?.find(l => l.id === eff.legionId);
-        if (!legion) break;
-        if (eff.factionId        !== undefined) legion.factionId        = eff.factionId;
-        if (eff.attackFrequency  !== undefined) legion.attackFrequency  = eff.attackFrequency;
-        break;
-      }
-      default: console.warn('[EventEngine] unknown effect type:', eff.type);
-    }
+  static getAvailableTheaterEvents(ws) {
+    const candidates = _loadAllEvents().filter(ev => ev.trigger === 'theater');
+    return EventEngine._filterEligible(ws, candidates, {});
   }
 
   static getOccurrenceCount(ws, eventId) {

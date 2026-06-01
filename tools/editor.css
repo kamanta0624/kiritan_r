@@ -217,10 +217,10 @@ input[type=file]{display:none;}
 /* ====================================================================== */
 
 /* ---- layout: 3-pane grid with strong boundaries ---- */
-.ev-tab{display:flex;flex-direction:column;height:100%;overflow:hidden;background:#0d1117;}
+.ev-tab{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;background:#0d1117;}
 .ev-layout{display:grid;grid-template-columns:280px minmax(0,1fr) 460px;flex:1;min-height:0;overflow:hidden;}
 .ev-pane{display:flex;flex-direction:column;min-height:0;overflow:hidden;}
-.ev-pane-list  {background:#161b22;border-right:1px solid #30363d;}
+.ev-pane-list  {background:#161b22;border-right:1px solid #30363d;display:flex;flex-direction:column;min-height:0;overflow:hidden;}
 .ev-pane-center{background:#0d1117;border-right:1px solid #30363d;}
 .ev-pane-right {background:#0d1117;}
 .ev-pane-scroll{flex:1;overflow-y:auto;}
@@ -238,12 +238,12 @@ input[type=file]{display:none;}
 .ev-filter select{width:100%;padding:5px 8px;border-radius:5px;border:1px solid #30363d;background:#0d1117;color:#c9d1d9;font-size:11px;font-family:inherit;}
 .ev-filter select:focus{outline:none;border-color:#388bfd;}
 
-.ev-list{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:6px;}
+.ev-list{overflow-y:auto;padding:10px;max-height:calc(100vh - 224px);}
 .ev-list::-webkit-scrollbar{width:6px;}
 .ev-list::-webkit-scrollbar-thumb{background:#21262d;border-radius:3px;}
 
-.ev-group{border:1px solid #21262d;border-radius:6px;overflow:hidden;background:#0d1117;}
-.ev-group > summary{padding:8px 11px;font-size:11px;font-weight:600;color:#8b949e;letter-spacing:.04em;background:#161b22;cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;}
+.ev-group{border:1px solid #21262d;border-radius:6px;background:#0d1117;}
+.ev-group > summary{padding:8px 11px;font-size:11px;font-weight:600;color:#8b949e;letter-spacing:.04em;background:#161b22;cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;position:sticky;top:0;z-index:1;}
 .ev-group > summary::-webkit-details-marker{display:none;}
 .ev-group > summary::before{content:"▸";display:inline-block;color:#484f58;font-size:9px;transition:transform .15s;}
 .ev-group[open] > summary::before{transform:rotate(90deg);}
