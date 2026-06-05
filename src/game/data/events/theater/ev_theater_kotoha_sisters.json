@@ -1,0 +1,42 @@
+{
+  "id": "ev_theater_kotoha_sisters",
+  "name": "琴葉姉妹の会話",
+  "trigger": "theater",
+  "category": "story",
+  "title": "琴葉姉妹の会話",
+  "description": "琴葉茜と琴葉葵が仲間にいるときに見られる会話。",
+  "cost": {
+    "actionPoints": 1
+  },
+  "conditions": [
+    {
+      "type": "hasChar",
+      "charId": "char_008"
+    },
+    {
+      "type": "hasChar",
+      "charId": "char_009"
+    }
+  ],
+  "probability": 1,
+  "priority": 500,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        {
+          "characterId": "char_008",
+          "position": "left",
+          "text": "琴葉姉妹の会話　セリフダミー"
+        }
+      ]
+    },
+    {
+      "type": "end"
+    }
+  ],
+  "effects": {
+    "default": []
+  }
+}

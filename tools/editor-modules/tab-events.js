@@ -48,14 +48,14 @@ const EFFECT_TYPES = [
 ];
 
 const CHAR_PARAM_FIELDS = [
-  { value: 'soldiers',    label: 'ミーム（兵士）数' },
-  { value: 'maxSoldiers', label: 'ミーム（兵士）上限' },
+  { value: 'soldiers',    label: 'SP数' },
+  { value: 'maxSoldiers', label: 'SP上限' },
   { value: 'charHp',      label: 'キャラHP' },
   { value: 'charMaxHp',   label: 'キャラHP上限' },
   { value: 'charAttack',  label: 'キャラ攻撃力' },
   { value: 'charSong',    label: 'キャラ歌唱力' },
-  { value: 'soldierAtk',  label: 'ミーム攻撃力' },
-  { value: 'soldierDef',  label: 'ミーム防御力' },
+  { value: 'soldierAtk',  label: 'SP攻撃力' },
+  { value: 'soldierDef',  label: 'SP防御力' },
 ];
 
 const TRIGGER_OPTIONS = [

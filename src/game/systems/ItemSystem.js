@@ -127,9 +127,9 @@ export class ItemSystem {
     const labels = {
       charAttack:  '攻撃力',
       charMaxHp:   '最大HP',
-      soldierAtk:  '兵士攻撃力',
-      soldierDef:  '兵士防御力',
-      maxSoldiers: '最大兵士数',
+      soldierAtk:  'SP攻撃力',
+      soldierDef:  'SP防御力',
+      maxSoldiers: '最大SP',
     };
     return `${labels[def.effect.type] ?? def.effect.type} +${def.effect.value}`;
   }

@@ -1,0 +1,57 @@
+{
+  "id": "ev_turn2_join_kotohaxsisters",
+  "name": "2ターン目：琴葉茜・葵加入",
+  "trigger": "player_turn",
+  "conditions": [
+    {
+      "type": "turn",
+      "op": "eq",
+      "value": 2
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_kotoha_sisters_joined"
+    }
+  ],
+  "probability": 1,
+  "priority": 900,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        {
+          "characterId": "char_008",
+          "position": "left",
+          "text": "あかねちゃんやで"
+        },
+        {
+          "characterId": "char_009",
+          "position": "right",
+          "text": "あおいだよ"
+        }
+      ]
+    },
+    {
+      "type": "end"
+    }
+  ],
+  "effects": {
+    "default": [
+      {
+        "type": "charJoin",
+        "charId": "char_008",
+        "factionId": "東北家"
+      },
+      {
+        "type": "charJoin",
+        "charId": "char_009",
+        "factionId": "東北家"
+      },
+      {
+        "type": "setFlag",
+        "flag": "flag_kotoha_sisters_joined"
+      }
+    ]
+  }
+}

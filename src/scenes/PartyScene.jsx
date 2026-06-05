@@ -460,7 +460,7 @@ export default function PartyScene({ onNavigate, characters, treasury=0, upgrade
     troops:  c.troops ?? c.soldiers ?? 0,
     meme:    c.meme ?? c.soldiers ?? 0,
     memeMax: c.memeMax ?? c.maxSoldiers ?? c.soldiers ?? 0,
-    joined:  c.joined ?? (c.status === 'active'),
+    joined:  c.joined ?? true,
     portrait: c.portrait ?? null,
   }));
   const joined = allChars.filter(c=>c.joined);

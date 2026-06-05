@@ -1,46 +1,22 @@
 {
   "id": "ev_tokyo_open",
-  "name": "【ダミー】春日部制圧・東京解禁",
+  "name": "【ダミー】さいたま陥落・東京開放",
   "trigger": "player_turn",
   "conditions": [
-    {
-      "type": "baseOwned",
-      "baseId": "base_028"
-    },
-    {
-      "type": "noFlag",
-      "flag": "flag_saitama_conquered_by_player"
-    }
+    { "type": "baseOwned", "baseId": "base_028" },
+    { "type": "noFlag", "flag": "flag_saitama_conquered_by_player" }
   ],
   "probability": 1,
-  "priority": 1000,
+  "priority": 950,
   "maxOccurrences": 1,
   "script": [
-    {
-      "type": "conversation",
-      "lines": [
-        {
-          "characterId": "char_004",
-          "position": "center",
-          "text": "【ダミー】埼玉を制圧した。東京との決戦が近い。"
-        }
-      ]
-    },
-    {
-      "type": "end"
-    }
+    { "type": "conversation", "lines": [
+      { "characterId": "char_004", "position": "center", "text": "【ダミー】春日部を制圧。東京が動き出す。" }
+    ] },
+    { "type": "end" }
   ],
-  "effects": {
-    "default": [
-      {
-        "type": "setFlag",
-        "flag": "flag_saitama_conquered_by_player"
-      },
-      {
-        "type": "warFlag",
-        "factionId": "faction_new01",
-        "atWar": true
-      }
-    ]
-  }
+  "effects": { "default": [
+    { "type": "setFlag", "flag": "flag_saitama_conquered_by_player" },
+    { "type": "warFlag", "factionId": "faction_new01", "atWar": true }
+  ] }
 }

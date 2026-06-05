@@ -1,0 +1,46 @@
+{
+  "id": "ev_defeated_awamo",
+  "name": "[沖縄あわも撃破]沖縄あわも加入",
+  "trigger": "char_defeated",
+  "conditions": [
+    {
+      "type": "defeatedChar",
+      "charId": "char_023"
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_awamo_joined"
+    }
+  ],
+  "probability": 1,
+  "priority": 900,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        {
+          "characterId": "char_023",
+          "position": "left",
+          "text": "沖縄あわも撃破イベント　セリフダミー"
+        }
+      ]
+    },
+    {
+      "type": "end"
+    }
+  ],
+  "effects": {
+    "default": [
+      {
+        "type": "charJoin",
+        "charId": "char_023",
+        "factionId": "東北家"
+      },
+      {
+        "type": "setFlag",
+        "flag": "flag_awamo_joined"
+      }
+    ]
+  }
+}

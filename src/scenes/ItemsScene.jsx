@@ -13,9 +13,9 @@ const TYPE_GLYPH = { weapon:'⚔', armor:'⛨', accessory:'◈' };
 const EFFECT_LABELS = {
   charAttack:  '攻撃力',
   charMaxHp:   '最大HP',
-  soldierAtk:  '兵士攻撃力',
-  soldierDef:  '兵士防御力',
-  maxSoldiers: '最大兵士数',
+  soldierAtk:  'SP攻撃力',
+  soldierDef:  'SP防御力',
+  maxSoldiers: '最大SP',
 };
 
 function effectLabel(def, itemSystem) {

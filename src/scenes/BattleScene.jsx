@@ -10,7 +10,7 @@ const SKILLS = Object.fromEntries((skillsData.skills ?? []).map(s => [s.id, s]))
 const FONT_DISPLAY="'Zen Maru Gothic',sans-serif";
 const FONT_NUM="'Rajdhani',sans-serif";
 // 攻撃ストリーム配色（overlay 専用）
-const STREAM_SP='#7fff00', STREAM_HIT='#ff2244', STREAM_GEN='#a06bff';
+const STREAM_SP='#7fff00', STREAM_GEN='#a06bff';
 const ATK_LABEL = { melee:'近接', ranged:'遠距離', song:'歌', attack:'近接', skill:'特技', focus:'集中', special:'必殺技', defend:'防御', retreat:'撤退' };
 const ATK_COLOR = { melee:PK, ranged:TEAL, song:AC2, attack:PK };
 const POS_LABEL = { front:'前衛', rear:'後衛' };
@@ -359,7 +359,7 @@ function EnemyHoverMenu({ attackerAtkType, onAttack }) {
 // ── UnitCard (Design v4) ──────────────────────────────────────
 function UnitCard({ unit, active, ally, activeUnit, specialPending, onAllyAction, onEnemyAttack, battleCapacity, isDuel }) {
   const color  = ally ? PK : AC;
-  const dead   = unit.soldiers <= 0;
+  const dead   = unit.charHp <= 0;
   const done   = unit.status === 'done';
   const retreated = unit.action === 'retreat';
   const defended  = unit.action === 'defend';
@@ -565,7 +565,7 @@ function SPPlaceholder({ side, name, portrait, color }) {
 }
 
 // ── DamageBurst ───────────────────────────────────────────────
-function DamageBurst({ x, y, value, label }) {
+function DamageBurst({ x, y, value, fromSP, fromBody }) {
   return (
     <div style={{
       position:'absolute',
@@ -575,14 +575,28 @@ function DamageBurst({ x, y, value, label }) {
       display:'flex', flexDirection:'column', alignItems:'center', gap:2,
       animation:'dmgPop2 .35s cubic-bezier(.2,.8,.3,1.3) both',
     }}>
-      <div style={{ fontFamily:FONT_DISPLAY, fontSize:13, color:'rgba(255,255,255,.85)', letterSpacing:'.42em', fontWeight:900, textShadow:'0 1px 6px rgba(0,0,0,.8)' }}>{label} DAMAGE</div>
       <div style={{ fontFamily:FONT_NUM, fontWeight:900, fontSize:96, lineHeight:1, color:'#ff2244', textShadow:'0 0 32px rgba(255,30,60,.95), 0 4px 0 rgba(0,0,0,.85)', letterSpacing:'.04em' }}>−{value}</div>
+      <DamageBreakdown fromSP={fromSP} fromBody={fromBody}/>
+    </div>
+  );
+}
+
+// 発生源別ダメージ内訳。ラベルは出さず色で発生源を区別（SP発=STREAM_SP, 本体発=STREAM_GEN／命中バッジ色と一致）。0でも表示。
+function DamageBreakdown({ fromSP, fromBody }) {
+  if (fromSP == null && fromBody == null) return null;
+  const row = (v, color) => (
+    <span style={{ fontFamily:FONT_NUM, fontSize:18, fontWeight:900, lineHeight:1, color, textShadow:'0 1px 4px rgba(0,0,0,.8)' }}>−{v ?? 0}</span>
+  );
+  return (
+    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:1, marginTop:2 }}>
+      {row(fromSP,   STREAM_SP)}
+      {row(fromBody, STREAM_GEN)}
     </div>
   );
 }
 
 // ── BottomPortrait ────────────────────────────────────────────
-function BottomPortrait({ unit, hp, maxHP, color, side, hpDmg, showDamage, defeated }) {
+function BottomPortrait({ unit, hp, maxHP, color, side, hpDmg, showDamage, defeated, hpFromSP, hpFromBody }) {
   const flip    = side === 'right';
   const hpPct   = Math.max(0, Math.min(100, (hp / maxHP) * 100));
   const name    = unit?.char?.name    ?? unit?.name    ?? '—';
@@ -606,12 +620,12 @@ function BottomPortrait({ unit, hp, maxHP, color, side, hpDmg, showDamage, defea
         )}
         <div style={{ position:'absolute', inset:0, background:'linear-gradient(180deg, transparent 50%, rgba(0,0,0,.6))' }}/>
         <div style={{ position:'absolute', bottom:8, [flip ? 'right' : 'left']:10, fontFamily:FONT_DISPLAY, fontWeight:900, fontSize:18, color:'#fff', letterSpacing:'.06em', textShadow:'0 2px 8px rgba(0,0,0,.85)' }}>{name}</div>
-        {showDamage && hpDmg > 0 && !defeated && (
+        {showDamage && !defeated && (
           <>
-            <div style={{ position:'absolute', inset:0, background:'rgba(255,40,60,.3)' }}/>
+            {hpDmg > 0 && <div style={{ position:'absolute', inset:0, background:'rgba(255,40,60,.3)' }}/>}
             <div style={{ position:'absolute', inset:0, zIndex:10, pointerEvents:'none', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:2, animation:'dmgPop2 .35s cubic-bezier(.2,.8,.3,1.3) both' }}>
-              <div style={{ fontFamily:FONT_DISPLAY, fontSize:11, color:'rgba(255,255,255,.85)', letterSpacing:'.42em', fontWeight:900, textShadow:'0 1px 6px rgba(0,0,0,.8)' }}>本体 DAMAGE</div>
               <div style={{ fontFamily:FONT_NUM, fontWeight:900, fontSize:82, lineHeight:1, color:'#ff2244', textShadow:'0 0 28px rgba(255,30,60,.95), 0 3px 0 rgba(0,0,0,.8)', letterSpacing:'.04em' }}>−{hpDmg}</div>
+              <DamageBreakdown fromSP={hpFromSP} fromBody={hpFromBody}/>
             </div>
           </>
         )}
@@ -661,6 +675,8 @@ function BattleAnimOverlay({ anim, targetNode, onContinue, bgUrl = 'url(assets/b
   const { attacker, defender, atkMem, atkChr, defMem, defChr, actionLabel, attackerSide='player',
           atkToMeme=0, atkToChar=0, defToMeme=0, defToChar=0,
           atkSelfMemeHits=0, atkSelfCharHits=0, defSelfMemeHits=0, defSelfCharHits=0,
+          atkMemeDmg=0, atkSelfMemeDmg=0, atkCharDmg=0, atkSelfCharDmg=0,
+          defMemeDmg=0, defSelfMemeDmg=0, defCharDmg=0, defSelfCharDmg=0,
           atkSolBefore, defSolBefore, atkHpBefore, defHpBefore } = anim;
   const isSpecial   = actionLabel === '必殺技';
   const atkColor    = attackerSide === 'player' ? PK : AC;
@@ -672,6 +688,25 @@ function BattleAnimOverlay({ anim, targetNode, onContinue, bgUrl = 'url(assets/b
   const allyHPdmg  = allyIsAttacker ? (defChr ?? 0) : (atkChr ?? 0);
   const enemySPdmg = allyIsAttacker ? (atkMem ?? 0) : (defMem ?? 0);
   const enemyHPdmg = allyIsAttacker ? (atkChr ?? 0) : (defChr ?? 0);
+
+  // 受け手ごとの発生源別内訳（SP発 = meme/char, 本体発 = selfMeme/selfChar）
+  // ally が attacker → ally は反撃(def側)を受ける。enemy は atk側を受ける。逆も同様。
+  const allySPfromSP    = allyIsAttacker ? defMemeDmg     : atkMemeDmg;
+  const allySPfromBody  = allyIsAttacker ? defSelfMemeDmg : atkSelfMemeDmg;
+  const allyHPfromSP    = allyIsAttacker ? defCharDmg     : atkCharDmg;
+  const allyHPfromBody  = allyIsAttacker ? defSelfCharDmg : atkSelfCharDmg;
+  const enemySPfromSP   = allyIsAttacker ? atkMemeDmg     : defMemeDmg;
+  const enemySPfromBody = allyIsAttacker ? atkSelfMemeDmg : defSelfMemeDmg;
+  const enemyHPfromSP   = allyIsAttacker ? atkCharDmg     : defCharDmg;
+  const enemyHPfromBody = allyIsAttacker ? atkSelfCharDmg : defSelfCharDmg;
+
+  // 被命中数（表示判定はダメージ値ではなく命中数で行う。命中0＝攻撃を受けていない→非表示）
+  // 守備側 SP被命中 = atkToMeme + atkSelfMemeHits / 本体被命中 = atkToChar + atkSelfCharHits
+  // 攻撃側 SP被命中 = defToMeme + defSelfMemeHits / 本体被命中 = defToChar + defSelfCharHits
+  const allySPhits  = allyIsAttacker ? (defToMeme + defSelfMemeHits) : (atkToMeme + atkSelfMemeHits);
+  const allyHPhits  = allyIsAttacker ? (defToChar + defSelfCharHits) : (atkToChar + atkSelfCharHits);
+  const enemySPhits = allyIsAttacker ? (atkToMeme + atkSelfMemeHits) : (defToMeme + defSelfMemeHits);
+  const enemyHPhits = allyIsAttacker ? (atkToChar + atkSelfCharHits) : (defToChar + defSelfCharHits);
 
   const allySolBefore  = allyIsAttacker ? atkSolBefore : defSolBefore;
   const allyHpBefore   = allyIsAttacker ? atkHpBefore  : defHpBefore;
@@ -709,8 +744,8 @@ function BattleAnimOverlay({ anim, targetNode, onContinue, bgUrl = 'url(assets/b
   };
 
   // 飛行バッジ用ストリーム
-  //   BUG-4/5: SP命中(toMeme) と 将軍命中(toChar) を分離表示（toMeme+toChar=N）。HPダメージは別系統(DamageBurst/BottomPortrait)。
-  //   BUG-6: 将軍本人攻撃(selfHits) を兵士突撃とは別ストリームで描画。
+  //   バッジは発生源(誰が攻撃したか)= SP発 / 本体発 で色分け・ラベル。
+  //   命中先(誰に)は飛び先(敵SP / 敵本体)で表現。SP発・本体発それぞれが両方へ飛ぶ。
   const streams = useMemo(() => {
     const arr = [];
     // 攻撃側/守備側の座標ゾーン（ally/enemy にマップ）
@@ -719,23 +754,24 @@ function BattleAnimOverlay({ anim, targetNode, onContinue, bgUrl = 'url(assets/b
       : { atkSP: POS.enemySP, atkPort: POS.enemyPortrait, defSP: POS.allySP,  defPort: POS.allyPortrait  };
     const push = (src, dst, count, kind) => {
       if (!count || count <= 0) return;
+      // §5: バッジ呼称は発生源(誰が攻撃したか)の SP / 本体 のみ。将軍/兵士は使わない。
+      // 命中先(誰に)はストリームの飛び先(dst)で表現。
       const cfg = {
-        sp:  { color: STREAM_SP,  textColor:'#0a0816', isSP:true,  prefix:'SP'   },
-        hit: { color: STREAM_HIT, textColor:'#fff',    isSP:false, prefix:'本体' },
-        gen: { color: STREAM_GEN, textColor:'#fff',    isSP:false, prefix:'将軍' },
+        spSrc:   { color: STREAM_SP,  textColor:'#0a0816', isSP:true,  prefix:'SP'   },
+        bodySrc: { color: STREAM_GEN, textColor:'#fff',    isSP:false, prefix:'本体' },
       }[kind];
       arr.push({ src, dst, count, ...cfg });
     };
-    // 攻撃側 → 守備側（兵士突撃 + 将軍本人）
-    push(z.atkSP,   z.defSP,   atkToMeme,       'sp');
-    push(z.atkSP,   z.defPort, atkToChar,       'hit');
-    push(z.atkPort, z.defSP,   atkSelfMemeHits, 'gen');
-    push(z.atkPort, z.defPort, atkSelfCharHits, 'gen');
-    // 反撃（守備側 → 攻撃側）
-    push(z.defSP,   z.atkSP,   defToMeme,       'sp');
-    push(z.defSP,   z.atkPort, defToChar,       'hit');
-    push(z.defPort, z.atkSP,   defSelfMemeHits, 'gen');
-    push(z.defPort, z.atkPort, defSelfCharHits, 'gen');
+    // 攻撃側 → 守備側（4本・合算しない）
+    push(z.atkSP,   z.defSP,   atkToMeme,       'spSrc');   // SP発→敵SP
+    push(z.atkSP,   z.defPort, atkToChar,       'spSrc');   // SP発→敵本体
+    push(z.atkPort, z.defSP,   atkSelfMemeHits, 'bodySrc'); // 本体発→敵SP
+    push(z.atkPort, z.defPort, atkSelfCharHits, 'bodySrc'); // 本体発→敵本体
+    // 反撃（守備側 → 攻撃側）4本
+    push(z.defSP,   z.atkSP,   defToMeme,       'spSrc');
+    push(z.defSP,   z.atkPort, defToChar,       'spSrc');
+    push(z.defPort, z.atkSP,   defSelfMemeHits, 'bodySrc');
+    push(z.defPort, z.atkPort, defSelfCharHits, 'bodySrc');
     return arr;
   }, []);
 
@@ -829,8 +865,8 @@ function BattleAnimOverlay({ anim, targetNode, onContinue, bgUrl = 'url(assets/b
         <SPPlaceholder side="left"  name={allyUnit.char?.name}  portrait={allyUnit.char?.portrait}  color={PK}/>
         <SPPlaceholder side="right" name={enemyUnit.char?.name} portrait={enemyUnit.char?.portrait} color={AC}/>
         <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)', fontFamily:FONT_DISPLAY, fontWeight:900, fontSize:54, color:'#fff', letterSpacing:'.2em', textShadow:'0 4px 18px rgba(0,0,0,.85)', pointerEvents:'none', zIndex:1, opacity:.32 }}>VS</div>
-        {phase === 'damages' && allySPdmg  > 0 && <DamageBurst x={POS.allySP.x}  y={POS.allySP.y}  value={allySPdmg}  label="SP"/>}
-        {phase === 'damages' && enemySPdmg > 0 && <DamageBurst x={POS.enemySP.x} y={POS.enemySP.y} value={enemySPdmg} label="SP"/>}
+        {phase === 'damages' && allySPhits  > 0 && <DamageBurst x={POS.allySP.x}  y={POS.allySP.y}  value={allySPdmg}  fromSP={allySPfromSP}  fromBody={allySPfromBody}/>}
+        {phase === 'damages' && enemySPhits > 0 && <DamageBurst x={POS.enemySP.x} y={POS.enemySP.y} value={enemySPdmg} fromSP={enemySPfromSP} fromBody={enemySPfromBody}/>}
       </div>
 
       {/* BOTTOM — 3列グリッド */}
@@ -844,14 +880,16 @@ function BattleAnimOverlay({ anim, targetNode, onContinue, bgUrl = 'url(assets/b
         <BottomPortrait
           unit={allyUnit} hp={allyHP} maxHP={allyUnit.charMaxHp ?? allyUnit.char?.charMaxHp ?? 200}
           color={PK} side="left"
-          hpDmg={allyHPdmg} showDamage={phase === 'damages' || phase === 'defeat'}
+          hpDmg={allyHPdmg} showDamage={(phase === 'damages' || phase === 'defeat') && allyHPhits > 0}
+          hpFromSP={allyHPfromSP} hpFromBody={allyHPfromBody}
           defeated={phase === 'defeat' && allyWillDie}
         />
         <MessageWindow speaker={speaker} line={line}/>
         <BottomPortrait
           unit={enemyUnit} hp={enemyHP} maxHP={enemyUnit.charMaxHp ?? enemyUnit.char?.charMaxHp ?? 200}
           color={AC} side="right"
-          hpDmg={enemyHPdmg} showDamage={phase === 'damages' || phase === 'defeat'}
+          hpDmg={enemyHPdmg} showDamage={(phase === 'damages' || phase === 'defeat') && enemyHPhits > 0}
+          hpFromSP={enemyHPfromSP} hpFromBody={enemyHPfromBody}
           defeated={phase === 'defeat' && enemyWillDie}
         />
       </div>
@@ -1129,6 +1167,8 @@ export default function BattleFlow({ formation, targetNode, onComplete, onBattle
   const animSeqRef   = useRef(0);
   // BUG-3: 交換キュー。単一スロット上書きで先行overlayがスキップされるのを防ぐ。
   const animQueueRef = useRef([]);
+  // Bug①: doAction 再入ガード（クリック重複 / 残存タイマ / nextActor再選出を一括で弾く）
+  const actionLockRef = useRef(false);
   const [cutinVisible,  setCutinVisible]  = useState(false);
   const [strategyWinner, setStrategyWinner] = useState(null);
   const [strategyBonus,  setStrategyBonus]  = useState(null);
@@ -1173,17 +1213,23 @@ export default function BattleFlow({ formation, targetNode, onComplete, onBattle
 
   // M1: action mapping — doAction 内でエンジンに渡す前に変換
   const doAction = useCallback(async (unit, isPlayer) => {
-    const eng = engineRef.current;
-    unit.action = ACTION_MAP[unit.action] ?? unit.action;
-    await eng.executeAction(unit, isPlayer);
-    // BUG-3: overlay 表示中 or キューに残りがある間は必ず待機（drainされるまで）
-    if (animStateRef.current || animQueueRef.current.length) {
-      await new Promise(resolve => { animResolveRef.current = resolve; });
+    if (actionLockRef.current) return;         // 再入ガード（全トリガ網羅）
+    actionLockRef.current = true;
+    try {
+      const eng = engineRef.current;
+      unit.action = ACTION_MAP[unit.action] ?? unit.action;
+      await eng.executeAction(unit, isPlayer);
+      eng.markActed(unit);                     // await より前に未acted窓を閉じる（再選出での再攻撃を防ぐ）
+      // BUG-3: overlay 表示中 or キューに残りがある間は必ず待機（drainされるまで）
+      if (animStateRef.current || animQueueRef.current.length) {
+        await new Promise(resolve => { animResolveRef.current = resolve; });
+      }
+      syncDisplay(null);
+      if (eng.checkGameOver()) return;          // finally でロック解放されるので return 可
+      setTimeout(() => processNextRef.current?.(), 300);
+    } finally {
+      actionLockRef.current = false;
     }
-    eng.markActed(unit);
-    syncDisplay(null);
-    if (eng.checkGameOver()) return;
-    setTimeout(() => processNextRef.current?.(), 300);
   }, [syncDisplay]);
 
   const onRoundEnd = useCallback(() => {
@@ -1293,16 +1339,21 @@ export default function BattleFlow({ formation, targetNode, onComplete, onBattle
           defChr:      result.defChr,
           N:           result.N,
           Nr:          result.Nr,
-          // 兵士突撃の命中数内訳（SP命中 + 将軍命中 = N）
+          // SP突撃の命中数内訳（SP命中 + 本体命中 = N）
           atkToMeme:   result.atkToMeme,
           atkToChar:   result.atkToChar,
           defToMeme:   result.defToMeme,
           defToChar:   result.defToChar,
-          // 将軍本人攻撃の命中数
+          // 本体本人攻撃の命中数
           atkSelfMemeHits: result.atkSelfMemeHits,
           atkSelfCharHits: result.atkSelfCharHits,
           defSelfMemeHits: result.defSelfMemeHits,
           defSelfCharHits: result.defSelfCharHits,
+          // 発生源別ダメージ内訳（SP発 / 本体発）
+          atkMemeDmg: result.atkMemeDmg, atkSelfMemeDmg: result.atkSelfMemeDmg,
+          atkCharDmg: result.atkCharDmg, atkSelfCharDmg: result.atkSelfCharDmg,
+          defMemeDmg: result.defMemeDmg, defSelfMemeDmg: result.defSelfMemeDmg,
+          defCharDmg: result.defCharDmg, defSelfCharDmg: result.defSelfCharDmg,
           atkSolBefore: result.atkSolBefore,
           defSolBefore: result.defSolBefore,
           atkHpBefore:  result.atkHpBefore,

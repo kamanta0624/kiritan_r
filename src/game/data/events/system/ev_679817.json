@@ -1,19 +1,19 @@
 {
-  "id": "ev_000_opening",
-  "name": "オープニング",
-  "trigger": "game_start",
+  "id": "ev_679817",
+  "name": "2ターン目イベント2つ目",
+  "trigger": "player_turn",
   "conditions": [],
   "probability": 1,
-  "priority": 999,
+  "priority": 50,
   "maxOccurrences": 1,
   "script": [
     {
       "type": "conversation",
       "lines": [
         {
-          "characterId": "char_004",
+          "characterId": null,
           "position": "center",
-          "text": "オープニング　セリフダミー"
+          "text": "2ターン目イベント２つ目"
         }
       ]
     },

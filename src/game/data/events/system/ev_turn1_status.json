@@ -1,14 +1,8 @@
 {
   "id": "ev_turn1_status",
-  "name": "1ターン目きりたん・めたん現状確認",
-  "trigger": "player_turn",
-  "conditions": [
-    {
-      "type": "turn",
-      "op": "eq",
-      "value": 1
-    }
-  ],
+  "name": "1ターン目イベント",
+  "trigger": "game_start",
+  "conditions": [],
   "probability": 1,
   "priority": 900,
   "maxOccurrences": 1,
@@ -17,9 +11,9 @@
       "type": "conversation",
       "lines": [
         {
-          "characterId": "char_017",
-          "position": "left",
-          "text": "1ターン目冒頭イベント"
+          "characterId": "char_004",
+          "position": "center",
+          "text": "1ターン目イベント　セリフダミー"
         }
       ]
     },
@@ -30,8 +24,14 @@
   "effects": {
     "default": [
       {
-        "type": "setFlag",
-        "flag": "ev_turn1_done"
+        "type": "charJoin",
+        "charId": "char_008",
+        "factionId": "東北家"
+      },
+      {
+        "type": "charJoin",
+        "charId": "char_009",
+        "factionId": "東北家"
       }
     ]
   }

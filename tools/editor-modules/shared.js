@@ -14,13 +14,6 @@ export const state = {
   selectedLegionId: null,
 };
 
-export const STATUS_LABELS = {
-  active:      { label: '加入済み', cls: 'badge-active' },
-  recruitable: { label: '雇用可',   cls: 'badge-recruitable' },
-  standby:     { label: '在野',     cls: 'badge-standby' },
-  dead:        { label: '戦死',     cls: 'badge-dead' },
-};
-
 export const TRIGGER_META = [
   { key: 'turn_start',        label: 'ターン開始',    desc: '各ターン開始時（汎用）' },
   { key: 'low_treasury',      label: 'ミーム不足',    desc: 'ミーム 300 以下' },
@@ -131,8 +124,8 @@ export function getFactionColor(factionId) {
 // battleBonus 共通
 // ----------------------------------------------------------------
 const BONUS_FIELDS = [
-  { id: 'soldierAtk', label: 'ミーム攻撃力 (soldierAtk)', min: -20, max: 20, isSong: false },
-  { id: 'soldierDef', label: 'ミーム防御力 (soldierDef)', min: -20, max: 20, isSong: false },
+  { id: 'soldierAtk', label: 'SP攻撃力 (soldierAtk)', min: -20, max: 20, isSong: false },
+  { id: 'soldierDef', label: 'SP防御力 (soldierDef)', min: -20, max: 20, isSong: false },
   { id: 'charAttack', label: 'キャラ攻撃力 (charAttack)', min: -50, max: 50, isSong: false },
   { id: 'charSong',   label: '歌パラメータ (charSong)',   min: -30, max: 30, isSong: true  },
 ];

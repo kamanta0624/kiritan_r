@@ -135,8 +135,7 @@ function renderCharsTab(main) {
     <th class="col-num">歌</th>
     <th class="col-num" title="recoveryRate">回復率</th>
     <th class="col-num" title="strategyRate">作戦率</th>
-    <th class="col-name" style="width:80px">ミームタイプ</th>
-    <th class="col-num">ミーム数</th>
+    <th class="col-num">SP数</th>
     <th class="col-num">上限</th>
     <th class="col-num">攻</th>
     <th class="col-num">守</th>
@@ -185,7 +184,6 @@ function buildCharRow(c, idx, factionOpts, skillOpts) {
     <td><input type="number" class="c_charSong"     value="${c.charSong??20}"        min="0"    max="200"  /></td>
     <td><input type="number" class="c_recoveryRate" value="${c.recoveryRate??''}"    step="0.01" min="0" max="1" placeholder="未指定" /></td>
     <td><input type="number" class="c_strategyRate" value="${c.strategyRate??0}"     min="0"    max="100"  /></td>
-    <td><input type="text"   class="c_soldierName"  value="${esc(c.soldierName||'一般兵')}" /></td>
     <td><input type="number" class="c_soldiers"     value="${c.soldiers||500}"       min="0"    max="99999" /></td>
     <td><input type="number" class="c_maxSoldiers"  value="${c.maxSoldiers||1000}"   min="1"    max="99999" /></td>
     <td><input type="number" class="c_soldierAtk"   value="${c.soldierAtk||9}"       min="1"    max="100"  /></td>
@@ -213,7 +211,7 @@ function addCharRow() {
     role: 'attacker', attackType: 'melee',
     kana: null, recoveryRate: null, strategyRate: 0,
     charHp: 150, charMaxHp: 150, charAttack: 70, charDefense: 0, attackCount: 8, charSong: 20,
-    soldiers: 500, maxSoldiers: 1000, soldierName: '一般兵', soldierAtk: 10, soldierDef: 8,
+    soldiers: 500, maxSoldiers: 1000, soldierAtk: 10, soldierDef: 8,
     description: '', hireCost: 0, skillId: null, equipment: { item: null },
     battleBonus: {
       attack:  { soldierAtk:0, soldierDef:0, charAttack:0, charSong:0 },
@@ -246,7 +244,7 @@ function addCharRowTemplate() {
     role: 'attacker', attackType: 'melee',
     kana: null, recoveryRate: null, strategyRate: 0,
     charHp: 120, charMaxHp: 120, charAttack: 50, charDefense: 0, attackCount: 8, charSong: 15,
-    soldiers: 400, maxSoldiers: 800, soldierName: '一般兵', soldierAtk: 8, soldierDef: 7,
+    soldiers: 400, maxSoldiers: 800, soldierAtk: 8, soldierDef: 7,
     description: '', hireCost: 0, skillId: null, equipment: { item: null },
     battleBonus: {
       attack:  { soldierAtk:0, soldierDef:0, charAttack:0, charSong:0 },
@@ -296,7 +294,6 @@ function collectCharsFromTable() {
     const rrVal    = tr.querySelector('.c_recoveryRate').value;
     c.recoveryRate = rrVal !== '' ? parseFloat(rrVal) : null;
     c.strategyRate = Number(tr.querySelector('.c_strategyRate').value);
-    c.soldierName  = tr.querySelector('.c_soldierName').value.trim() || '一般兵';
     c.soldiers     = Number(tr.querySelector('.c_soldiers').value);
     c.maxSoldiers  = Number(tr.querySelector('.c_maxSoldiers').value);
     c.soldierAtk   = Number(tr.querySelector('.c_soldierAtk').value);
@@ -368,8 +365,8 @@ function renderSkillsTab(main) {
       <div class="grid-3">
         <div class="form-group"><label>対象パラメータ (target)</label>
           <select id="ns_buffTarget">
-            <option value="soldierAtk">soldierAtk（ミーム攻撃力）</option>
-            <option value="soldierDef">soldierDef（ミーム防御力）</option>
+            <option value="soldierAtk">soldierAtk（SP攻撃力）</option>
+            <option value="soldierDef">soldierDef（SP防御力）</option>
             <option value="charAttack">charAttack（キャラ攻撃力）</option>
             <option value="charSong">charSong（歌パラメータ）</option>
           </select>
@@ -562,7 +559,7 @@ function renderDungeonsTab(main) {
           </div>
           <div class="grid-3" style="margin-top:6px">
             <div class="form-group"><label>敵ミーム数</label><input type="number" class="fl_esol" data-did="${esc(dungeon.id)}" data-fi="${i}" value="${fl.enemy?.soldiers??200}" /></div>
-            <div class="form-group"><label>敵ミーム攻撃</label><input type="number" class="fl_esa" data-did="${esc(dungeon.id)}" data-fi="${i}" value="${fl.enemy?.soldierAtk??8}" /></div>
+            <div class="form-group"><label>敵SP攻撃</label><input type="number" class="fl_esa" data-did="${esc(dungeon.id)}" data-fi="${i}" value="${fl.enemy?.soldierAtk??8}" /></div>
             <div class="form-group"><label>敵ミーム防御</label><input type="number" class="fl_esd" data-did="${esc(dungeon.id)}" data-fi="${i}" value="${fl.enemy?.soldierDef??6}" /></div>
           </div>
           <div class="grid-2" style="margin-top:6px">

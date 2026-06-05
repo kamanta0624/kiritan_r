@@ -4,8 +4,6 @@
  *
  * 研究は勢力全体バフ。拠点への紐づけなし。
  * worldScene.buildings = ['voice_1', 'voice_plus', ...] で管理する。
- *
- * 雇用候補は characters.json の status:'recruitable' かつ isTemplate:false のキャラ。
  */
 
 import researchData   from '../data/facilities.json';
@@ -86,43 +84,6 @@ export class BuildingSystem {
   }
 
   // ----------------------------------------------------------------
-  // 雇用関連
-  // ----------------------------------------------------------------
-  getHirePool(activeCharacters) {
-    const activeIds = new Set(activeCharacters.map(c => c.id));
-    return charactersData.characters.filter(c =>
-      c.status === 'recruitable' &&
-      !c.isTemplate &&
-      !activeIds.has(c.id)
-    );
-  }
-
-  hire(charId, faction, activeCharacters) {
-    const activeIds = new Set(activeCharacters.map(c => c.id));
-    const template  = charactersData.characters.find(c =>
-      c.id === charId &&
-      c.status === 'recruitable' &&
-      !c.isTemplate &&
-      !activeIds.has(c.id)
-    );
-    if (!template) return null;
-    if (faction.treasury < (template.hireCost ?? 0)) return null;
-
-    faction.treasury -= template.hireCost ?? 0;
-
-    const newChar = {
-      ...JSON.parse(JSON.stringify(template)),
-      factionId:    faction.id,
-      status:       'active',
-      usedThisTurn: false,
-      charHp:       template.charMaxHp,
-      equipment:    { item: null },
-    };
-    activeCharacters.push(newChar);
-    return newChar;
-  }
-
-  // ----------------------------------------------------------------
   // テンプレートモブからインスタンスを生成（EnemyAI用）
   // ----------------------------------------------------------------
   static createMobInstance(template, factionId) {
@@ -146,7 +107,6 @@ export class BuildingSystem {
       name,
       displayName:  template.displayName,
       factionId,
-      status:       'active',
       isTemplate:   false,
       isLeader:     false,
       usedThisTurn: false,
@@ -160,7 +120,6 @@ export class BuildingSystem {
       charSong:     template.charSong ?? 15,
       attack:       vary(template.charAttack),
       defense:      vary(template.defense ?? 60),
-      soldierName:  template.soldierName,
       soldierAtk:   vary(template.soldierAtk),
       soldierDef:   vary(template.soldierDef),
       description:  template.description ?? '',

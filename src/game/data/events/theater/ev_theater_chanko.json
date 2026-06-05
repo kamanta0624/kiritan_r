@@ -1,0 +1,38 @@
+{
+  "id": "ev_theater_chanko",
+  "name": "大江戸ちゃんこの会話",
+  "trigger": "theater",
+  "category": "story",
+  "title": "大江戸ちゃんこの会話",
+  "description": "大江戸ちゃんこが仲間にいるときに見られる会話。",
+  "cost": {
+    "actionPoints": 1
+  },
+  "conditions": [
+    {
+      "type": "hasChar",
+      "charId": "char_020"
+    }
+  ],
+  "probability": 1,
+  "priority": 500,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        {
+          "characterId": "char_020",
+          "position": "left",
+          "text": "大江戸ちゃんこの会話　セリフダミー"
+        }
+      ]
+    },
+    {
+      "type": "end"
+    }
+  ],
+  "effects": {
+    "default": []
+  }
+}

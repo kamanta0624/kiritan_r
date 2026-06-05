@@ -15,6 +15,7 @@
  */
 
 import { createContext, useContext, useReducer, useCallback, useRef, useEffect } from 'react';
+import { flushSync } from 'react-dom';
 import { BuildingSystem } from '../game/systems/BuildingSystem.js';
 import { ItemSystem }     from '../game/systems/ItemSystem.js';
 import { LegionAI }       from '../game/systems/LegionAI.js';
@@ -35,8 +36,10 @@ import dungeonsData   from '../game/data/dungeons.json';
 // ─────────────────────────────────────────────────────────────
 
 function createInitialState() {
+  // status 廃止: 加入判定は factionId に一元化。全非テンプレキャラを state に投入し、
+  // factionId===null の在野キャラも charJoin で加入できるようにする（表示は factionId でゲート）。
   const characters = charactersData.characters
-    .filter(c => c.status === 'active' && !c.isTemplate)
+    .filter(c => !c.isTemplate)
     .map(c => ({
       ...c,
       penaltyTurns: c.penaltyTurns ?? 0,
@@ -432,7 +435,7 @@ function applyEffectToState(state, eff) {
         ...state,
         characters: state.characters.map(c =>
           c.id === eff.charId
-            ? { ...c, factionId: eff.factionId ?? playerFaction?.id, status: 'active' }
+            ? { ...c, factionId: eff.factionId ?? playerFaction?.id }
             : c
         ),
       };
@@ -441,7 +444,7 @@ function applyEffectToState(state, eff) {
       return {
         ...state,
         characters: state.characters.map(c =>
-          c.id === eff.charId ? { ...c, factionId: null, status: 'standby' } : c
+          c.id === eff.charId ? { ...c, factionId: null } : c
         ),
       };
     }
@@ -592,7 +595,6 @@ function serializeState(state, legionAI) {
       const base = {
         id:                c.id,
         factionId:         c.factionId,
-        status:            c.status ?? 'active',
         soldiers:          c.soldiers,
         maxSoldiers:       c.maxSoldiers,
         usedThisTurn:      c.usedThisTurn,
@@ -617,7 +619,6 @@ function serializeState(state, legionAI) {
           isLeader:     c.isLeader    ?? false,
           charAttack:   c.charAttack,
           charDefense:  c.charDefense ?? 0,
-          soldierName:  c.soldierName,
           soldierAtk:   c.soldierAtk,
           soldierDef:   c.soldierDef,
           recoveryRate: c.recoveryRate ?? 0.05,
@@ -663,7 +664,6 @@ function deserializeToState(data, itemSystem) {
     restoredChars.push({
       ...JSON.parse(JSON.stringify(def)),
       factionId:         saved.factionId,
-      status:            saved.status            ?? 'active',
       soldiers:          saved.soldiers,
       maxSoldiers:       saved.maxSoldiers,
       usedThisTurn:      saved.usedThisTurn      ?? false,
@@ -892,7 +892,11 @@ export function GameProvider({ children }) {
       ? ai.characters.filter(c => c._isMobInstance && !existingIds.has(c.id))
       : [];
 
-    dispatch({ type: 'NEXT_TURN', payload: { incomeBonus, mobAdditions } });
+    // flushSync で NEXT_TURN を同期反映してから wsAdapter を構築する。
+    // stateRef.current はレンダ本体で同期されるため、flushSync なしだと dispatch 直後の
+    // buildWsAdapter() は currentTurn 反映前（表示ターン−1）の値で player_turn 条件を評価し、
+    // turn 条件イベントが1ターン遅延する。flushSync で再レンダを強制し stateRef を確定させる。
+    flushSync(() => dispatch({ type: 'NEXT_TURN', payload: { incomeBonus, mobAdditions } }));
 
     const wsAdapter = buildWsAdapter();
     await EventEngine.processTrigger(wsAdapter, 'player_turn', {});
@@ -903,7 +907,10 @@ export function GameProvider({ children }) {
   // ─────────────────────────────────────
 
   const startNewGame = useCallback(async () => {
-    dispatch({ type: 'START_NEW_GAME' });
+    // flushSync で START_NEW_GAME を同期反映し、game_start 発火前に stateRef を確定させる。
+    // startPlayerTurn と同型の欠陥（dispatch 直後の buildWsAdapter が反映前 state を読む）を
+    // game_start 側にも残さない（条件付き game_start を追加した際の遅延を未然に防ぐ）。
+    flushSync(() => dispatch({ type: 'START_NEW_GAME' }));
     // LegionAI再初期化
     legionAIRef.current = null;
     // useEffectで再初期化されるが、即時反映のため
@@ -916,7 +923,7 @@ export function GameProvider({ children }) {
     );
     const newMobs = charsMutable.filter(c => c._isMobInstance);
     if (newMobs.length) {
-      dispatch({ type: 'ADD_MOB_CHARS', payload: { mobs: newMobs } });
+      flushSync(() => dispatch({ type: 'ADD_MOB_CHARS', payload: { mobs: newMobs } }));
     }
     // game_startイベント発火（dispatch後に呼ぶこと）
     const ws = buildWsAdapter();

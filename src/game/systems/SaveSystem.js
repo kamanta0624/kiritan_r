@@ -79,7 +79,6 @@ export class SaveSystem {
         const base = {
           id:           c.id,
           factionId:    c.factionId,
-          status:       c.status ?? 'active',
           soldiers:     c.soldiers,
           maxSoldiers:  c.maxSoldiers,
           usedThisTurn: c.usedThisTurn,
@@ -100,7 +99,6 @@ export class SaveSystem {
             isLeader:    c.isLeader ?? false,
             charAttack:  c.charAttack,
             charDefense: c.charDefense ?? 0,
-            soldierName: c.soldierName,
             soldierAtk:  c.soldierAtk,
             soldierDef:  c.soldierDef,
             recoveryRate: c.recoveryRate ?? 0.05,
@@ -174,7 +172,6 @@ export class SaveSystem {
       restoredChars.push({
         ...JSON.parse(JSON.stringify(def)),
         factionId:    saved.factionId,
-        status:       saved.status ?? 'active',
         soldiers:     saved.soldiers,
         maxSoldiers:  saved.maxSoldiers,
         usedThisTurn: saved.usedThisTurn,

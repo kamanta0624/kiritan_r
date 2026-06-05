@@ -1,0 +1,46 @@
+{
+  "id": "ev_defeated_shinobi",
+  "name": "[関西しのび撃破]関西しのび加入",
+  "trigger": "char_defeated",
+  "conditions": [
+    {
+      "type": "defeatedChar",
+      "charId": "char_022"
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_shinobi_joined"
+    }
+  ],
+  "probability": 1,
+  "priority": 900,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        {
+          "characterId": "char_022",
+          "position": "left",
+          "text": "関西しのび撃破イベント　セリフダミー"
+        }
+      ]
+    },
+    {
+      "type": "end"
+    }
+  ],
+  "effects": {
+    "default": [
+      {
+        "type": "charJoin",
+        "charId": "char_022",
+        "factionId": "東北家"
+      },
+      {
+        "type": "setFlag",
+        "flag": "flag_shinobi_joined"
+      }
+    ]
+  }
+}

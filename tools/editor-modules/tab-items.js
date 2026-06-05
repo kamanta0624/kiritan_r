@@ -53,9 +53,9 @@ function buildItemForm(item) {
   const effectTypes = {
     charAttack:  '攻撃力',
     charMaxHp:   '最大HP',
-    soldierAtk:  'ミーム攻撃力',
-    soldierDef:  'ミーム防御力',
-    maxSoldiers: '最大ミーム数',
+    soldierAtk:  'SP攻撃力',
+    soldierDef:  'SP防御力',
+    maxSoldiers: '最大SP',
   };
   wrap.innerHTML = `
     <div class="form-section"><div class="form-section-title">基本情報</div>

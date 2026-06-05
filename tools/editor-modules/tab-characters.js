@@ -1,7 +1,7 @@
 // tools/editor-modules/tab-characters.js
 
 import {
-  state, STATUS_LABELS,
+  state,
   v, n, esc, syncNum, syncRange, showToast,
   imgPreviewHTML, reloadImages,
   buildBonusSectionHTML, collectBonusFromForm,
@@ -10,10 +10,14 @@ import {
 export function renderCharTab(main) {
   const allChars = state.data.characters?.characters ?? [];
   const factions = state.data.factions?.factions ?? [];
+  // 加入判定は factionId に一元化（status 廃止）。
+  const factionName = (fid) => factions.find(f => f.id === fid)?.name ?? fid;
   const filtered = allChars.filter(c => {
     if (state.charFilter === 'all')      return true;
     if (state.charFilter === 'template') return !!c.isTemplate;
-    return !c.isTemplate && c.status === state.charFilter;
+    if (state.charFilter === 'joined')   return !c.isTemplate && c.factionId != null;
+    if (state.charFilter === 'standby')  return !c.isTemplate && c.factionId == null;
+    return true;
   });
   const selChar = allChars.find(c => c.id === state.selectedId) ?? null;
 
@@ -26,7 +30,7 @@ export function renderCharTab(main) {
       <button class="btn-add" onclick="window.EditorApp.addChar()">＋</button>
     </div>
     <div class="filter-bar">
-      ${[['all','すべて'],['active','加入済み'],['recruitable','雇用可'],['standby','在野'],['template','テンプレート']]
+      ${[['all','すべて'],['joined','加入済み'],['standby','在野'],['template','テンプレート']]
         .map(([k,l]) => `<button class="filter-btn${state.charFilter===k?' active':''}"
           onclick="window.EditorApp.setFilter('${k}')">${l}</button>`).join('')}
     </div>
@@ -40,8 +44,8 @@ export function renderCharTab(main) {
     div.onclick = () => { state.selectedId = c.id; window.EditorApp.renderAll(); };
     const iconImgs = (state.images['characters/icons'] || []).filter(i => i.filename.startsWith(c.id));
     const iconUrl  = iconImgs[0]?.url ?? null;
-    const badgeCls = c.isTemplate ? 'badge-template' : (STATUS_LABELS[c.status]?.cls ?? '');
-    const badgeTxt = c.isTemplate ? 'テンプレート' : (STATUS_LABELS[c.status]?.label ?? c.status ?? '?');
+    const badgeCls = c.isTemplate ? 'badge-template' : (c.factionId != null ? 'badge-active' : 'badge-standby');
+    const badgeTxt = c.isTemplate ? 'テンプレート' : (c.factionId != null ? factionName(c.factionId) : '在野');
     const dispName = (c.isTemplate ? c.displayName : c.name) || '(名前なし)';
     div.innerHTML = (iconUrl
       ? `<img class="char-thumb" src="${iconUrl}?t=${Date.now()}" />`
@@ -112,10 +116,6 @@ function buildCharForm(c, factions) {
         <div class="form-group w-half"></div>
       </div>
       <div class="form-row">
-        <div class="form-group w-half"><label>ステータス</label>
-          <select id="f_status">${['active','recruitable','standby','dead']
-            .map(s => `<option value="${s}" ${c.status===s?'selected':''}>${STATUS_LABELS[s]?.label??s}</option>`)
-            .join('')}</select></div>
         <div class="form-group w-half"><label>テンプレート</label>
           <select id="f_isTemplate">
             <option value="false" ${!isTemplate?'selected':''}>ネームド</option>
@@ -224,18 +224,16 @@ function buildCharForm(c, factions) {
           <input type="number" id="f_recoveryRate" value="${c.recoveryRate??''}" step="0.01" min="0" max="1" placeholder="未指定" /></div>
       </div>
     </div>
-    <div class="form-section"><div class="form-section-title">ミーム（兵士）</div>
+    <div class="form-section"><div class="form-section-title">SP</div>
       <div class="form-row">
-        <div class="form-group w-half"><label>ミームタイプ名</label>
-          <input type="text" id="f_soldierName" value="${esc(c.soldierName||'一般兵')}" /></div>
-        <div class="form-group w-half"><label>初期ミーム数</label>
+        <div class="form-group w-half"><label>初期SP</label>
           <div class="num-wrap">
             <input type="range" min="100" max="5000" step="100" value="${c.soldiers||500}"
               oninput="window.EditorApp.syncNum(this,'f_soldiers')" />
             <input type="number" id="f_soldiers" value="${c.soldiers||500}"
               oninput="window.EditorApp.syncRange(this)" /></div></div>
       </div>
-      <div class="form-row"><div class="form-group"><label>最大ミーム数</label>
+      <div class="form-row"><div class="form-group"><label>最大SP</label>
         <div class="num-wrap">
           <input type="range" min="100" max="5000" step="100" value="${c.maxSoldiers||1000}"
             oninput="window.EditorApp.syncNum(this,'f_maxSoldiers')" />
@@ -243,13 +241,13 @@ function buildCharForm(c, factions) {
             oninput="window.EditorApp.syncRange(this)" /></div></div>
       </div>
       <div class="form-row">
-        <div class="form-group w-half"><label>ミーム攻撃力</label>
+        <div class="form-group w-half"><label>SP攻撃力</label>
           <div class="num-wrap">
             <input type="range" min="1" max="30" value="${c.soldierAtk||9}"
               oninput="window.EditorApp.syncNum(this,'f_soldierAtk')" />
             <input type="number" id="f_soldierAtk" value="${c.soldierAtk||9}"
               oninput="window.EditorApp.syncRange(this)" /></div></div>
-        <div class="form-group w-half"><label>ミーム防御力</label>
+        <div class="form-group w-half"><label>SP防御力</label>
           <div class="num-wrap">
             <input type="range" min="1" max="30" value="${c.soldierDef||9}"
               oninput="window.EditorApp.syncNum(this,'f_soldierDef')" />
@@ -357,7 +355,7 @@ export function saveChar() {
   const c     = chars[idx];
   const isTemplate = v('f_isTemplate') === 'true';
 
-  c.id = v('f_id'); c.isTemplate = isTemplate; c.status = v('f_status');
+  c.id = v('f_id'); c.isTemplate = isTemplate;
   c.kana = v('f_kana') || null;
   c.role = v('f_role'); c.attackType = v('f_attackType'); c.description = v('f_description');
   c.charMaxHp  = n('f_charMaxHp'); c.charHp = c.charMaxHp;
@@ -370,7 +368,7 @@ export function saveChar() {
   c.strategyRate = n('f_strategyRate');
   c.recoveryRate = v('f_recoveryRate') !== '' ? parseFloat(v('f_recoveryRate')) : null;
   c.talkEventId  = v('f_talkEventId') || null;
-  c.soldierName = v('f_soldierName'); c.soldiers = n('f_soldiers'); c.maxSoldiers = n('f_maxSoldiers');
+  c.soldiers = n('f_soldiers'); c.maxSoldiers = n('f_maxSoldiers');
   c.soldierAtk = n('f_soldierAtk'); c.soldierDef = n('f_soldierDef');
   c.factionId  = v('f_factionId') || null;
   c.battleBonus = collectBonusFromForm();
@@ -401,12 +399,12 @@ export function addChar() {
   chars.push({
     id: newId, name: '新規キャラクター', kana: null,
     factionId: state.data.factions.factions[0]?.id ?? 'player',
-    status: 'standby', joinCondition: null, isTemplate: false,
+    joinCondition: null, isTemplate: false,
     attack: 70, defense: 70, soldiers: 500, maxSoldiers: 1000,
     isLeader: false, usedThisTurn: false, role: 'attacker', attackType: 'melee',
     charHp: 150, charMaxHp: 150, charAttack: 70, charDefense: 0, attackCount: 8, charSong: 20,
     skillId: null, strategyRate: 0, recoveryRate: null,
-    soldierName: '一般兵', soldierAtk: 10, soldierDef: 8,
+    soldierAtk: 10, soldierDef: 8,
     description: '', hireCost: 0, equipment: { item: null }, battleBonus: defaultBonus,
   });
   state.selectedId  = newId;

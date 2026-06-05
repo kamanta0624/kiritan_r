@@ -33,6 +33,7 @@ export default function App() {
   // dungeonFlow: null | { dungeonId, explorerCharId, floor, baseNode }
   const [dungeonFlow, setDungeonFlow] = useState(null);
   const [focusKey, setFocusKey]       = useState(0);
+  const dialogSeqRef = useRef(0);
 
   const navigate = useCallback((dest, params = {}) => {
     setSceneParams(params);
@@ -75,6 +76,7 @@ export default function App() {
       navigate('adv', {
         script,
         effects,
+        dialogId: ++dialogSeqRef.current,
         onExit: () => { navigate('map'); onComplete?.(); },
       });
     });
@@ -191,6 +193,9 @@ export default function App() {
 
   // ── ターン終了 → 勢力ごとに演出→防衛→次勢力 ──────────────────
   const handleNextTurn = useCallback(async () => {
+    // 防衛フロー進行中の再入を遮断（二重ガードの片側）。防衛プロンプト中に背後の
+    // ターン終了ボタンが押されてもターン処理を再開させない。
+    if (defenseFlowRef.current) return;
     const fullQueue    = await game.actions.runEnemyPhase();
     const enemyFactions = factions.filter(f => !f.isPlayer);
 
@@ -397,6 +402,11 @@ export default function App() {
           enemyChars={fEnemyChars}
           battleMode={null}
           onLaunch={async (formation, _tNode, opts) => {
+            // 攻撃出撃 = 行動力1消費（旧kiritan正仕様）。行動力0なら出撃不可。
+            // 防衛フロー（defenseFlow の formation→battle）では減算しない（共通の BATTLE_END に
+            // 入れると防衛側でも減るため、攻撃の出撃確定点でのみ消費する）。
+            if (game.actionPoints < 1) return;
+            game.actions.setActionPoints(game.actionPoints - 1);
             await game.actions.beforeAttack(fNode?.baseId, playerFaction?.id);
             navigate('battle', {
               mode:           'attack',
@@ -592,6 +602,7 @@ export default function App() {
             navigate('adv', {
               script,
               effects: ev.effects ?? null,
+              dialogId: ++dialogSeqRef.current,
               onExit: () => navigate('theater'),
             });
           }}
@@ -670,6 +681,7 @@ export default function App() {
       // （未指定時のみ map へ戻る）。effects 適用・choice 分岐は ADV 内部。
       case 'adv':
         return <ADVScene
+          key={sceneParams.dialogId ?? 'adv'}
           script={sceneParams.script ?? []}
           effects={sceneParams.effects ?? null}
           onExit={sceneParams.onExit ?? (() => navigate('map'))}
@@ -701,6 +713,15 @@ export default function App() {
   return (
     <div id="app-root" style={{ position:'relative', width:'100vw', height:'100vh' }}>
       {renderScene()}
+      {/* 防衛プロンプト表示中は背後マップへのクリック貫通を物理遮断（二重ガードの片側）。
+          PartnerWidget の防衛モーダル（zIndex:200）より下、マップより上に置く。
+          背景は透明（直書きカラー回避）でも pointer-events で遮断は成立する。 */}
+      {defenseFlow?.phase === 'defense_prompt' && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 150,
+          pointerEvents: 'auto', background: 'transparent',
+        }} />
+      )}
       <PartnerWidget
         secretaryId={game.secretaryId}
         characters={characters}

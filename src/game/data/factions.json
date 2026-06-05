@@ -6,11 +6,6 @@
       "color": "#c4427a",
       "isPlayer": true,
       "treasury": 500,
-      "characters": [
-        "char_001",
-        "char_002",
-        "char_003"
-      ],
       "atWarWith": [
         "faction_red"
       ],
@@ -22,10 +17,6 @@
       "color": "#7300ff",
       "isPlayer": false,
       "treasury": 400,
-      "characters": [
-        "char_101",
-        "char_102"
-      ],
       "atWarWith": [
         "東北家"
       ],
@@ -37,10 +28,6 @@
       "color": "#66bb6a",
       "isPlayer": false,
       "treasury": 350,
-      "characters": [
-        "char_201",
-        "char_202"
-      ],
       "atWarWith": [],
       "warFlags": {
         "canDeclareWar": false,
@@ -53,10 +40,6 @@
       "color": "#ffca28",
       "isPlayer": false,
       "treasury": 300,
-      "characters": [
-        "char_301",
-        "char_302"
-      ],
       "atWarWith": [],
       "warFlags": {
         "canDeclareWar": false,
@@ -69,7 +52,6 @@
       "color": "#4294d7",
       "isPlayer": false,
       "treasury": 300,
-      "characters": [],
       "atWarWith": [],
       "warFlags": {
         "canDeclareWar": false,
@@ -82,7 +64,6 @@
       "color": "#2d4e37",
       "isPlayer": false,
       "treasury": 300,
-      "characters": [],
       "atWarWith": [],
       "warFlags": {
         "canDeclareWar": false,
@@ -95,7 +76,6 @@
       "color": "#d75d42",
       "isPlayer": false,
       "treasury": 300,
-      "characters": [],
       "atWarWith": [],
       "warFlags": {
         "canDeclareWar": false,
@@ -108,7 +88,6 @@
       "color": "#426ed7",
       "isPlayer": false,
       "treasury": 300,
-      "characters": [],
       "atWarWith": [],
       "warFlags": {
         "canDeclareWar": false,

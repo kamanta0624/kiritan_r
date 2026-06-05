@@ -255,7 +255,6 @@ const server = http.createServer(async (req, res) => {
           const soldiers = c.soldiers ?? 100;
           const entry = {
             isTemplate: false,
-            status: 'standby',
             maxSoldiers: soldiers,
             charHp: 100, charMaxHp: 100,
             charAttack: 10, charSong: 5,

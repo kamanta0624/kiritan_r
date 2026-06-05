@@ -505,6 +505,11 @@ export class BattleEngineV3 {
       // 将軍本人攻撃の命中数（兵士分と別系統）
       atkSelfMemeHits: ar.selfMemeHits, atkSelfCharHits: ar.selfCharHits,
       defSelfMemeHits: dr ? dr.selfMemeHits : 0, defSelfCharHits: dr ? dr.selfCharHits : 0,
+      // 発生源別ダメージ内訳（SP発=meme/char, 本体発=selfMeme/selfChar）
+      atkMemeDmg: ar.memeDmg,        atkSelfMemeDmg: ar.selfMemeDmg,
+      atkCharDmg: ar.charDmg,        atkSelfCharDmg: ar.selfCharDmg,
+      defMemeDmg: dr?.memeDmg ?? 0,  defSelfMemeDmg: dr?.selfMemeDmg ?? 0,
+      defCharDmg: dr?.charDmg ?? 0,  defSelfCharDmg: dr?.selfCharDmg ?? 0,
       atkSolBefore,
       defSolBefore,
       atkHpBefore,
