@@ -2,7 +2,13 @@
   "id": "ev_679817",
   "name": "2ターン目イベント2つ目",
   "trigger": "player_turn",
-  "conditions": [],
+  "conditions": [
+    {
+      "type": "turn",
+      "op": "eq",
+      "value": 2
+    }
+  ],
   "probability": 1,
   "priority": 50,
   "maxOccurrences": 1,

@@ -3,22 +3,54 @@
   "name": "【ダミー】さいたま東京吸収（T55タイムリミット）",
   "trigger": "player_turn",
   "conditions": [
-    { "type": "turn", "op": "gte", "value": 55 },
-    { "type": "noFlag", "flag": "flag_saitama_conquered_by_player" },
-    { "type": "noFlag", "flag": "flag_saitama_absorbed_by_tokyo" }
+    {
+      "type": "turn",
+      "op": "gte",
+      "value": 55
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_saitama_conquered_by_player"
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_saitama_absorbed_by_tokyo"
+    }
   ],
   "probability": 1,
   "priority": 850,
   "maxOccurrences": 1,
   "script": [
-    { "type": "conversation", "lines": [
-      { "characterId": "char_004", "position": "center", "text": "【ダミー】遅すぎた。さいたまは東京に吸収された。" }
-    ] },
-    { "type": "end" }
+    {
+      "type": "conversation",
+      "lines": [
+        {
+          "characterId": "char_004",
+          "position": "center",
+          "text": "【ダミー】遅すぎた。さいたまは東京に吸収された。"
+        }
+      ]
+    },
+    {
+      "type": "end"
+    }
   ],
-  "effects": { "default": [
-    { "type": "baseTransfer", "fromFactionId": "faction_green", "toFactionId": "faction_new01" },
-    { "type": "setFlag", "flag": "flag_saitama_absorbed_by_tokyo" },
-    { "type": "warFlag", "factionId": "faction_new01", "atWar": true }
-  ] }
+  "effects": {
+    "default": [
+      {
+        "type": "baseTransfer",
+        "fromFactionId": "faction_green",
+        "toFactionId": "faction_new01"
+      },
+      {
+        "type": "setFlag",
+        "flag": "flag_saitama_absorbed_by_tokyo"
+      },
+      {
+        "type": "warFlag",
+        "factionId": "faction_new01",
+        "atWar": true
+      }
+    ]
+  }
 }

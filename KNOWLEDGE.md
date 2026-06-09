@@ -123,7 +123,7 @@ const {
   legionAI,
   setStartDialogHandler,   // App.jsx起動時に登録
   actions: {
-    startNewGame(),                       // async。START_NEW_GAME後に game_start trigger発火
+    startNewGame(),                       // async。START_NEW_GAME → game_start 発火 → startPlayerTurn（player_turn 発火・ターン1入場）
     runEnemyPhase(), runEnemyPhaseForFaction(factionId),
     startPlayerTurn(),                    // NEXT_TURN dispatch + player_turn
     beforeAttack(baseId, factionId),
@@ -186,7 +186,7 @@ choice 持ちは選択時に `applyEffects(choice.effects)` 即時適用＋`choi
 
 接続済: `game_start` / `player_turn` / `enemy_turn` / `before_faction_turn` / `base_attack` / `base_conquered` / `base_defense` / `battle_start` / `battle_end` / `char_defeated`。共通基盤は `actions.fireTrigger(trigger, ctx)`。
 未接続: `base_visit`（訪問UI未実装・ディレクター判断待ち）。
-- **ターン1イベントは `game_start` で発火**。`player_turn` は `startPlayerTurn`（ターン終了後）のみ発火しターン1入場時に評価されないため。ターン1専用は `trigger:"game_start"`/`conditions:[]`（例 `ev_turn1_status`）。
+- **ターン入場は全ターン `player_turn` 単一経路**（2026-06-07統一）。`startNewGame` が `game_start`（生涯1回・`ev_000_opening` のみ）発火後に `startPlayerTurn` を呼び、`currentTurn` 0→1 で `player_turn` を発火（ターン1も非例外）。ターン1専用イベントは `trigger:"player_turn"`/`conditions:[{type:"turn",op:"eq",value:1}]`（例 `ev_turn1_status`）。`game_start` 残存は `ev_000_opening` のみ。`createInitialState.currentTurn=0`。NGP直navigate・`?qa=`専用シーンは startNewGame 非経由で `currentTurn=0` を読む（NGP集約時に解消予定）。
 - `battle_start`/`battle_end` は対応イベントJSON未存在（将来用）。
 
 ### 8-5. 既知の制約（条件評価の鮮度）
@@ -335,6 +335,7 @@ Code引き継ぎプロンプトは `docs/prompts/PROMPT_<名前>.md`、完了後
 ### シナリオ
 - 復元9件のダミーテキスト差し替え。
 - charJoin の実合流処理（ウナしゅお/ずん子いたこ解禁。現状フラグのみ）。
+- **要ディレクター判断**: `ev_turn1_status`（player_turn turn==1）と `ev_turn2_join_kotohaxsisters`（player_turn turn==2）が共に char_008・char_009 を `charJoin`。前者は flag 未設定のため後者の `noFlag` が通過し2ターン目で再 charJoin。どちらが正か・前者に `setFlag` を持たせるか要決定（ターン入場統一とは独立の既存重複）。
 - **要調査**: `ch02_saitama/ev_saitama_chain_3` の `trigger:"turn_start"` は未接続trigger疑い→chain停止で `ev_saitama_chain_4` の `legionForceAttack` 不発の可能性。
 
 ### バランス・デザイン（別途設計）

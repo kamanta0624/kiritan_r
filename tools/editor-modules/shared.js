@@ -86,6 +86,39 @@ export async function uploadImage(input, dest, baseName) {
   window.EditorApp.renderAll();
 }
 
+// 立ち絵専用アップロード: クライアント側 Canvas で長辺 ≤ maxEdge へ縮小・png 化し、
+// 正準パス characters/portraits/<charId>.png として保存する（拡大はしない）。
+export async function uploadPortrait(input, charId, maxEdge = 1536) {
+  const file = input.files[0]; if (!file) return;
+  try {
+    const blob = await resizeToPngBlob(file, maxEdge);
+    const fd   = new FormData();
+    fd.append('dest', 'characters/portraits');
+    fd.append('file', new File([blob], `${charId}.png`, { type: 'image/png' }));
+    await fetch('/api/upload', { method: 'POST', body: fd });
+    await reloadImages();
+    showToast('アップロードしました ✓');
+    window.EditorApp.renderAll();
+  } catch (e) {
+    console.error('立ち絵アップロード失敗', e);
+    showToast('画像の処理に失敗しました: ' + e.message, true);
+  }
+}
+
+async function resizeToPngBlob(file, maxEdge) {
+  const bitmap = await createImageBitmap(file);
+  const { width, height } = bitmap;
+  const scale  = Math.min(1, maxEdge / Math.max(width, height)); // 縮小のみ。拡大しない
+  const w = Math.max(1, Math.round(width  * scale));
+  const h = Math.max(1, Math.round(height * scale));
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  canvas.getContext('2d').drawImage(bitmap, 0, 0, w, h);
+  bitmap.close?.();
+  return await new Promise((resolve, reject) =>
+    canvas.toBlob(b => b ? resolve(b) : reject(new Error('toBlob returned null')), 'image/png'));
+}
+
 export async function deleteImage(imgUrl, filename) {
   if (!confirm(`${filename} を削除しますか？`)) return;
   await fetch('/api/delete-image', {

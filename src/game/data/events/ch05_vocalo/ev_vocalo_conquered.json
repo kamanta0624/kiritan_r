@@ -3,17 +3,39 @@
   "name": "【ダミー】北九州制圧・ボーカル界統一",
   "trigger": "player_turn",
   "conditions": [
-    { "type": "baseOwned", "baseId": "base_092" },
-    { "type": "noFlag", "flag": "flag_vocalo_conquered" }
+    {
+      "type": "baseOwned",
+      "baseId": "base_092"
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_vocalo_conquered"
+    }
   ],
   "probability": 1,
   "priority": 999,
   "maxOccurrences": 1,
   "script": [
-    { "type": "conversation", "lines": [
-      { "characterId": "char_004", "position": "center", "text": "【ダミー】北九州を制圧。ボーカル界を統一した。" }
-    ] },
-    { "type": "end" }
+    {
+      "type": "conversation",
+      "lines": [
+        {
+          "characterId": "char_004",
+          "position": "center",
+          "text": "【ダミー】北九州を制圧。ボーカル界を統一した。"
+        }
+      ]
+    },
+    {
+      "type": "end"
+    }
   ],
-  "effects": { "default": [ { "type": "setFlag", "flag": "flag_vocalo_conquered" } ] }
+  "effects": {
+    "default": [
+      {
+        "type": "setFlag",
+        "flag": "flag_vocalo_conquered"
+      }
+    ]
+  }
 }

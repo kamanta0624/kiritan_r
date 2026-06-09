@@ -4,7 +4,7 @@
 import {
   state, TRIGGER_META,
   v, n, esc, syncNum, syncRange, showToast,
-  uploadImage, deleteImage, reloadImages,
+  uploadImage, uploadPortrait, deleteImage, reloadImages,
   switchBonusTab, onBonusNumChange, onBonusRangeChange,
 } from './shared.js';
 
@@ -103,7 +103,7 @@ window.EditorApp = {
   switchTab,
   // shared
   syncNum, syncRange, showToast,
-  uploadImage, deleteImage,
+  uploadImage, uploadPortrait, deleteImage,
   switchBonusTab, onBonusNumChange, onBonusRangeChange,
   // characters
   setFilter, addChar, saveChar, duplicateChar, deleteChar,

@@ -55,7 +55,7 @@ function createInitialState() {
   }));
 
   return {
-    currentTurn:       1,
+    currentTurn:       0,
     factions,
     bases:             basesData.bases.map(b => ({ ...b, _originalFactionId: b.factionId })),
     characters,
@@ -878,7 +878,14 @@ export function GameProvider({ children }) {
   }, [buildWsAdapter]);
 
   // フェーズB: プレイヤーターン開始（NEXT_TURN dispatch + 収入・回復）
-  // 全防衛キュー完了後に呼ぶ
+  // 全防衛キュー完了後に呼ぶ。
+  //
+  // ★ターン入場の唯一の関数★
+  // 「ターンN入場」（NEXT_TURN で currentTurn を +1 し player_turn を発火）は
+  // 必ずこの関数を通す。ターン1も例外にしない（startNewGame が game_start 後に
+  // この関数を呼び、currentTurn 0→1 で player_turn を発火する）。
+  // 将来の NGP・周回経路も初期化後に必ずこの関数を経由させること
+  // （現状 NGP は startNewGame 非経由で未集約。別タスクで解消予定）。
   const startPlayerTurn = useCallback(async () => {
     syncLegionAI();
     const ai = legionAIRef.current;
@@ -926,9 +933,13 @@ export function GameProvider({ children }) {
       flushSync(() => dispatch({ type: 'ADD_MOB_CHARS', payload: { mobs: newMobs } }));
     }
     // game_startイベント発火（dispatch後に呼ぶこと）
+    // 層A: ゲーム生涯1回のターン非依存イベントのみ（ev_000_opening）
     const ws = buildWsAdapter();
     await EventEngine.processTrigger(ws, 'game_start', {});
-  }, [buildWsAdapter]);
+    // 層B: ターン1入場。currentTurn 0→1 で player_turn を発火（ev_turn1_status）。
+    // ターン1も他ターンと同じ唯一の入場経路（startPlayerTurn）を通す。
+    await startPlayerTurn();
+  }, [buildWsAdapter, startPlayerTurn]);
 
   // ─────────────────────────────────────
   // 戦闘終了処理
