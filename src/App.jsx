@@ -266,8 +266,8 @@ export default function App() {
         enemyStrategyRate={fEnemyStrategyRate}
         enemyChars={fEnemyChars}
         battleMode={item.retreatRule ?? null}
-        onLaunch={(formation) => {
-          setDefenseFlow(prev => prev ? { ...prev, phase: 'battle', formation } : null);
+        onLaunch={(formation, _tNode, opts) => {
+          setDefenseFlow(prev => prev ? { ...prev, phase: 'battle', formation, battleCapacity: opts?.battleCapacity } : null);
         }}
         onCancel={() => {
           setDefenseFlow(prev => prev ? { ...prev, phase: 'adv' } : null);
@@ -290,6 +290,7 @@ export default function App() {
           <BattleScene
             formation={defenseFlow.formation}
             targetNode={item.defenderBase}
+            battleCapacity={defenseFlow.battleCapacity}
             isDefense={true}
             enemyChars={enemyChars}
             enemyRetreatRule={item.retreatRule ?? 'char_dead'}
@@ -437,6 +438,7 @@ export default function App() {
             <BattleScene
               formation={sceneParams.formation}
               targetNode={targetBase}
+              battleCapacity={sceneParams.battleCapacity}
               isDefense={false}
               enemyChars={enemyChars}
               enemyRetreatRule={enemyRetreatRule}

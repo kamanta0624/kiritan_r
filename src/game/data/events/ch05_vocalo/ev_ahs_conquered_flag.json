@@ -3,17 +3,39 @@
   "name": "【ダミー】AHS（京都）制圧フラグ",
   "trigger": "player_turn",
   "conditions": [
-    { "type": "baseOwned", "baseId": "base_074" },
-    { "type": "noFlag", "flag": "flag_ahs_conquered_by_player" }
+    {
+      "type": "baseOwned",
+      "baseId": "base_074"
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_ahs_conquered_by_player"
+    }
   ],
   "probability": 1,
   "priority": 900,
   "maxOccurrences": 1,
   "script": [
-    { "type": "conversation", "lines": [
-      { "characterId": "char_004", "position": "center", "text": "【ダミー】京都を制圧。AHSを下した。" }
-    ] },
-    { "type": "end" }
+    {
+      "type": "conversation",
+      "lines": [
+        {
+          "characterId": "char_004",
+          "position": "center",
+          "text": "【ダミー】京都を制圧。AHSを下した。"
+        }
+      ]
+    },
+    {
+      "type": "end"
+    }
   ],
-  "effects": { "default": [ { "type": "setFlag", "flag": "flag_ahs_conquered_by_player" } ] }
+  "effects": {
+    "default": [
+      {
+        "type": "setFlag",
+        "flag": "flag_ahs_conquered_by_player"
+      }
+    ]
+  }
 }

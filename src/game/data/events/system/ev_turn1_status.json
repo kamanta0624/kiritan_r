@@ -1,8 +1,14 @@
 {
   "id": "ev_turn1_status",
   "name": "1ターン目イベント",
-  "trigger": "game_start",
-  "conditions": [],
+  "trigger": "player_turn",
+  "conditions": [
+    {
+      "type": "turn",
+      "op": "eq",
+      "value": 1
+    }
+  ],
   "probability": 1,
   "priority": 900,
   "maxOccurrences": 1,

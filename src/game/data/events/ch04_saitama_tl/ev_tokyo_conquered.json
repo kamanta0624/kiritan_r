@@ -3,18 +3,43 @@
   "name": "【ダミー】秋葉原制圧・ずん子いたこ解禁",
   "trigger": "player_turn",
   "conditions": [
-    { "type": "baseOwned", "baseId": "base_032" },
-    { "type": "flag", "flag": "flag_saitama_conquered_by_player" },
-    { "type": "noFlag", "flag": "flag_chara_unlock_zunko_itako" }
+    {
+      "type": "baseOwned",
+      "baseId": "base_032"
+    },
+    {
+      "type": "flag",
+      "flag": "flag_saitama_conquered_by_player"
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_chara_unlock_zunko_itako"
+    }
   ],
   "probability": 1,
   "priority": 900,
   "maxOccurrences": 1,
   "script": [
-    { "type": "conversation", "lines": [
-      { "characterId": "char_004", "position": "center", "text": "【ダミー】秋葉原を制圧。ずん子・いたこが解禁された。" }
-    ] },
-    { "type": "end" }
+    {
+      "type": "conversation",
+      "lines": [
+        {
+          "characterId": "char_004",
+          "position": "center",
+          "text": "【ダミー】秋葉原を制圧。ずん子・いたこが解禁された。"
+        }
+      ]
+    },
+    {
+      "type": "end"
+    }
   ],
-  "effects": { "default": [ { "type": "setFlag", "flag": "flag_chara_unlock_zunko_itako" } ] }
+  "effects": {
+    "default": [
+      {
+        "type": "setFlag",
+        "flag": "flag_chara_unlock_zunko_itako"
+      }
+    ]
+  }
 }

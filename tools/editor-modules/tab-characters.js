@@ -42,8 +42,8 @@ export function renderCharTab(main) {
     const div = document.createElement('div');
     div.className = 'char-item' + (c.id === state.selectedId ? ' active' : '');
     div.onclick = () => { state.selectedId = c.id; window.EditorApp.renderAll(); };
-    const iconImgs = (state.images['characters/icons'] || []).filter(i => i.filename.startsWith(c.id));
-    const iconUrl  = iconImgs[0]?.url ?? null;
+    const portraitImg = (state.images['characters/portraits'] || []).find(i => i.filename === `${c.id}.png`);
+    const iconUrl     = portraitImg?.url ?? null;
     const badgeCls = c.isTemplate ? 'badge-template' : (c.factionId != null ? 'badge-active' : 'badge-standby');
     const badgeTxt = c.isTemplate ? 'テンプレート' : (c.factionId != null ? factionName(c.factionId) : '在野');
     const dispName = (c.isTemplate ? c.displayName : c.name) || '(名前なし)';
@@ -291,39 +291,19 @@ function buildCharForm(c, factions) {
 }
 
 function buildCharImages(c) {
-  const wrap        = document.createElement('div');
-  wrap.className    = 'editor-right';
-  const iconImgs    = (state.images['characters/icons']    ||[]).filter(i => i.filename.startsWith(c.id));
-  const portraitImgs= (state.images['characters/portraits']||[]).filter(i => i.filename.startsWith(c.id));
-  const sceneImgs   = (state.images['characters/scenes']   ||[]).filter(i => i.filename.startsWith(c.id));
+  const wrap         = document.createElement('div');
+  wrap.className     = 'editor-right';
+  const portraitImg  = (state.images['characters/portraits'] || []).find(i => i.filename === `${c.id}.png`);
   wrap.innerHTML = `
     <div class="form-section"><div class="form-section-title">画像</div>
-      <div class="img-card"><div class="img-card-title">アイコン</div>
-        <div class="img-preview-wrap">
-          ${iconImgs.map(img => imgPreviewHTML(img, 'icon')).join('')}
-          ${!iconImgs.length ? `<div class="img-placeholder" style="width:72px;height:72px;font-size:10px">未設定</div>` : ''}
-        </div>
-        <input type="file" id="fileIcon" accept="image/*"
-          onchange="window.EditorApp.uploadImage(this,'characters/icons','${c.id}_icon')" />
-        <button class="btn-upload" onclick="document.getElementById('fileIcon').click()">＋ アップロード</button>
-      </div>
       <div class="img-card"><div class="img-card-title">立ち絵</div>
         <div class="img-preview-wrap">
-          ${portraitImgs.map(img => imgPreviewHTML(img, 'portrait')).join('')}
-          ${!portraitImgs.length ? `<div class="img-placeholder" style="width:54px;height:72px;font-size:10px">未設定</div>` : ''}
+          ${portraitImg ? imgPreviewHTML(portraitImg, 'portrait')
+            : `<div class="img-placeholder" style="width:54px;height:72px;font-size:10px">未設定</div>`}
         </div>
         <input type="file" id="filePortrait" accept="image/*"
-          onchange="window.EditorApp.uploadImage(this,'characters/portraits','${c.id}_portrait')" />
+          onchange="window.EditorApp.uploadPortrait(this,'${c.id}')" />
         <button class="btn-upload" onclick="document.getElementById('filePortrait').click()">＋ アップロード</button>
-      </div>
-      <div class="img-card"><div class="img-card-title">シーン画像</div>
-        <div class="img-preview-wrap">
-          ${sceneImgs.map(img => imgPreviewHTML(img, 'scene')).join('')}
-          ${!sceneImgs.length ? `<div class="img-placeholder" style="width:110px;height:62px;font-size:10px">未設定</div>` : ''}
-        </div>
-        <input type="file" id="fileScene" accept="image/*"
-          onchange="window.EditorApp.uploadImage(this,'characters/scenes','${c.id}_scene_'+Date.now())" />
-        <button class="btn-upload" onclick="document.getElementById('fileScene').click()">＋ 追加</button>
       </div>
     </div>`;
   return wrap;

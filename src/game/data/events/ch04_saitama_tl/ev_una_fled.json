@@ -3,19 +3,48 @@
   "name": "【ダミー】ウナしゅお離脱（T25）",
   "trigger": "player_turn",
   "conditions": [
-    { "type": "turn", "op": "gte", "value": 25 },
-    { "type": "noFlag", "flag": "flag_una_joined" },
-    { "type": "noFlag", "flag": "flag_una_fled" },
-    { "type": "flag", "flag": "flag_mito_conquest_done" }
+    {
+      "type": "turn",
+      "op": "gte",
+      "value": 25
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_una_joined"
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_una_fled"
+    },
+    {
+      "type": "flag",
+      "flag": "flag_mito_conquest_done"
+    }
   ],
   "probability": 1,
   "priority": 900,
   "maxOccurrences": 1,
   "script": [
-    { "type": "conversation", "lines": [
-      { "characterId": "char_004", "position": "center", "text": "【ダミー】間に合わなかった。ウナ・しゅおは去った。" }
-    ] },
-    { "type": "end" }
+    {
+      "type": "conversation",
+      "lines": [
+        {
+          "characterId": "char_004",
+          "position": "center",
+          "text": "【ダミー】間に合わなかった。ウナ・しゅおは去った。"
+        }
+      ]
+    },
+    {
+      "type": "end"
+    }
   ],
-  "effects": { "default": [ { "type": "setFlag", "flag": "flag_una_fled" } ] }
+  "effects": {
+    "default": [
+      {
+        "type": "setFlag",
+        "flag": "flag_una_fled"
+      }
+    ]
+  }
 }

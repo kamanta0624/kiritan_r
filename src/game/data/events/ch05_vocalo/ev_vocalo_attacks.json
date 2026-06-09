@@ -3,21 +3,49 @@
   "name": "【ダミー】ボーカル界宣戦（T85）",
   "trigger": "player_turn",
   "conditions": [
-    { "type": "flag", "flag": "flag_ahs_absorbed" },
-    { "type": "turn", "op": "gte", "value": 85 },
-    { "type": "noFlag", "flag": "flag_vocalo_at_war" }
+    {
+      "type": "flag",
+      "flag": "flag_ahs_absorbed"
+    },
+    {
+      "type": "turn",
+      "op": "gte",
+      "value": 85
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_vocalo_at_war"
+    }
   ],
   "probability": 1,
   "priority": 900,
   "maxOccurrences": 1,
   "script": [
-    { "type": "conversation", "lines": [
-      { "characterId": "char_004", "position": "center", "text": "【ダミー】ボーカル界が全軍で攻めてきた。" }
-    ] },
-    { "type": "end" }
+    {
+      "type": "conversation",
+      "lines": [
+        {
+          "characterId": "char_004",
+          "position": "center",
+          "text": "【ダミー】ボーカル界が全軍で攻めてきた。"
+        }
+      ]
+    },
+    {
+      "type": "end"
+    }
   ],
-  "effects": { "default": [
-    { "type": "warFlag", "factionId": "faction_new03", "atWar": true },
-    { "type": "setFlag", "flag": "flag_vocalo_at_war" }
-  ] }
+  "effects": {
+    "default": [
+      {
+        "type": "warFlag",
+        "factionId": "faction_new03",
+        "atWar": true
+      },
+      {
+        "type": "setFlag",
+        "flag": "flag_vocalo_at_war"
+      }
+    ]
+  }
 }
