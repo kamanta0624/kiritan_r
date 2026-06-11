@@ -2,6 +2,10 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { PK, PK2, AC, AC2, TEAL, TX, TXD, TXF, BR, glass, GAME_STATE, ROLES, CHARS } from '../shared/tokens.js';
 import { TopBar, BottomBar } from '../shared/SharedUI.jsx';
 
+// ADVScene.getPortrait と同じ規約パス解決。
+// /characters/portraits/<id>.png 一本。404時は各imgのonErrorでプレースホルダへ倒す。
+const portraitPath = (id) => id ? `/characters/portraits/${id}.png` : null;
+
 const UPGRADE_COMMANDS = {
   sp_refill: {
     label: 'SP補充',
@@ -50,6 +54,9 @@ function MemeBar({val, max, color}) {
 function LeftPanel({char, onConfirm}) {
   const [key, setKey] = useState(0);
   const prevId = useRef(null);
+  // 規約パスが読めなければ（404）プレースホルダ分岐へ倒す
+  const [imgSrc, setImgSrc] = useState(char?.portrait ?? null);
+  useEffect(()=>{ setImgSrc(char?.portrait ?? null); },[char?.portrait]);
   useEffect(()=>{
     if(char && char.id !== prevId.current){
       prevId.current = char.id;
@@ -90,8 +97,9 @@ function LeftPanel({char, onConfirm}) {
           pointerEvents:'none'}}/>
         <div style={{position:'absolute', bottom:-60, left:'50%', transform:'translateX(-50%)',
           width:400, height:400, borderRadius:'50%', border:`1px solid ${role.color}22`, pointerEvents:'none'}}/>
-        {char.portrait ? (
-          <img key={char.id} src={char.portrait} alt={char.name}
+        {imgSrc ? (
+          <img key={char.id} src={imgSrc} alt={char.name}
+            onError={()=>setImgSrc(null)}
             style={{position:'relative', zIndex:2, width:'auto', height:'100%',
               maxHeight:'calc(100vh - 220px)', objectFit:'contain', objectPosition:'bottom center',
               animation:'portraitRise .38s cubic-bezier(.2,.8,.3,1) both',
@@ -161,6 +169,9 @@ function LeftPanel({char, onConfirm}) {
 function NameItem({char, isHovered, isSelected, onHover, onLeave, onClick, index}) {
   const role = ROLES[char.role] || ROLES.front;
   const active = isHovered || isSelected;
+  // 規約パスが読めなければ（404）`?` プレースホルダ分岐へ倒す
+  const [imgSrc, setImgSrc] = useState(char.portrait);
+  useEffect(()=>{ setImgSrc(char.portrait); },[char.portrait]);
   return (
     <div onMouseEnter={onHover} onMouseLeave={onLeave} onClick={onClick}
       style={{position:'relative', padding:'10px 14px', borderRadius:8, cursor:'pointer',
@@ -175,10 +186,11 @@ function NameItem({char, isHovered, isSelected, onHover, onLeave, onClick, index
         width:3, height:active?'70%':'40%', borderRadius:2,
         background:char.joined?role.color:'rgba(0,0,0,.2)', transition:'height .15s'}}/>
       <div style={{display:'flex', alignItems:'center', gap:6, paddingLeft:4}}>
-        {char.portrait ? (
+        {imgSrc ? (
           <div style={{width:20, height:20, borderRadius:'50%', flexShrink:0, overflow:'hidden',
             border:`1.5px solid ${active?role.color+'66':'rgba(0,0,0,.1)'}`, transition:'border-color .15s'}}>
-            <img src={char.portrait} alt="" style={{width:'100%',height:'100%',objectFit:'cover',objectPosition:'top'}}/>
+            <img src={imgSrc} alt="" onError={()=>setImgSrc(null)}
+              style={{width:'100%',height:'100%',objectFit:'cover',objectPosition:'top'}}/>
           </div>
         ) : (
           <div style={{width:20, height:20, borderRadius:'50%', flexShrink:0,
@@ -207,6 +219,9 @@ function CharDetail({char, onClose,
   const role = ROLES[char.role] || ROLES.front;
   const [confirmState, setConfirmState] = useState(null);
   // confirmState: { type: 'upgrade'|'charUpgrade', cmdId, label, cost, preview, action }
+  // 規約パスが読めなければ（404）プレースホルダ枠へ倒す
+  const [imgSrc, setImgSrc] = useState(char.portrait);
+  useEffect(()=>{ setImgSrc(char.portrait); },[char.portrait]);
   return (
     <div style={{position:'fixed', inset:0, zIndex:100,
       display:'flex', animation:'fadeIn .18s ease both'}}>
@@ -219,10 +234,21 @@ function CharDetail({char, onClose,
           <div style={{position:'absolute', bottom:-80, left:'50%', transform:'translateX(-50%)',
             width:400, height:400, borderRadius:'50%',
             background:`radial-gradient(circle,${role.color}22 0%,transparent 70%)`, pointerEvents:'none'}}/>
-          <img src={char.portrait} alt={char.name}
-            style={{position:'relative', zIndex:1, width:'100%', height:'auto',
-              maxHeight:'100%', objectFit:'contain', objectPosition:'bottom',
-              animation:'portraitRise .4s ease both'}}/>
+          {imgSrc ? (
+            <img src={imgSrc} alt={char.name} onError={()=>setImgSrc(null)}
+              style={{position:'relative', zIndex:1, width:'100%', height:'auto',
+                maxHeight:'100%', objectFit:'contain', objectPosition:'bottom',
+                animation:'portraitRise .4s ease both'}}/>
+          ) : (
+            <div style={{position:'relative', zIndex:1, width:'100%', height:'100%',
+              display:'flex', alignItems:'flex-end', justifyContent:'center', paddingBottom:32,
+              animation:'portraitRise .4s ease both'}}>
+              <svg viewBox="0 0 120 240" width="55%" style={{opacity:.2}} aria-hidden="true">
+                <ellipse cx="60" cy="36" rx="28" ry="32" fill={TXD}/>
+                <path d="M12 240 Q20 140 60 130 Q100 140 108 240Z" fill={TXD}/>
+              </svg>
+            </div>
+          )}
         </div>
         <div style={{flex:1, padding:'32px 28px', overflowY:'auto',
           display:'flex', flexDirection:'column', gap:16, position:'relative'}}>
@@ -461,7 +487,7 @@ export default function PartyScene({ onNavigate, characters, treasury=0, upgrade
     meme:    c.meme ?? c.soldiers ?? 0,
     memeMax: c.memeMax ?? c.maxSoldiers ?? c.soldiers ?? 0,
     joined:  c.joined ?? true,
-    portrait: c.portrait ?? null,
+    portrait: c.portrait ?? portraitPath(c.id),
   }));
   const joined = allChars.filter(c=>c.joined);
   const activeChar = allChars.find(c=>c.id===activeId) || null;

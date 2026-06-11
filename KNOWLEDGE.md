@@ -1,6 +1,6 @@
 # KNOWLEDGE.md — kiritan_r テックリード引き継ぎ
 
-> 最終更新: 2026-06-05（肥大化整理・実装状況と同期。完了済みの詳細は docs/archive/ へ集約）
+> 最終更新: 2026-06-10（肥大化整理・実装状況と同期。完了済みの詳細は docs/archive/ へ集約）
 > このファイルのみ参照。履歴・完了済みの詳細は docs/archive/ にある。
 
 ---
@@ -50,7 +50,7 @@ tools/
   editor-ui.html / editor.css / bulk-input.html
   editor-modules/         ← タブ別モジュール
 docs/
-  prompts/                ← 作業中のCode引き継ぎプロンプト（現在 空）
+  prompts/                ← 作業中のCode引き継ぎプロンプト（内容は本ファイルで追跡しない。ls で確認）
   archive/                ← 完了済みプロンプト・旧ドキュメント（Game.html / DESIGN_DOMESTIC.md 等）
   IMAGE_TASKS.md / image_asset_audit.md / assets/  ← 画像タスク管理
 ```
@@ -91,7 +91,7 @@ docs/
 | formation | FormationScene.jsx | ✅ | ✅ | Design v4（V3.2） |
 | battle | BattleScene.jsx | ✅ | ✅ | Design v4（V3.2）+ アニメoverlay |
 | enemy_turn | EnemyTurnScene.jsx | ✅ | ✅ | |
-| characters | PartyScene.jsx | ✅ | ✅ | 勢力絞込・SP表示・全画面詳細・強化コマンド |
+| characters | PartyScene.jsx | ✅ | ⚠️ | 勢力絞込・SP表示・全画面詳細・強化コマンド。BUG-06/07（非実在フィールド参照）未解消・portrait未対応 |
 | items | ItemsScene.jsx | ✅ | ✅ | inventory+items.json |
 | research | ResearchScene.jsx | ✅ | ✅ | ターン制研究キュー |
 | save | SaveScene.jsx | ✅ | ✅ | |
@@ -102,6 +102,7 @@ docs/
 | new_game_plus | NewGamePlusScene.jsx | ⬜ | 🔴 | DEMO_FACTIONSハードコード（残タスク） |
 
 未実装: gallery / settings / credits。
+凡例: ✅=接続・実データ整合済 / ⚠️=接続済だが実データ整合に未解消項目あり / ⬜=未接続 / 🔴=モックデータ。
 
 ---
 
@@ -301,7 +302,7 @@ glass(extra={})
 ## 14. docs 運用ルール
 
 ```
-docs/prompts/   ← 作業中のCode引き継ぎプロンプト（PROMPT_<名前>.md）
+docs/prompts/   ← 作業中のCode引き継ぎプロンプト（PROMPT_<名前>.md）。内容一覧は本ファイルに書かない
 docs/archive/   ← 完了済みプロンプト・旧ドキュメント
 ```
 
