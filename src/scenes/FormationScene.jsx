@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { PK, PK2, AC, AC2, TEAL, TX, TXD, TXF, BR, glass } from '../shared/tokens.js';
 
+const portraitPath = (id) => id ? `/characters/portraits/${id}.png` : null;
+
 const FONT_DISPLAY = "'Zen Maru Gothic',sans-serif";
 const FONT_NUM     = "'Rajdhani',sans-serif";
 const FIELD_BATTLE_CAPACITY = 5000;
@@ -79,8 +81,9 @@ function SlotRow({ slotLabel, color, char, onRemove }) {
       <div style={{ width:78, height:'100%', overflow:'hidden', flexShrink:0,
         marginLeft:62, borderRight:`1px solid ${BR}`,
         background:`linear-gradient(180deg, ${color}22, transparent)` }}>
-        {char.portrait
-          ? <img src={char.portrait} alt={char.name}
+        {portraitPath(char.id)
+          ? <img src={portraitPath(char.id)} alt={char.name}
+              onError={e => { e.currentTarget.style.display='none'; }}
               style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'center 12%' }}/>
           : <div style={{ width:'100%', height:'100%', background:'rgba(28,16,32,.06)',
               display:'flex', alignItems:'center', justifyContent:'center',
@@ -131,11 +134,13 @@ function CharCard({ char, disabled, disLabel, picked, pickIdx, slotColor, battle
     onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}>
       <div style={{ height:168, position:'relative', overflow:'hidden',
         background:`linear-gradient(180deg, ${atkColor}22, transparent 70%)` }}>
-        {char.portrait
-          ? <img src={char.portrait} alt={char.name} style={{
-              width:'100%', height:'100%', objectFit:'cover', objectPosition:'center 8%',
-              filter: disabled ? 'grayscale(.7)' : 'none',
-            }}/>
+        {portraitPath(char.id)
+          ? <img src={portraitPath(char.id)} alt={char.name}
+              onError={e => { e.currentTarget.style.display='none'; }}
+              style={{
+                width:'100%', height:'100%', objectFit:'cover', objectPosition:'center 8%',
+                filter: disabled ? 'grayscale(.7)' : 'none',
+              }}/>
           : <div style={{ width:'100%', height:'100%', background:'rgba(28,16,32,.06)',
               display:'flex', alignItems:'center', justifyContent:'center',
               fontFamily:FONT_DISPLAY, fontSize:40, color:TXF }}>?</div>
@@ -223,10 +228,12 @@ function BattlefieldPreview({ formation, enemies, battleCapacity, battleMode=nul
       transition:'all .2s',
     }}>
       {char ? (
-        <img src={char.portrait} alt="" style={{
-          width:'100%', height:'100%', objectFit:'cover', objectPosition:'center 10%',
-          transform: flip ? 'scaleX(-1)' : 'none',
-        }}/>
+        <img src={portraitPath(char.id)} alt=""
+          onError={e => { e.currentTarget.style.display='none'; }}
+          style={{
+            width:'100%', height:'100%', objectFit:'cover', objectPosition:'center 10%',
+            transform: flip ? 'scaleX(-1)' : 'none',
+          }}/>
       ) : (
         <div style={{
           position:'absolute', inset:0, display:'flex', alignItems:'center',
@@ -366,11 +373,13 @@ function UnitMiniRow({ char, color, ally, battleCapacity }) {
         width:72, height:72, borderRadius:'50%', overflow:'hidden', flexShrink:0,
         border:`2px solid ${color}77`, boxShadow:`0 0 12px ${color}33`,
       }}>
-        {char.portrait
-          ? <img src={char.portrait} alt="" style={{
-              width:'100%', height:'100%', objectFit:'cover', objectPosition:'center 10%',
-              transform: ally ? 'none' : 'scaleX(-1)',
-            }}/>
+        {portraitPath(char.id)
+          ? <img src={portraitPath(char.id)} alt=""
+              onError={e => { e.currentTarget.style.display='none'; }}
+              style={{
+                width:'100%', height:'100%', objectFit:'cover', objectPosition:'center 10%',
+                transform: ally ? 'none' : 'scaleX(-1)',
+              }}/>
           : <div style={{ width:'100%', height:'100%', background:'rgba(28,16,32,.06)',
               display:'flex', alignItems:'center', justifyContent:'center',
               fontFamily:FONT_DISPLAY, fontSize:28, color:TXF }}>?</div>

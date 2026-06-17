@@ -6,6 +6,8 @@ import { PK, PK2, AC, AC2, TEAL, TX, TXD, TXF, BR, glass } from '../shared/token
 
 const SKILLS = Object.fromEntries((skillsData.skills ?? []).map(s => [s.id, s]));
 
+const portraitPath = (id) => id ? `/characters/portraits/${id}.png` : null;
+
 // ── Design v4 トークン（色/glass は tokens.js から import） ──────
 const FONT_DISPLAY="'Zen Maru Gothic',sans-serif";
 const FONT_NUM="'Rajdhani',sans-serif";
@@ -56,7 +58,7 @@ function normalizeChar(c, idx) {
     atk:c.soldierAtk??c.charAttack??10, def:c.soldierDef??8,
     charAttack:c.charAttack??c.attack??70, attackCount:c.attackCount??8,
     meme:c.soldiers??500, max:c.maxSoldiers??c.soldiers??500, memeMax:c.maxSoldiers??c.soldiers??500,
-    hp:c.charHp??200, hpMax:c.charMaxHp??200, portrait:c.portrait??null, _raw:c, status:idx===0?'active':'pending',
+    hp:c.charHp??200, hpMax:c.charMaxHp??200, portrait:portraitPath(c.id), _raw:c, status:idx===0?'active':'pending',
   };
 }
 function buildDefaultEnemies(targetNode) {
@@ -154,10 +156,12 @@ function StrategyCutin({ winner, onSkip, bgUrl = 'url(assets/bg_battle.jpg)' }) 
           border:`6px solid ${accent}`, boxShadow:`0 0 80px ${accent}cc, 0 0 0 14px rgba(0,0,0,.7)`,
           background:'#0a0816', flexShrink:0, position:'relative',
         }}>
-          <img src={winner.char.portrait} alt="" style={{
-            width:'100%', height:'100%', objectFit:'cover', objectPosition:'center 8%',
-            transform: enemy ? 'scaleX(-1)' : 'none',
-          }}/>
+          <img src={portraitPath(winner.char?.id ?? winner.id)} alt=""
+            onError={e => { e.currentTarget.style.display='none'; }}
+            style={{
+              width:'100%', height:'100%', objectFit:'cover', objectPosition:'center 8%',
+              transform: enemy ? 'scaleX(-1)' : 'none',
+            }}/>
           <div style={{ position:'absolute', inset:0, background:`linear-gradient(180deg, transparent 55%, ${accent}66)` }}/>
         </div>
         <div style={{ display:'flex', flexDirection:'column', gap:22, maxWidth:780, alignItems:enemy?'flex-end':'flex-start' }}>
@@ -600,7 +604,7 @@ function BottomPortrait({ unit, hp, maxHP, color, side, hpDmg, showDamage, defea
   const flip    = side === 'right';
   const hpPct   = Math.max(0, Math.min(100, (hp / maxHP) * 100));
   const name    = unit?.char?.name    ?? unit?.name    ?? '—';
-  const portrait = unit?.char?.portrait ?? unit?.portrait ?? null;
+  const portrait = portraitPath(unit?.char?.id ?? unit?.id ?? null);
   return (
     <div style={{
       position:'relative', display:'flex', flexDirection:'column',
@@ -862,8 +866,8 @@ function BattleAnimOverlay({ anim, targetNode, onContinue, bgUrl = 'url(assets/b
         <div style={{ position:'absolute', top:30, bottom:30, left:'50%', width:1, background:'linear-gradient(180deg, transparent, rgba(255,255,255,.45), transparent)' }}/>
         <SoldierCountHeader side="left"  color={PK} value={allySP}  max={allyUnit.maxSoldiers  ?? allyUnit.char?.maxSoldiers  ?? 500}/>
         <SoldierCountHeader side="right" color={AC} value={enemySP} max={enemyUnit.maxSoldiers ?? enemyUnit.char?.maxSoldiers ?? 500}/>
-        <SPPlaceholder side="left"  name={allyUnit.char?.name}  portrait={allyUnit.char?.portrait}  color={PK}/>
-        <SPPlaceholder side="right" name={enemyUnit.char?.name} portrait={enemyUnit.char?.portrait} color={AC}/>
+        <SPPlaceholder side="left"  name={allyUnit.char?.name}  portrait={portraitPath(allyUnit.char?.id)}  color={PK}/>
+        <SPPlaceholder side="right" name={enemyUnit.char?.name} portrait={portraitPath(enemyUnit.char?.id)} color={AC}/>
         <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)', fontFamily:FONT_DISPLAY, fontWeight:900, fontSize:54, color:'#fff', letterSpacing:'.2em', textShadow:'0 4px 18px rgba(0,0,0,.85)', pointerEvents:'none', zIndex:1, opacity:.32 }}>VS</div>
         {phase === 'damages' && allySPhits  > 0 && <DamageBurst x={POS.allySP.x}  y={POS.allySP.y}  value={allySPdmg}  fromSP={allySPfromSP}  fromBody={allySPfromBody}/>}
         {phase === 'damages' && enemySPhits > 0 && <DamageBurst x={POS.enemySP.x} y={POS.enemySP.y} value={enemySPdmg} fromSP={enemySPfromSP} fromBody={enemySPfromBody}/>}
@@ -932,7 +936,9 @@ function BattleAnimOverlay({ anim, targetNode, onContinue, bgUrl = 'url(assets/b
             display:'flex', alignItems:'center', gap:60, animation:'cutinPortrait .5s cubic-bezier(.18,.9,.32,1.2) both',
           }}>
             <div style={{ width:560, height:780, borderRadius:18, overflow:'hidden', border:`6px solid ${atkColor}`, boxShadow:`0 0 80px ${atkColor}cc`, background:'#0a0816', flexShrink:0 }}>
-              {attacker.char?.portrait && <img src={attacker.char.portrait} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'center 8%' }}/>}
+              {portraitPath(attacker.char?.id) && <img src={portraitPath(attacker.char?.id)} alt=""
+                onError={e => { e.currentTarget.style.display='none'; }}
+                style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'center 8%' }}/>}
             </div>
             <div style={{ display:'flex', flexDirection:'column', gap:24, maxWidth:760 }}>
               <div style={{ fontFamily:FONT_DISPLAY, fontWeight:900, fontSize:22, color:atkColor, letterSpacing:'.52em' }}>SPECIAL MOVE</div>
@@ -1190,7 +1196,7 @@ export default function BattleFlow({ formation, targetNode, onComplete, onBattle
         maxSoldiers: u.maxSoldiers,
         charHp:      u.charHp,
         charMaxHp:   u.charMaxHp ?? 200,
-        portrait:    u.char.portrait ?? null,
+        portrait:    portraitPath(u.char.id),
         attackType:  u.char.attackType ?? 'melee',
         charged:     u.charged ?? false,
         skillUsed:   u.skillUsed ?? false,

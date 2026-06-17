@@ -511,7 +511,9 @@
       "battleCapacity": 30,
       "charDefense": 0,
       "attackCount": 8,
-      "recoveryRate": null
+      "recoveryRate": null,
+      "specialType": null,
+      "talkEventId": null
     },
     {
       "id": "char_011",
@@ -672,7 +674,7 @@
     {
       "id": "char_014",
       "name": "東北ずんこ",
-      "factionId": null,
+      "factionId": "東北家",
       "isTemplate": false,
       "joinCondition": null,
       "hireCost": 0,
@@ -697,17 +699,20 @@
         "attack": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         },
         "defense": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         },
         "dungeon": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         }
       },
       "charSong": 20,
@@ -717,12 +722,14 @@
       "battleCapacity": 30,
       "charDefense": 0,
       "attackCount": 8,
-      "recoveryRate": null
+      "recoveryRate": null,
+      "specialType": null,
+      "talkEventId": null
     },
     {
       "id": "char_015",
       "name": "東北イタコ",
-      "factionId": null,
+      "factionId": "東北家",
       "isTemplate": false,
       "joinCondition": null,
       "hireCost": 0,
@@ -747,17 +754,20 @@
         "attack": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         },
         "defense": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         },
         "dungeon": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         }
       },
       "charSong": 20,
@@ -767,7 +777,9 @@
       "battleCapacity": 30,
       "charDefense": 0,
       "attackCount": 8,
-      "recoveryRate": null
+      "recoveryRate": null,
+      "specialType": null,
+      "talkEventId": null
     },
     {
       "id": "char_016",
@@ -1062,17 +1074,20 @@
         "attack": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         },
         "defense": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         },
         "dungeon": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         }
       },
       "charSong": 0,
@@ -1082,7 +1097,9 @@
       "battleCapacity": 30,
       "charDefense": 5,
       "attackCount": 8,
-      "recoveryRate": null
+      "recoveryRate": null,
+      "specialType": null,
+      "talkEventId": null
     },
     {
       "id": "char_022",
@@ -2175,17 +2192,20 @@
         "attack": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         },
         "defense": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         },
         "dungeon": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         }
       },
       "charSong": 20,
@@ -2195,7 +2215,9 @@
       "battleCapacity": 30,
       "charDefense": 0,
       "attackCount": 8,
-      "recoveryRate": null
+      "recoveryRate": null,
+      "specialType": null,
+      "talkEventId": null
     },
     {
       "id": "char_044",
@@ -2225,17 +2247,20 @@
         "attack": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         },
         "defense": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         },
         "dungeon": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         }
       },
       "charSong": 20,
@@ -2245,12 +2270,14 @@
       "battleCapacity": 30,
       "charDefense": 0,
       "attackCount": 8,
-      "recoveryRate": null
+      "recoveryRate": null,
+      "specialType": null,
+      "talkEventId": null
     },
     {
       "id": "char_045",
       "name": "足立レイ",
-      "factionId": null,
+      "factionId": "faction_new02",
       "isTemplate": false,
       "joinCondition": null,
       "hireCost": 0,
@@ -2275,17 +2302,20 @@
         "attack": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         },
         "defense": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         },
         "dungeon": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         }
       },
       "charSong": 20,
@@ -2295,7 +2325,9 @@
       "battleCapacity": 30,
       "charDefense": 0,
       "attackCount": 8,
-      "recoveryRate": null
+      "recoveryRate": null,
+      "specialType": null,
+      "talkEventId": null
     },
     {
       "id": "char_046",
@@ -2879,7 +2911,7 @@
     },
     {
       "id": "char_057",
-      "name": "リリンちゃん",
+      "name": "リリン",
       "factionId": "faction_green",
       "isTemplate": false,
       "joinCondition": null,
@@ -2934,7 +2966,7 @@
     },
     {
       "id": "char_058",
-      "name": "クロワちゃん",
+      "name": "クロワ",
       "factionId": "faction_green",
       "isTemplate": false,
       "joinCondition": null,
@@ -2960,17 +2992,20 @@
         "attack": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         },
         "defense": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         },
         "dungeon": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         }
       },
       "charSong": 20,
@@ -2980,7 +3015,9 @@
       "battleCapacity": 30,
       "charDefense": 0,
       "attackCount": 8,
-      "recoveryRate": null
+      "recoveryRate": null,
+      "specialType": null,
+      "talkEventId": null
     },
     {
       "id": "char_059",
@@ -3039,7 +3076,7 @@
     },
     {
       "id": "char_060",
-      "name": "アンジーさん",
+      "name": "アンジー",
       "factionId": "faction_green",
       "isTemplate": false,
       "joinCondition": null,
@@ -3065,17 +3102,20 @@
         "attack": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         },
         "defense": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         },
         "dungeon": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         }
       },
       "charSong": 20,
@@ -3085,11 +3125,13 @@
       "battleCapacity": 30,
       "charDefense": 0,
       "attackCount": 8,
-      "recoveryRate": null
+      "recoveryRate": null,
+      "specialType": null,
+      "talkEventId": null
     },
     {
       "id": "char_061",
-      "name": "ディアちゃん",
+      "name": "ディア",
       "factionId": "faction_green",
       "isTemplate": false,
       "joinCondition": null,
@@ -3115,17 +3157,20 @@
         "attack": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         },
         "defense": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         },
         "dungeon": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         }
       },
       "charSong": 20,
@@ -3135,11 +3180,13 @@
       "battleCapacity": 30,
       "charDefense": 0,
       "attackCount": 8,
-      "recoveryRate": null
+      "recoveryRate": null,
+      "specialType": null,
+      "talkEventId": null
     },
     {
       "id": "char_062",
-      "name": "アルマちゃん",
+      "name": "アルマ",
       "factionId": "faction_green",
       "isTemplate": false,
       "joinCondition": null,
@@ -3165,17 +3212,20 @@
         "attack": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         },
         "defense": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         },
         "dungeon": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         }
       },
       "charSong": 20,
@@ -3185,11 +3235,13 @@
       "battleCapacity": 30,
       "charDefense": 0,
       "attackCount": 8,
-      "recoveryRate": null
+      "recoveryRate": null,
+      "specialType": null,
+      "talkEventId": null
     },
     {
       "id": "char_063",
-      "name": "アメノちゃん",
+      "name": "アメノ",
       "factionId": "faction_green",
       "isTemplate": false,
       "joinCondition": null,
@@ -3215,17 +3267,20 @@
         "attack": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         },
         "defense": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         },
         "dungeon": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         }
       },
       "charSong": 20,
@@ -3235,7 +3290,9 @@
       "battleCapacity": 30,
       "charDefense": 0,
       "attackCount": 8,
-      "recoveryRate": null
+      "recoveryRate": null,
+      "specialType": null,
+      "talkEventId": null
     },
     {
       "id": "char_064",
@@ -3765,17 +3822,20 @@
         "attack": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         },
         "defense": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         },
         "dungeon": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         }
       },
       "charSong": 20,
@@ -3785,7 +3845,9 @@
       "battleCapacity": 30,
       "charDefense": 0,
       "attackCount": 8,
-      "recoveryRate": null
+      "recoveryRate": null,
+      "specialType": null,
+      "talkEventId": null
     },
     {
       "id": "char_075",
@@ -4095,7 +4157,7 @@
     {
       "id": "char_081",
       "name": "フィーちゃん",
-      "factionId": null,
+      "factionId": "faction_new01",
       "isTemplate": false,
       "joinCondition": null,
       "hireCost": 0,
@@ -4120,17 +4182,20 @@
         "attack": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         },
         "defense": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         },
         "dungeon": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         }
       },
       "charSong": 20,
@@ -4140,7 +4205,9 @@
       "battleCapacity": 30,
       "charDefense": 0,
       "attackCount": 8,
-      "recoveryRate": null
+      "recoveryRate": null,
+      "specialType": null,
+      "talkEventId": null
     },
     {
       "id": "char_082",
@@ -4220,17 +4287,20 @@
         "attack": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         },
         "defense": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         },
         "dungeon": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         }
       },
       "charSong": 20,
@@ -4240,7 +4310,9 @@
       "battleCapacity": 30,
       "charDefense": 0,
       "attackCount": 8,
-      "recoveryRate": null
+      "recoveryRate": null,
+      "specialType": null,
+      "talkEventId": null
     },
     {
       "id": "char_084",
@@ -4380,17 +4452,20 @@
         "attack": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         },
         "defense": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         },
         "dungeon": {
           "soldierAtk": 0,
           "soldierDef": 0,
-          "charAttack": 0
+          "charAttack": 0,
+          "charSong": 0
         }
       },
       "charSong": 20,
@@ -4400,7 +4475,9 @@
       "battleCapacity": 30,
       "charDefense": 0,
       "attackCount": 8,
-      "recoveryRate": null
+      "recoveryRate": null,
+      "specialType": null,
+      "talkEventId": null
     },
     {
       "id": "char_087",
@@ -4978,7 +5055,115 @@
     },
     {
       "id": "char_098",
-      "name": "新規キャラクター",
+      "name": "琴詠ニア",
+      "kana": null,
+      "factionId": "faction_green",
+      "joinCondition": null,
+      "isTemplate": false,
+      "attack": 70,
+      "defense": 70,
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "charDefense": 0,
+      "attackCount": 8,
+      "charSong": 20,
+      "skillId": null,
+      "strategyRate": 0,
+      "recoveryRate": null,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "hireCost": 0,
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        }
+      },
+      "specialType": null,
+      "talkEventId": null
+    },
+    {
+      "id": "char_099",
+      "name": "満別花丸",
+      "kana": null,
+      "factionId": "faction_yellow",
+      "joinCondition": null,
+      "isTemplate": false,
+      "attack": 70,
+      "defense": 70,
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "charDefense": 0,
+      "attackCount": 8,
+      "charSong": 20,
+      "skillId": null,
+      "strategyRate": 0,
+      "recoveryRate": null,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "hireCost": 0,
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        }
+      },
+      "specialType": null,
+      "talkEventId": null
+    },
+    {
+      "id": "char_100",
+      "name": "藍田ノエル",
       "kana": null,
       "factionId": "東北家",
       "joinCondition": null,
@@ -5029,6 +5214,548 @@
       },
       "specialType": null,
       "talkEventId": null
+    },
+    {
+      "id": "char_101",
+      "name": "ROSA",
+      "kana": null,
+      "factionId": "東北家",
+      "joinCondition": null,
+      "isTemplate": false,
+      "attack": 70,
+      "defense": 70,
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "charDefense": 0,
+      "attackCount": 8,
+      "charSong": 20,
+      "skillId": null,
+      "strategyRate": 0,
+      "recoveryRate": null,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "hireCost": 0,
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        }
+      },
+      "specialType": null,
+      "talkEventId": null
+    },
+    {
+      "id": "char_102",
+      "name": "羽ノ華",
+      "kana": "うのか",
+      "factionId": "faction_new04",
+      "joinCondition": null,
+      "isTemplate": false,
+      "attack": 70,
+      "defense": 70,
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "charDefense": 0,
+      "attackCount": 8,
+      "charSong": 20,
+      "skillId": null,
+      "strategyRate": 0,
+      "recoveryRate": null,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "hireCost": 0,
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        }
+      },
+      "specialType": null,
+      "talkEventId": null
+    },
+    {
+      "id": "char_103",
+      "name": "RIA",
+      "kana": null,
+      "factionId": "faction_new04",
+      "joinCondition": null,
+      "isTemplate": false,
+      "attack": 70,
+      "defense": 70,
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "charDefense": 0,
+      "attackCount": 8,
+      "charSong": 20,
+      "skillId": null,
+      "strategyRate": 0,
+      "recoveryRate": null,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "hireCost": 0,
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        }
+      },
+      "specialType": null,
+      "talkEventId": null
+    },
+    {
+      "id": "char_104",
+      "name": "来果",
+      "kana": "らいか",
+      "factionId": "faction_new04",
+      "joinCondition": null,
+      "isTemplate": false,
+      "attack": 70,
+      "defense": 70,
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "charDefense": 0,
+      "attackCount": 8,
+      "charSong": 20,
+      "skillId": null,
+      "strategyRate": 0,
+      "recoveryRate": null,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "hireCost": 0,
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        }
+      },
+      "specialType": null,
+      "talkEventId": null
+    },
+    {
+      "id": "char_105",
+      "name": "紅桜ショウガ",
+      "kana": null,
+      "factionId": "東北家",
+      "joinCondition": null,
+      "isTemplate": false,
+      "attack": 70,
+      "defense": 70,
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "charDefense": 0,
+      "attackCount": 8,
+      "charSong": 20,
+      "skillId": null,
+      "strategyRate": 0,
+      "recoveryRate": null,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "hireCost": 0,
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        }
+      },
+      "specialType": null,
+      "talkEventId": null
+    },
+    {
+      "id": "char_106",
+      "name": "サーラちゃんさま",
+      "kana": null,
+      "factionId": "faction_new04",
+      "joinCondition": null,
+      "isTemplate": false,
+      "attack": 70,
+      "defense": 70,
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "charDefense": 0,
+      "attackCount": 8,
+      "charSong": 20,
+      "skillId": null,
+      "strategyRate": 0,
+      "recoveryRate": null,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "hireCost": 0,
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        }
+      },
+      "specialType": null,
+      "talkEventId": null
+    },
+    {
+      "id": "char_107",
+      "name": "あんこもん",
+      "kana": null,
+      "factionId": "東北家",
+      "joinCondition": null,
+      "isTemplate": false,
+      "attack": 70,
+      "defense": 70,
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "charDefense": 0,
+      "attackCount": 8,
+      "charSong": 20,
+      "skillId": null,
+      "strategyRate": 0,
+      "recoveryRate": null,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "hireCost": 0,
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        }
+      },
+      "specialType": null,
+      "talkEventId": null
+    },
+    {
+      "id": "char_108",
+      "name": "暁記ミタマ",
+      "kana": null,
+      "factionId": "faction_green",
+      "joinCondition": null,
+      "isTemplate": false,
+      "attack": 70,
+      "defense": 70,
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "charDefense": 0,
+      "attackCount": 8,
+      "charSong": 20,
+      "skillId": null,
+      "strategyRate": 0,
+      "recoveryRate": null,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "hireCost": 0,
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        }
+      },
+      "specialType": null,
+      "talkEventId": null
+    },
+    {
+      "id": "char_109",
+      "name": "里石ユカ",
+      "kana": null,
+      "factionId": "東北家",
+      "joinCondition": null,
+      "isTemplate": false,
+      "attack": 70,
+      "defense": 70,
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "charDefense": 0,
+      "attackCount": 8,
+      "charSong": 20,
+      "skillId": null,
+      "strategyRate": 0,
+      "recoveryRate": null,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "hireCost": 0,
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        }
+      },
+      "specialType": null,
+      "talkEventId": null
+    },
+    {
+      "id": "char_110",
+      "kana": null,
+      "factionId": "東北家",
+      "joinCondition": null,
+      "isTemplate": true,
+      "attack": 70,
+      "defense": 70,
+      "soldiers": 500,
+      "maxSoldiers": 1000,
+      "isLeader": false,
+      "usedThisTurn": false,
+      "role": "attacker",
+      "attackType": "song",
+      "charHp": 150,
+      "charMaxHp": 150,
+      "charAttack": 70,
+      "charDefense": 0,
+      "attackCount": 8,
+      "charSong": 20,
+      "skillId": null,
+      "strategyRate": 0,
+      "recoveryRate": null,
+      "soldierAtk": 10,
+      "soldierDef": 8,
+      "description": "",
+      "hireCost": 0,
+      "equipment": {
+        "item": null
+      },
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        }
+      },
+      "specialType": null,
+      "talkEventId": null,
+      "displayName": "歌部隊",
+      "nameVariants": [],
+      "statVariance": 0.15
     }
   ]
 }
