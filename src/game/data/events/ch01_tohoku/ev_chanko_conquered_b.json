@@ -1,0 +1,27 @@
+{
+  "id": "ev_chanko_conquered_b",
+  "name": "[郡山制圧・ルートB]ちゃんこ安堵",
+  "trigger": "base_conquered",
+  "conditions": [
+    { "type": "baseOwned", "baseId": "base_021" },
+    { "type": "flag", "flag": "flag_awamo_joined" },
+    { "type": "noFlag", "flag": "flag_chanko_conquered" }
+  ],
+  "probability": 1,
+  "priority": 999,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        { "characterId": "char_020", "position": "left", "text": "[ルートB]郡山制圧・ちゃんこ安堵イベント　セリフダミー" }
+      ]
+    },
+    { "type": "end" }
+  ],
+  "effects": {
+    "default": [
+      { "type": "setFlag", "flag": "flag_chanko_conquered" }
+    ]
+  }
+}

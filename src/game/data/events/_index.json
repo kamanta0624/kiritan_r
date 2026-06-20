@@ -22,8 +22,43 @@
       "chapter": "system"
     },
     {
-      "id": "ev_mito_conquest",
-      "path": "ch01_tohoku/ev_mito_conquest.json",
+      "id": "ev_daitoshi_turn1",
+      "path": "ch01_tohoku/ev_daitoshi_turn1.json",
+      "chapter": "ch01_tohoku"
+    },
+    {
+      "id": "ev_defense_sendai",
+      "path": "ch01_tohoku/ev_defense_sendai.json",
+      "chapter": "ch01_tohoku"
+    },
+    {
+      "id": "ev_defeated_meron",
+      "path": "ch01_tohoku/ev_defeated_meron.json",
+      "chapter": "ch01_tohoku"
+    },
+    {
+      "id": "ev_chanko_conquered_a",
+      "path": "ch01_tohoku/ev_chanko_conquered_a.json",
+      "chapter": "ch01_tohoku"
+    },
+    {
+      "id": "ev_chanko_conquered_b",
+      "path": "ch01_tohoku/ev_chanko_conquered_b.json",
+      "chapter": "ch01_tohoku"
+    },
+    {
+      "id": "ev_mito_conquest_a",
+      "path": "ch01_tohoku/ev_mito_conquest_a.json",
+      "chapter": "ch01_tohoku"
+    },
+    {
+      "id": "ev_mito_conquest_b",
+      "path": "ch01_tohoku/ev_mito_conquest_b.json",
+      "chapter": "ch01_tohoku"
+    },
+    {
+      "id": "ev_qa_fukushima_conquest",
+      "path": "ch01_tohoku/ev_qa_fukushima_conquest.json",
       "chapter": "ch01_tohoku"
     },
     {
@@ -160,6 +195,11 @@
       "id": "ev_vocalo_conquered",
       "path": "ch05_vocalo/ev_vocalo_conquered.json",
       "chapter": "ch05_vocalo"
+    },
+    {
+      "id": "ev_247618",
+      "path": "system/ev_247618.json",
+      "chapter": "system"
     }
   ]
 }

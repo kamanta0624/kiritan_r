@@ -1,0 +1,28 @@
+{
+  "id": "ev_chanko_conquered_a",
+  "name": "[郡山制圧・ルートA]暗黒大将軍覚醒",
+  "trigger": "base_conquered",
+  "conditions": [
+    { "type": "baseOwned", "baseId": "base_021" },
+    { "type": "noFlag", "flag": "flag_awamo_joined" },
+    { "type": "noFlag", "flag": "flag_chanko_conquered" }
+  ],
+  "probability": 1,
+  "priority": 999,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        { "characterId": "char_023", "position": "left", "text": "[ルートA]郡山制圧・暗黒大将軍覚醒イベント　セリフダミー" }
+      ]
+    },
+    { "type": "end" }
+  ],
+  "effects": {
+    "default": [
+      { "type": "setFlag", "flag": "flag_ankokugun_active" },
+      { "type": "setFlag", "flag": "flag_chanko_conquered" }
+    ]
+  }
+}

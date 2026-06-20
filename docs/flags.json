@@ -1,0 +1,22 @@
+{
+  "_meta": {
+    "description": "ゲーム内フラグの定義台帳。新しいフラグは必ずここに登録してから実装する。",
+    "namingConvention": "スネークケース、カテゴリプレフィックスつき（例: story_kiritan_ch1_end, unlock_theater_tohoku）"
+  },
+  "categories": {
+    "story_": "ストーリー進行フラグ（シーン・章の完了）",
+    "unlock_": "機能・場所・イベントの解禁",
+    "char_": "キャラクター状態（加入・秘書・強化）",
+    "research_": "研究完了フラグ",
+    "collab_": "コラボ・商品展開イベント完了"
+  },
+  "flags": {
+    "flag_daitoshi_turn1": "1ターン目の大都会作戦会議ADV（ev_daitoshi_turn1）が発生済み",
+    "flag_sendai_defense_adv": "仙台防衛前ADV（ev_defense_sendai）が発生済み",
+    "flag_meron_joined": "北海道めろん（char_024）撃破→加入済み（ev_defeated_meron）",
+    "flag_ankokugun_active": "ルートA: 郡山制圧で暗黒大将軍フェーズ移行済み（ev_chanko_conquered_a）",
+    "flag_chanko_conquered": "郡山（base_021）制圧イベント発生済み（ルートA/B共通）",
+    "flag_mito_conquest_done": "水戸（base_045）制圧イベント発生済み（ev_mito_conquest_a/b、setFlagWithTurn）",
+    "flag_awamo_joined": "沖縄あわも（char_023）撃破→加入済み（ev_defeated_awamo、ルートB分岐の起点）"
+  }
+}

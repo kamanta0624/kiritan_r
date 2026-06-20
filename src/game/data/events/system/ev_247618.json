@@ -1,25 +1,19 @@
 {
-  "id": "ev_turn1_status",
-  "name": "1ターン目イベント",
+  "id": "ev_247618",
+  "name": "新規イベント",
   "trigger": "player_turn",
-  "conditions": [
-    {
-      "type": "turn",
-      "op": "eq",
-      "value": 1
-    }
-  ],
+  "conditions": [],
   "probability": 1,
-  "priority": 900,
+  "priority": 50,
   "maxOccurrences": 1,
   "script": [
     {
       "type": "conversation",
       "lines": [
         {
-          "characterId": "char_004",
+          "characterId": null,
           "position": "center",
-          "text": "1ターン目イベント　セリフダミー"
+          "text": ""
         }
       ]
     },

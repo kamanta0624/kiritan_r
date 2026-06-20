@@ -270,7 +270,7 @@ export default function App() {
           setDefenseFlow(prev => prev ? { ...prev, phase: 'battle', formation, battleCapacity: opts?.battleCapacity } : null);
         }}
         onCancel={() => {
-          setDefenseFlow(prev => prev ? { ...prev, phase: 'adv' } : null);
+          setDefenseFlow(prev => prev ? { ...prev, phase: 'defense_prompt' } : null);
         }}
       />;
     }
@@ -682,12 +682,31 @@ export default function App() {
       // 契約: { script, effects, onExit }。戻り先は呼び出し元が onExit に閉じる
       // （未指定時のみ map へ戻る）。effects 適用・choice 分岐は ADV 内部。
       case 'adv':
-        return <ADVScene
-          key={sceneParams.dialogId ?? 'adv'}
-          script={sceneParams.script ?? []}
-          effects={sceneParams.effects ?? null}
-          onExit={sceneParams.onExit ?? (() => navigate('map'))}
-        />;
+        return (
+          <div style={{ position:'relative', width:'100vw', height:'100vh' }}>
+            {/* 背景レイヤ: MAPを表示専用で残す。pointer-events:none で操作貫通を物理遮断。
+                onReady 等の副作用トリガは渡さない（背景用途のため発火させない）。 */}
+            <div style={{ position:'absolute', inset:0, pointerEvents:'none' }}>
+              <MapScene
+                onNavigate={() => {}}
+                onAttackNode={() => {}}
+                onNodeClick={() => {}}
+                gameState={gameState}
+                basesData={bases}
+                factionsData={factions}
+                conqueredThisTurn={game.conqueredThisTurn}
+                onNextTurn={() => {}}
+              />
+            </div>
+            <ADVScene
+              key={sceneParams.dialogId ?? 'adv'}
+              script={sceneParams.script ?? []}
+              effects={sceneParams.effects ?? null}
+              transparent={sceneParams.transparent ?? true}
+              onExit={sceneParams.onExit ?? (() => navigate('map'))}
+            />
+          </div>
+        );
 
       // ── 空実装 ──
       case 'gallery':

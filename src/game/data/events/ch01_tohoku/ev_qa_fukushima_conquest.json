@@ -1,0 +1,36 @@
+{
+  "id": "ev_qa_fukushima_conquest",
+  "name": "【QA】ふくしま占領イベント",
+  "trigger": "base_conquered",
+  "conditions": [
+    {
+      "type": "baseOwned",
+      "baseId": "base_003"
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_qa_fukushima_conquest_done"
+    }
+  ],
+  "probability": 1,
+  "priority": 999,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        {
+          "characterId": "char_020",
+          "position": "left",
+          "text": "【QA】ふくしま占領イベント　セリフダミー"
+        }
+      ]
+    },
+    {
+      "type": "end"
+    }
+  ],
+  "effects": {
+    "default": []
+  }
+}

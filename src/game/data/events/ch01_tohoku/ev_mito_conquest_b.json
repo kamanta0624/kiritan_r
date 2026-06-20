@@ -1,0 +1,29 @@
+{
+  "id": "ev_mito_conquest_b",
+  "name": "[水戸制圧・ルートB]あんこもん加入",
+  "trigger": "base_conquered",
+  "conditions": [
+    { "type": "baseOwned", "baseId": "base_045" },
+    { "type": "noFlag", "flag": "flag_ankokugun_active" },
+    { "type": "noFlag", "flag": "flag_mito_conquest_done" }
+  ],
+  "probability": 1,
+  "priority": 999,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        { "characterId": "char_107", "position": "left", "text": "[ルートB]水戸制圧・あんこもん加入イベント　セリフダミー" }
+      ]
+    },
+    { "type": "end" }
+  ],
+  "effects": {
+    "default": [
+      { "type": "charJoin", "charId": "char_107", "factionId": "東北家" },
+      { "type": "baseTransfer", "fromFactionId": "faction_red", "toFactionId": "東北家" },
+      { "type": "setFlagWithTurn", "flag": "flag_mito_conquest_done" }
+    ]
+  }
+}

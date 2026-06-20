@@ -175,6 +175,10 @@ choice 持ちは選択時に `applyEffects(choice.effects)` 即時適用＋`choi
 
 各 startDialog/theater 起動時に `dialogSeqRef` をインクリメントした `dialogId` を付与、`<ADVScene key={sceneParams.dialogId ?? 'adv'}>` で描画。key変化で unmount→remount し `idx`/`finishedRef`/`history` をリセット。同一 scene='adv' で逐次2件目が来てもフリーズしない。
 
+### 8-2b. 透過背景MAP（2026-06-16）
+
+`renderScene` の `case 'adv'` は MapScene を `pointerEvents:'none'` ラッパで背景に残し、その上に透過 ADVScene を重ねて描画する（`navigate('adv', { transparent })` 既定 true）。bg画像未設定でも背後にMAPが透けて見える。ADVScene 側は `transparent`（prop → `meta.transparent` → false）で背景黒 `#0a0610`・BG描画・dim overlay をスキップし、DialogBox を全幅下部バー表示にする。背景MapScene には `onReady` 等の副作用コールバックを渡さない（背景用途・二重副作用防止）。非透過にしたい呼び出しは `navigate('adv', { transparent:false, ... })`。
+
 ### 8-3. 呼び出し元
 
 - **EventEngine**: `processTrigger` が `eligible` 全件を順次 await 発火。script無しイベントは EventEngine が `applyEffects(default)` 直接適用。

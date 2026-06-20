@@ -5432,60 +5432,6 @@
       "talkEventId": null
     },
     {
-      "id": "char_105",
-      "name": "紅桜ショウガ",
-      "kana": null,
-      "factionId": "東北家",
-      "joinCondition": null,
-      "isTemplate": false,
-      "attack": 70,
-      "defense": 70,
-      "soldiers": 500,
-      "maxSoldiers": 1000,
-      "isLeader": false,
-      "usedThisTurn": false,
-      "role": "attacker",
-      "attackType": "melee",
-      "charHp": 150,
-      "charMaxHp": 150,
-      "charAttack": 70,
-      "charDefense": 0,
-      "attackCount": 8,
-      "charSong": 20,
-      "skillId": null,
-      "strategyRate": 0,
-      "recoveryRate": null,
-      "soldierAtk": 10,
-      "soldierDef": 8,
-      "description": "",
-      "hireCost": 0,
-      "equipment": {
-        "item": null
-      },
-      "battleBonus": {
-        "attack": {
-          "soldierAtk": 0,
-          "soldierDef": 0,
-          "charAttack": 0,
-          "charSong": 0
-        },
-        "defense": {
-          "soldierAtk": 0,
-          "soldierDef": 0,
-          "charAttack": 0,
-          "charSong": 0
-        },
-        "dungeon": {
-          "soldierAtk": 0,
-          "soldierDef": 0,
-          "charAttack": 0,
-          "charSong": 0
-        }
-      },
-      "specialType": null,
-      "talkEventId": null
-    },
-    {
       "id": "char_106",
       "name": "サーラちゃんさま",
       "kana": null,

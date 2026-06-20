@@ -1,0 +1,27 @@
+{
+  "id": "ev_defeated_meron",
+  "name": "[北海道めろん撃破]めろん加入",
+  "trigger": "char_defeated",
+  "conditions": [
+    { "type": "defeatedChar", "charId": "char_024" },
+    { "type": "noFlag", "flag": "flag_meron_joined" }
+  ],
+  "probability": 1,
+  "priority": 900,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        { "characterId": "char_024", "position": "left", "text": "北海道めろん撃破イベント　セリフダミー" }
+      ]
+    },
+    { "type": "end" }
+  ],
+  "effects": {
+    "default": [
+      { "type": "charJoin", "charId": "char_024", "factionId": "東北家" },
+      { "type": "setFlag", "flag": "flag_meron_joined" }
+    ]
+  }
+}
