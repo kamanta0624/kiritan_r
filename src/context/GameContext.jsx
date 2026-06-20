@@ -959,6 +959,12 @@ export function GameProvider({ children }) {
     // EventEngine 発火用 ws。制圧フラグを先付けし、base_conquered/battle_end 双方から参照可能にする。
     const ws = buildWsAdapter();
     if (result.conquered) {
+      // dispatch 後 re-render 前のため stateRef は旧値。bases を手動パッチ。
+      ws.bases = ws.bases.map(b =>
+        b.id === result.defenderBaseId
+          ? { ...b, factionId: result.winnerFactionId }
+          : b
+      );
       ws.eventFlags = {
         ...ws.eventFlags,
         [`conquered_${result.defenderBaseId}`]: true,

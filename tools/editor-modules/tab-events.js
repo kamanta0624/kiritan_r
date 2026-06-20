@@ -68,6 +68,8 @@ const TRIGGER_OPTIONS = [
   { value: 'before_faction_turn', label: '特定勢力ターン行動前' },
   { value: 'base_conquered',      label: '拠点制圧時' },
   { value: 'turn_start',          label: 'ターン冒頭（全勢力共通）' },
+  { value: 'char_defeated',       label: '敵キャラ撃破時' },
+  { value: 'theater',             label: '劇場（手動再生）' },
 ];
 
 const SCRIPT_STEP_TYPES = [
@@ -476,11 +478,18 @@ function _buildEditor(pane, ev) {
   _field(pane, '名前', _text(ev, 'name'));
 
   const trigSel = document.createElement('select');
+  let triggerFound = false;
   TRIGGER_OPTIONS.forEach(t => {
     const o = document.createElement('option'); o.value = t.value; o.textContent = t.label;
-    if (ev.trigger === t.value) o.selected = true;
+    if (ev.trigger === t.value) { o.selected = true; triggerFound = true; }
     trigSel.appendChild(o);
   });
+  // 未登録 trigger の防御: 生値を option として追加し選択状態にする
+  if (!triggerFound && ev.trigger) {
+    const o = document.createElement('option');
+    o.value = ev.trigger; o.textContent = `⚠ ${ev.trigger}`; o.selected = true;
+    trigSel.appendChild(o);
+  }
   trigSel.onchange = () => { ev.trigger = trigSel.value; };
   _field(pane, 'タイミング', trigSel);
 

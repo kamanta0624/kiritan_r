@@ -1,0 +1,31 @@
+{
+  "id": "ev_mito_conquest_a",
+  "name": "[水戸制圧・ルートA]ちゃんこ軍門",
+  "trigger": "base_conquered",
+  "conditions": [
+    { "type": "baseOwned", "baseId": "base_045" },
+    { "type": "flag", "flag": "flag_ankokugun_active" },
+    { "type": "noFlag", "flag": "flag_mito_conquest_done" }
+  ],
+  "probability": 1,
+  "priority": 999,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        { "characterId": "char_020", "position": "left", "text": "[ルートA]水戸制圧・ちゃんこ軍門イベント　セリフダミー" }
+      ]
+    },
+    { "type": "end" }
+  ],
+  "effects": {
+    "default": [
+      { "type": "charJoin", "charId": "char_020", "factionId": "東北家" },
+      { "type": "charJoin", "charId": "char_021", "factionId": "東北家" },
+      { "type": "charJoin", "charId": "char_022", "factionId": "東北家" },
+      { "type": "baseTransfer", "fromFactionId": "faction_red", "toFactionId": "東北家" },
+      { "type": "setFlagWithTurn", "flag": "flag_mito_conquest_done" }
+    ]
+  }
+}
