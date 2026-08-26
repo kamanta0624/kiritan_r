@@ -147,6 +147,16 @@
       "chapter": "theater"
     },
     {
+      "id": "theater_voice_demo",
+      "path": "theater/ev_theater_voice_demo.json",
+      "chapter": "theater"
+    },
+    {
+      "id": "theater_psd_demo",
+      "path": "theater/ev_theater_psd_demo.json",
+      "chapter": "theater"
+    },
+    {
       "id": "ev_679817",
       "path": "system/ev_679817.json",
       "chapter": "system"

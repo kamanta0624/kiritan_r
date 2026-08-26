@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { PK, PK2, AC, AC2, TX, TXD, TXF, BR, glass } from '../shared/tokens.js';
+import { PK, PK2, TX, TXD, glass } from '../shared/tokens.js';
 import { TopBar, BottomBar } from '../shared/SharedUI.jsx';
 
 // ── Map constants ──────────────────────────────────────────
@@ -153,7 +153,7 @@ function NodeShape({type, color, selected, canAttack}) {
 }
 
 // ── Map SVG ────────────────────────────────────────────────
-function MapLayer({selNode, onNodeClick, nodes=[], edges=[]}) {
+function MapLayer({selNode, onNodeClick, onNodeHover, nodes=[], edges=[]}) {
   return (
     <svg width={MAP_W} height={MAP_H}
       style={{position:'absolute', top:0, left:0, overflow:'visible', display:'block'}}>
@@ -174,7 +174,10 @@ function MapLayer({selNode, onNodeClick, nodes=[], edges=[]}) {
         const fillColor=hexToRgba(fc, 0.18);
         return (
           <g key={n.id} transform={`translate(${n.px},${n.py})`}
-            style={{cursor:'pointer'}} onClick={()=>onNodeClick(n)}>
+            style={{cursor:'pointer'}}
+            onClick={()=>onNodeClick(n)}
+            onMouseEnter={()=>onNodeHover?.(n)}
+            onMouseLeave={()=>onNodeHover?.(null)}>
             {sel && <circle r={22} fill={fillColor} stroke={fc} strokeWidth="1.5" opacity=".8"/>}
             {n.canAttack && !sel && (
               <circle r={20} fill="none" stroke={fc} strokeWidth="1.5" opacity=".6"
@@ -236,8 +239,8 @@ function AreaNameOverlay({areaName, areaEn, triggerKey}) {
   );
 }
 
-// ── Node popup ─────────────────────────────────────────────
-function NodePopup({node, onClose, onAttack, onNodeInfo}) {
+// ── Node popup (hover) ─────────────────────────────────────
+function NodePopup({node}) {
   const fc = node.factionColor;
   const typeLabel = {city:'都市',town:'街',village:'村',fort:'砦'}[node.type]||node.type;
   return (
@@ -248,19 +251,14 @@ function NodePopup({node, onClose, onAttack, onNodeInfo}) {
         minWidth:195}),
       position:'relative',
     }}>
-      <button onClick={onClose} style={{position:'absolute', top:8, right:8,
-        background:'transparent', border:'none', color:TXD, cursor:'pointer', fontSize:14, lineHeight:1}}>✕</button>
       <div style={{display:'flex', alignItems:'center', gap:7, marginBottom:10}}>
         <div style={{width:9, height:9, borderRadius:'50%', background:fc, flexShrink:0}}/>
         <div style={{fontFamily:"'Zen Maru Gothic'", fontSize:16, fontWeight:900, color:TX}}>{node.name}</div>
         <span style={{marginLeft:'auto', fontSize:8, padding:'2px 6px', borderRadius:10, fontWeight:700,
           background:`${fc}22`, color:fc, border:`1px solid ${fc}44`}}>{typeLabel}</span>
       </div>
-      <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:5,
-        marginBottom:node.canAttack?10:0}}>
+      <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:5}}>
         {[
-          ['収入', `${node.income} M/T`, AC2],
-          ['防御部隊', `${fmtN(node.troops)} 兵`, TXD],
           ['勢力', node.factionName, fc],
           ['種別', typeLabel, TX],
         ].map(([k,v,c])=>(
@@ -270,38 +268,74 @@ function NodePopup({node, onClose, onAttack, onNodeInfo}) {
           </div>
         ))}
       </div>
-      <button
-        onClick={() => { onClose(); onNodeInfo?.(node); }}
-        style={{
-          width:'100%', padding:'9px', borderRadius:7, marginTop:10,
-          background:'rgba(0,0,0,.06)',
-          border:'1px solid rgba(0,0,0,.12)', color:'#444', cursor:'pointer',
-          fontFamily:"'Noto Sans JP'", fontSize:12, fontWeight:700,
-        }}>詳細を見る</button>
-      {node.canAttack && (
-        <button
-          onClick={() => { onClose(); onAttack(node); }}
-          style={{
-            width:'100%', padding:'9px', borderRadius:7, marginTop:6,
-            background:`linear-gradient(135deg,${PK},${PK2})`,
-            border:'none', color:'#fff', cursor:'pointer',
-            fontFamily:"'Noto Sans JP'", fontSize:12, fontWeight:700,
-            boxShadow:`0 3px 14px rgba(196,66,122,.45)`,
-          }}>⚔ 攻撃する</button>
-      )}
     </div>
   );
 }
 
 // ── Mini-map ───────────────────────────────────────────────
-function MiniMap({offsetX, offsetY, vpW, vpH, nodes=[]}) {
+// マウスオーバーで2倍に拡大。ミニマップ上をクリック/ドラッグするとその位置を視界中心へ即移動（高速パン）。
+function MiniMap({offsetX, offsetY, vpW, vpH, nodes=[], onSeek, clamp}) {
   const mmW=140, mmH=80;
   const scaleX=mmW/MAP_W, scaleY=mmH/MAP_H;
+  const svgRef = useRef(null);
+  const [hover, setHover] = useState(false);
+  const [dragging, setDragging] = useState(false);
+
+  // クライアント座標 → マップ offset（クリック位置を視界中心に）。CSS拡大は getBoundingClientRect が吸収。
+  const seekToClient = useCallback((clientX, clientY) => {
+    const el = svgRef.current;
+    if (!el || !onSeek || !clamp) return;
+    const rect = el.getBoundingClientRect();
+    const rx = (clientX - rect.left) / rect.width;   // 0..1
+    const ry = (clientY - rect.top)  / rect.height;  // 0..1
+    const mapX = rx * MAP_W;
+    const mapY = ry * MAP_H;
+    onSeek(clamp(mapX - vpW / 2, mapY - vpH / 2));
+  }, [onSeek, clamp, vpW, vpH]);
+
+  // ドラッグ中は window で追従（小さなミニマップ外へ出ても動かせる＝高速パン）
+  useEffect(() => {
+    if (!dragging) return;
+    const move = e => {
+      const t = e.touches && e.touches[0];
+      if (e.cancelable) e.preventDefault();
+      seekToClient(t ? t.clientX : e.clientX, t ? t.clientY : e.clientY);
+    };
+    const up = () => setDragging(false);
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', up);
+    window.addEventListener('touchmove', move, { passive:false });
+    window.addEventListener('touchend', up);
+    return () => {
+      window.removeEventListener('mousemove', move);
+      window.removeEventListener('mouseup', up);
+      window.removeEventListener('touchmove', move);
+      window.removeEventListener('touchend', up);
+    };
+  }, [dragging, seekToClient]);
+
+  const start = useCallback(e => {
+    e.stopPropagation();      // 親(MAPビューポート)のドラッグ開始を抑止
+    e.preventDefault();
+    setDragging(true);
+    const t = e.touches && e.touches[0];
+    seekToClient(t ? t.clientX : e.clientX, t ? t.clientY : e.clientY);
+  }, [seekToClient]);
+
+  const scale = (hover || dragging) ? 2 : 1;
+
   return (
-    <div style={{...glass({borderRadius:8, padding:0, border:'1px solid rgba(255,255,255,.7)',
-      overflow:'hidden', boxShadow:'0 2px 12px rgba(0,0,0,.2)'}),
-      position:'absolute', bottom:16, right:16, zIndex:20}}>
-      <svg width={mmW} height={mmH}>
+    <div
+      onMouseEnter={()=>setHover(true)}
+      onMouseLeave={()=>setHover(false)}
+      onMouseDown={start}
+      onTouchStart={start}
+      style={{...glass({borderRadius:8, padding:0, border:'1px solid rgba(255,255,255,.7)',
+        overflow:'hidden', boxShadow:'0 2px 12px rgba(0,0,0,.2)'}),
+        position:'absolute', bottom:16, right:16, zIndex:20,
+        transform:`scale(${scale})`, transformOrigin:'bottom right',
+        transition:'transform .15s ease', cursor:'crosshair'}}>
+      <svg ref={svgRef} width={mmW} height={mmH} style={{display:'block'}}>
         <rect x={0}     y={0} width={mmW/2} height={mmH} fill="rgba(190,210,225,.6)"/>
         <rect x={mmW/2} y={0} width={mmW/2} height={mmH} fill="rgba(175,200,170,.6)"/>
         <line x1={mmW/2} y1={0} x2={mmW/2} y2={mmH} stroke="rgba(255,255,255,.4)" strokeWidth="1"/>
@@ -312,25 +346,6 @@ function MiniMap({offsetX, offsetY, vpW, vpH, nodes=[]}) {
           width={vpW*scaleX} height={vpH*scaleY}
           fill="rgba(255,255,255,.15)" stroke="rgba(255,255,255,.7)" strokeWidth="1.2" rx={1}/>
       </svg>
-      <div style={{position:'absolute', top:4, left:6,
-        fontSize:7, fontFamily:'Rajdhani', fontWeight:600, color:'rgba(255,255,255,.8)',
-        textShadow:'0 1px 4px rgba(0,0,0,.5)', letterSpacing:'.1em'}}>MINIMAP</div>
-    </div>
-  );
-}
-
-// ── Legend ─────────────────────────────────────────────────
-function Legend({ factionsData }) {
-  return (
-    <div style={{...glass({borderRadius:8, padding:'8px 10px', boxShadow:'0 2px 12px rgba(0,0,0,.15)'}),
-      position:'absolute', top:16, left:16, zIndex:20, minWidth:110}}>
-      <div style={{fontSize:8, fontFamily:'Rajdhani', fontWeight:700, color:TXD, letterSpacing:'.12em', marginBottom:6}}>LEGEND</div>
-      {(factionsData ?? []).map(f=>(
-        <div key={f.id} style={{display:'flex', alignItems:'center', gap:5, marginBottom:3}}>
-          <div style={{width:8, height:8, borderRadius:'50%', background:f.color, flexShrink:0}}/>
-          <span style={{fontSize:9, color:TX}}>{f.name}</span>
-        </div>
-      ))}
     </div>
   );
 }
@@ -376,11 +391,9 @@ export default function MapScene({ onNavigate, onAttackNode, onNodeClick, gameSt
         factionId:   b.factionId,
         factionColor,
         factionName,
-        troops:      b.soldiers ?? b.battleCapacity ?? 400,
         income:      b.income ?? 0,
         canAttack:   !isPlayer && isAtWar && attackableIds.has(b.id) && !conqueredThisTurn,
         baseId:      b.id,
-        dungeonId:   b.dungeonId ?? null,
         isCapital:   b.isCapital ?? false,
         area:        b.area ?? 'tohoku',
       };
@@ -407,6 +420,7 @@ export default function MapScene({ onNavigate, onAttackNode, onNodeClick, gameSt
   const initOffsetX = Math.max(0, Math.min(3256 - window.innerWidth/2, MAP_W - window.innerWidth));
   const initOffsetY = Math.max(0, Math.min(1019 - (window.innerHeight-104)/2, MAP_H - (window.innerHeight-104)));
   const [offset, setOffset] = useState({x: initOffsetX, y: initOffsetY});
+  const [isAnimating, setIsAnimating] = useState(false);
   const dragRef = useRef(null);
 
   // focusBaseId が指定されたらその拠点を中央にカメラ移動し、500ms後に onReady を呼ぶ
@@ -425,12 +439,20 @@ export default function MapScene({ onNavigate, onAttackNode, onNodeClick, gameSt
     }
     const tx = Math.max(0, Math.min(target.px - vpSize.w / 2, MAP_W - vpSize.w));
     const ty = Math.max(0, Math.min(target.py - vpSize.h / 2, MAP_H - vpSize.h));
+    setIsAnimating(true);
     setOffset({ x: tx, y: ty });
     const t = setTimeout(() => {
+      setIsAnimating(false);
       if (!onReadyCalledRef.current) { onReadyCalledRef.current = true; onReady?.(); }
     }, 500);
     return () => clearTimeout(t);
   }, [focusBaseId, focusKey]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ミニマップからの setOffset は常に瞬間移動（isAnimating を解除してから）
+  const seekInstant = useCallback((o) => {
+    setIsAnimating(false);
+    setOffset(o);
+  }, []);
 
   const currentArea = React.useMemo(() => {
     if (!liveNodes.length) return 'tohoku';
@@ -476,6 +498,7 @@ export default function MapScene({ onNavigate, onAttackNode, onNodeClick, gameSt
 
   const onPointerDown = useCallback(e=>{
     e.preventDefault();
+    setIsAnimating(false);
     const cx=e.touches?e.touches[0].clientX:e.clientX;
     const cy=e.touches?e.touches[0].clientY:e.clientY;
     dragRef.current={startX:cx, startY:cy, offsetX:offset.x, offsetY:offset.y, moved:false};
@@ -495,7 +518,11 @@ export default function MapScene({ onNavigate, onAttackNode, onNodeClick, gameSt
   const [selNode, setSelNode] = useState(null);
   const handleNodeClick = useCallback(n=>{
     if(dragRef.current?.moved) return;
-    setSelNode(prev=>prev?.id===n.id?null:n);
+    setSelNode(null);
+    if(onNodeClick) onNodeClick(n);
+  },[onNodeClick]);
+  const handleNodeHover = useCallback(n=>{
+    setSelNode(n);
   },[]);
 
   const getPopupPos = useCallback((n)=>{
@@ -560,28 +587,26 @@ export default function MapScene({ onNavigate, onAttackNode, onNodeClick, gameSt
         {/* Draggable map */}
         <div style={{position:'absolute',
           transform:`translate(${-offset.x}px,${-offset.y}px)`,
+          transition: isAnimating ? 'transform 400ms cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
+          willChange: 'transform',
           width:MAP_W, height:MAP_H, zIndex:1}}>
-          <MapLayer selNode={selNode} onNodeClick={handleNodeClick} nodes={liveNodes} edges={liveEdges}/>
+          <MapLayer selNode={selNode} onNodeClick={handleNodeClick} onNodeHover={handleNodeHover} nodes={liveNodes} edges={liveEdges}/>
         </div>
 
         <AreaNameOverlay areaName={areaNameInfo.name} areaEn={areaNameInfo.en} triggerKey={areaNameInfo.key}/>
 
-        {/* Node popup */}
+        {/* Node popup (hover) */}
         {selNode && (()=>{
           const pos = getPopupPos(selNode);
           return (
-            <div style={{position:'absolute', zIndex:20, ...pos}}>
-              <NodePopup
-                node={selNode}
-                onClose={()=>setSelNode(null)}
-                onAttack={(node)=>{ onAttackNode(node); }} onNodeInfo={(node)=>{ if(onNodeClick) onNodeClick(node); }}
-              />
+            <div style={{position:'absolute', zIndex:20, pointerEvents:'none', ...pos}}>
+              <NodePopup node={selNode}/>
             </div>
           );
         })()}
 
-        <MiniMap offsetX={offset.x} offsetY={offset.y} vpW={vpSize.w} vpH={vpSize.h} nodes={liveNodes} />
-        <Legend factionsData={factionsData ?? []} />
+        <MiniMap offsetX={offset.x} offsetY={offset.y} vpW={vpSize.w} vpH={vpSize.h}
+          nodes={liveNodes} onSeek={seekInstant} clamp={clamp} />
 
         {/* boundary glow */}
         {(()=>{

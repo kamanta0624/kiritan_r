@@ -3,8 +3,15 @@
   "name": "[1T]大都会作戦会議",
   "trigger": "enemy_turn",
   "conditions": [
-    { "type": "turn", "op": "eq", "value": 1 },
-    { "type": "noFlag", "flag": "flag_daitoshi_turn1" }
+    {
+      "type": "turn",
+      "op": "eq",
+      "value": 1
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_daitoshi_turn1"
+    }
   ],
   "probability": 1,
   "priority": 900,
@@ -13,14 +20,23 @@
     {
       "type": "conversation",
       "lines": [
-        { "characterId": "char_020", "position": "left", "text": "1ターン目大都会行動開始イベント　セリフダミー" }
+        {
+          "characterId": "char_020",
+          "position": "left",
+          "text": "1ターン目大都会行動開始イベント　セリフダミー"
+        }
       ]
     },
-    { "type": "end" }
+    {
+      "type": "end"
+    }
   ],
   "effects": {
     "default": [
-      { "type": "setFlag", "flag": "flag_daitoshi_turn1" }
+      {
+        "type": "setFlag",
+        "flag": "flag_daitoshi_turn1"
+      }
     ]
   }
 }

@@ -312,53 +312,6 @@ function CharDetail({char, onClose,
             </button>
           )}
 
-          {/* 汎用強化コマンド */}
-          {upgradeUnlocks?.length > 0 && onUpgrade && (
-            <div style={{display:'flex', flexDirection:'column', gap:5, marginBottom:8}}>
-              <div style={{fontSize:9, fontFamily:'Rajdhani', fontWeight:700,
-                letterSpacing:'.15em', color:TXD, marginBottom:2}}>UPGRADE</div>
-              {upgradeUnlocks.filter(id => UPGRADE_COMMANDS[id]).map(id => {
-                const cmd = UPGRADE_COMMANDS[id];
-                const affordable = (treasury ?? 0) >= cmd.cost;
-                const getPreview = () => {
-                  if (id === 'sp_refill') {
-                    const cur = char.meme ?? 0;
-                    const next = Math.min(cur + Math.floor((char.memeMax ?? 0) * 0.5), char.memeMax ?? 0);
-                    return `SP: ${cur.toLocaleString()} → ${next.toLocaleString()}`;
-                  }
-                  if (id === 'sp_max_up') {
-                    const cur = char.memeMax ?? 0;
-                    return `SP上限: ${cur.toLocaleString()} → ${(cur + 200).toLocaleString()}`;
-                  }
-                  return '';
-                };
-                return (
-                  <button key={id}
-                    onClick={() => affordable && setConfirmState({
-                      type: 'upgrade', label: cmd.label, cost: cmd.cost,
-                      preview: getPreview(),
-                      action: () => onUpgrade(char.id, id),
-                    })}
-                    disabled={!affordable}
-                    style={{
-                      width:'100%', padding:'7px 10px', borderRadius:7,
-                      background: affordable ? `rgba(192,112,16,.1)` : 'rgba(0,0,0,.04)',
-                      border: affordable ? `1px solid rgba(192,112,16,.3)` : `1px solid ${BR}`,
-                      color: affordable ? AC : TXF,
-                      cursor: affordable ? 'pointer' : 'not-allowed',
-                      fontFamily:"'Noto Sans JP'", fontSize:10, fontWeight:700,
-                      display:'flex', alignItems:'center', justifyContent:'space-between',
-                    }}>
-                    <span>{cmd.label}</span>
-                    <span style={{fontFamily:'Rajdhani', fontSize:11}}>
-                      {cmd.cost.toLocaleString()} ミーム
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
           {/* キャラ固有強化コマンド */}
           {charUpgrades?.length > 0 && onPurchaseUpgrade && (
             <div style={{display:'flex', flexDirection:'column', gap:5, marginBottom:8}}>

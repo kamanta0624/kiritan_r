@@ -28,11 +28,17 @@ import {
   addUpgradeCmd, deleteUpgradeCmd, editUpgradeCmd, _saveUpgradeCmdModal,
   saveResearch, _closeModal,
 } from './tab-research.js';
+import {
+  renderPromotionTab,
+  addPromotionCommand, deletePromotionCommand, editPromotionCommand,
+  _savePromotionModal, _addEffect, _toggleLimitedFields, _closePromoModal,
+  savePromotion,
+} from './tab-promotion.js';
 
 // ----------------------------------------------------------------
 // タブ切替
 // ----------------------------------------------------------------
-const TAB_ORDER = ['characters', 'items', 'factions', 'map', 'legions', 'events', 'research'];
+const TAB_ORDER = ['characters', 'items', 'factions', 'map', 'legions', 'events', 'research', 'promotion'];
 
 function switchTab(tab) {
   state.tab        = tab;
@@ -61,7 +67,8 @@ function renderAll() {
       main.style.padding  = '0';
       initEventsTab(main, state.data);
     }
-    else if (state.tab === 'research') renderResearchTab(main);
+    else if (state.tab === 'research')  renderResearchTab(main);
+    else if (state.tab === 'promotion') renderPromotionTab(main);
   } catch (err) {
     main.innerHTML = `<div class="error-box"><p style="color:#f85149">描画エラー</p><pre>${err.stack}</pre></div>`;
     console.error(err);
@@ -126,6 +133,10 @@ window.EditorApp = {
   addResearchNode, deleteResearchNode, editResearchNode, _saveResearchNodeModal,
   addUpgradeCmd, deleteUpgradeCmd, editUpgradeCmd, _saveUpgradeCmdModal,
   saveResearch, _closeModal,
+  // promotion
+  addPromotionCommand, deletePromotionCommand, editPromotionCommand,
+  _savePromotionModal, _addEffect, _toggleLimitedFields, _closePromoModal,
+  savePromotion,
 };
 
 init();

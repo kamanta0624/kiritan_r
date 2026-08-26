@@ -48,8 +48,7 @@ function _calcPool(unit, action, isPlayer, eng) {
   const opponents = isPlayer ? eng.enemySide : eng.playerSide;
   const alive = opponents.filter(u => !eng.isDead(u) && !u.retreated);
   if (action === 'ranged' || action === 'song') return alive;
-  const front = alive.filter(u => u.position === 'front');
-  return front.length ? front : alive;
+  return alive.filter(u => u.position === 'front');
 }
 
 function normalizeChar(c, idx) {
@@ -106,7 +105,7 @@ function Pill({ label, color=PK, filled=false, size='md' }) {
   );
 }
 
-// ── R10: 作戦ボーナスバッジ ───────────────────────────────────
+// ── R10: カップリングボーナスバッジ ───────────────────────────
 function StrategyBadge({ side, bonus }) {
   const color = side==='player' ? TEAL : AC;
   return (
@@ -115,16 +114,51 @@ function StrategyBadge({ side, bonus }) {
       background:color, color:'#fff',
       fontSize:11, fontWeight:900, fontFamily:FONT_DISPLAY, letterSpacing:'.12em',
       boxShadow:`0 0 10px ${color}66`, whiteSpace:'nowrap',
-    }}>⚔ 作戦 +{Math.round(bonus*100)}%</div>
+    }}>♡ カップリング +{Math.round(bonus*100)}%</div>
   );
 }
 
-// ── R9: 作戦カットイン ────────────────────────────────────────
-function StrategyCutin({ winner, onSkip, bgUrl = 'url(assets/bg_battle.jpg)' }) {
-  const enemy   = winner.side === 'enemy';
-  const accent  = enemy ? AC : TEAL;
-  const accent2 = enemy ? AC2 : '#26b0bf';
-  const line    = winner.char.quotes?.strategy || '作戦は完璧——勝利は約束された';
+// ── R9: カップリングカットイン ────────────────────────────────
+/** 成立ペア1組ぶんの立ち絵＋ボーナス表示 */
+function CoupleCard({ pair, accent, delay }) {
+  const Face = ({ id }) => (
+    <div style={{
+      width:112, height:158, borderRadius:10, overflow:'hidden',
+      border:`3px solid ${accent}`, boxShadow:`0 0 28px ${accent}aa, 0 0 0 6px rgba(0,0,0,.6)`,
+      background:'#0a0816', flexShrink:0,
+    }}>
+      <img src={portraitPath(id)} alt=""
+        onError={e => { e.currentTarget.style.display='none'; }}
+        style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'center 8%' }}/>
+    </div>
+  );
+  return (
+    <div style={{
+      display:'flex', flexDirection:'column', alignItems:'center', gap:8,
+      animation:'cutinPortrait .5s cubic-bezier(.18,.9,.32,1.2) both',
+      animationDelay:`${delay}ms`,
+    }}>
+      <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+        <Face id={pair.a}/>
+        <div style={{ fontFamily:FONT_DISPLAY, fontWeight:900, fontSize:22, color:accent, textShadow:'0 2px 8px rgba(0,0,0,.9)' }}>♡</div>
+        <Face id={pair.b}/>
+      </div>
+      <div style={{ fontFamily:FONT_DISPLAY, fontWeight:900, fontSize:14, color:'#fff', letterSpacing:'.02em', textShadow:'0 3px 12px rgba(0,0,0,.85)', textAlign:'center', maxWidth:268 }}>
+        {pair.aName} ＆ {pair.bName}
+      </div>
+      <div style={{
+        padding:'4px 13px', borderRadius:99,
+        background:accent, color:'#fff',
+        fontFamily:FONT_DISPLAY, fontWeight:900, fontSize:12, letterSpacing:'.08em',
+        boxShadow:`0 4px 18px ${accent}aa`,
+      }}>Lv{pair.lv} ／ +{(pair.bonus*100).toFixed(1)}%</div>
+    </div>
+  );
+}
+
+function StrategyCutin({ pairs, total, onSkip, bgUrl = 'url(assets/bg_battle.jpg)' }) {
+  const accent  = TEAL;
+  const accent2 = '#26b0bf';
   return (
     <div onClick={onSkip} style={{
       position:'absolute', inset:0, zIndex:60, cursor:'pointer', overflow:'hidden',
@@ -147,46 +181,34 @@ function StrategyCutin({ winner, onSkip, bgUrl = 'url(assets/bg_battle.jpg)' }) 
       <div style={{
         position:'absolute', top:'50%', left:'50%',
         transform:'translate(-50%,-50%)',
-        display:'flex', alignItems:'center', gap:60,
-        animation:'cutinPortrait .5s cubic-bezier(.18,.9,.32,1.2) both',
-        flexDirection: enemy ? 'row-reverse' : 'row',
+        display:'flex', flexDirection:'column', alignItems:'center', gap:20,
+        width:'min(1200px, 92%)',
       }}>
         <div style={{
-          width:560, height:780, borderRadius:18, overflow:'hidden',
-          border:`6px solid ${accent}`, boxShadow:`0 0 80px ${accent}cc, 0 0 0 14px rgba(0,0,0,.7)`,
-          background:'#0a0816', flexShrink:0, position:'relative',
+          fontFamily:FONT_DISPLAY, fontWeight:900, fontSize:22, color:accent, letterSpacing:'.52em',
+          animation:'cutinPortrait .5s cubic-bezier(.18,.9,.32,1.2) both',
+        }}>COUPLING</div>
+        <div style={{
+          fontFamily:FONT_DISPLAY, fontWeight:900, fontSize:52, lineHeight:1,
+          color:'#fff', letterSpacing:'.12em',
+          textShadow:`0 0 32px ${accent}cc, 0 5px 0 rgba(0,0,0,.85)`,
+          animation:'cutinPortrait .5s cubic-bezier(.18,.9,.32,1.2) both',
+        }}>絆が力になる</div>
+        <div style={{
+          display:'flex', flexWrap:'wrap', justifyContent:'center', gap:'18px 24px',
         }}>
-          <img src={portraitPath(winner.char?.id ?? winner.id)} alt=""
-            onError={e => { e.currentTarget.style.display='none'; }}
-            style={{
-              width:'100%', height:'100%', objectFit:'cover', objectPosition:'center 8%',
-              transform: enemy ? 'scaleX(-1)' : 'none',
-            }}/>
-          <div style={{ position:'absolute', inset:0, background:`linear-gradient(180deg, transparent 55%, ${accent}66)` }}/>
+          {pairs.map((p, i) => (
+            <CoupleCard key={`${p.a}__${p.b}`} pair={p} accent={accent} delay={260 + i*160}/>
+          ))}
         </div>
-        <div style={{ display:'flex', flexDirection:'column', gap:22, maxWidth:780, alignItems:enemy?'flex-end':'flex-start' }}>
-          <div style={{ fontFamily:FONT_DISPLAY, fontWeight:900, fontSize:22, color:accent, letterSpacing:'.52em' }}>
-            STRATEGY {enemy ? 'BREACH' : 'SUCCESS'}
-          </div>
-          <div style={{
-            fontFamily:FONT_DISPLAY, fontWeight:900, fontSize:128, lineHeight:1,
-            color:'#fff', letterSpacing:'.12em',
-            textShadow:`0 0 32px ${accent}cc, 0 6px 0 rgba(0,0,0,.85)`,
-            textAlign: enemy ? 'right' : 'left',
-          }}>{enemy ? '作戦不利' : '作戦成功'}</div>
-          <div style={{ fontFamily:FONT_DISPLAY, fontWeight:900, fontSize:48, color:'#fff', letterSpacing:'.04em', lineHeight:1.3, textShadow:'0 4px 16px rgba(0,0,0,.85)', marginTop:4 }}>
-            {winner.char.name}
-          </div>
-          <div style={{ fontFamily:FONT_DISPLAY, fontWeight:700, fontSize:40, color:'rgba(255,255,255,.95)', lineHeight:1.3, letterSpacing:'.04em', textShadow:'0 3px 12px rgba(0,0,0,.85)', maxWidth:760 }}>
-            「{line}」
-          </div>
-          <div style={{
-            marginTop:10, padding:'10px 26px', borderRadius:99,
-            background:`linear-gradient(135deg, ${accent}, ${accent2})`, color:'#fff',
-            fontFamily:FONT_DISPLAY, fontWeight:900, fontSize:22, letterSpacing:'.16em',
-            boxShadow:`0 6px 28px ${accent}aa`,
-          }}>SP攻撃 {enemy ? '−' : '+'}{Math.round(winner.bonus*100)}%</div>
-        </div>
+        <div style={{
+          padding:'9px 24px', borderRadius:99,
+          background:`linear-gradient(135deg, ${accent}, ${accent2})`, color:'#fff',
+          fontFamily:FONT_DISPLAY, fontWeight:900, fontSize:20, letterSpacing:'.16em',
+          boxShadow:`0 6px 28px ${accent}aa`,
+          animation:'cutinPortrait .5s cubic-bezier(.18,.9,.32,1.2) both',
+          animationDelay:`${260 + pairs.length*160}ms`,
+        }}>SP攻撃 +{Math.round(total*100)}%</div>
       </div>
       <div style={{
         position:'absolute', bottom:36, left:'50%', transform:'translateX(-50%)',
@@ -959,7 +981,7 @@ function BActionScene({
   round, maxRounds, targetNode, isDuel,
   allyDisplay, enemyDisplay, activeUnitId, specialPending,
   unitStates, log, winner, phase,
-  strategyBonus, battleCapacity,
+  coupleBonus, battleCapacity,
   animState, bgUrl,
   onAllyAction, onEnemyAttack,
   onReturn,
@@ -1029,7 +1051,7 @@ function BActionScene({
         <div style={{ flex:1, display:'flex', flexDirection:'column', gap:12, minWidth:0, minHeight:0 }}>
           {/* ラウンドパネル */}
           <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:14, padding:'10px 18px', flexShrink:0 }}>
-            {strategyBonus?.side === 'player' && <StrategyBadge side="player" bonus={strategyBonus.bonus}/>}
+            {coupleBonus?.player > 0 && <StrategyBadge side="player" bonus={coupleBonus.player}/>}
             <Pill label={phase==='battleend' ? '戦闘終了' : specialPending ? '必殺技ターゲット選択' : '行動選択中'}
               color={phase==='battleend'?TXD:specialPending?'#ff2255':PK} filled/>
             {/* R13: 決闘 vs 通常でラウンド表示切り替え */}
@@ -1056,7 +1078,7 @@ function BActionScene({
                 </span>
               </div>
             )}
-            {strategyBonus?.side === 'enemy' && <StrategyBadge side="enemy" bonus={strategyBonus.bonus}/>}
+            {coupleBonus?.enemy > 0 && <StrategyBadge side="enemy" bonus={coupleBonus.enemy}/>}
           </div>
 
           {/* 戦闘終了パネル or スペーサー */}
@@ -1144,7 +1166,7 @@ function getBgUrl(targetNode, isDefense) {
     : 'url(assets/bg_battle.jpg)';
 }
 
-export default function BattleFlow({ formation, targetNode, onComplete, onBattleStart, enemyChars = [], battleMode = 'normal', isDefense = false, enemyRetreatRule = 'char_dead', battleCapacity = null }) {
+export default function BattleFlow({ formation, targetNode, onComplete, onBattleStart, enemyChars = [], battleMode = 'normal', isDefense = false, enemyRetreatRule = 'char_dead', battleCapacity = null, affinity = {} }) {
   const BATTLE_CAP  = battleCapacity ?? targetNode?.battleCapacity ?? 400;
   const slots       = ['front1','front2','rear1','rear2'];
   const rawAllies   = useRef(slots.map(k => formation?.[k]).filter(Boolean)).current;
@@ -1176,8 +1198,9 @@ export default function BattleFlow({ formation, targetNode, onComplete, onBattle
   // Bug①: doAction 再入ガード（クリック重複 / 残存タイマ / nextActor再選出を一括で弾く）
   const actionLockRef = useRef(false);
   const [cutinVisible,  setCutinVisible]  = useState(false);
-  const [strategyWinner, setStrategyWinner] = useState(null);
-  const [strategyBonus,  setStrategyBonus]  = useState(null);
+  // カットイン用の成立ペア（名前付き）と 両サイドのボーナス合計
+  const [couplePairs,   setCouplePairs]   = useState([]);
+  const [coupleBonus,   setCoupleBonus]   = useState(null);
 
   // ── display 同期 ──
   const syncDisplay = useCallback((activeId) => {
@@ -1263,7 +1286,8 @@ export default function BattleFlow({ formation, targetNode, onComplete, onBattle
       const opts = _calcOptions(unit, eng.allowRetreat, enemyRetreatRule, eng);
       BattleAI.selectAction(unit, opts);
       if (['attack','ranged','song','special'].includes(unit.action)) {
-        BattleAI.selectTarget(unit, _calcPool(unit, unit.action, false, eng));
+        const target = BattleAI.selectTarget(unit, _calcPool(unit, unit.action, false, eng));
+        if (!target) unit.action = 'defend';
       }
       syncDisplay(null);
       setTimeout(() => doAction(unit, false), 300);
@@ -1302,6 +1326,7 @@ export default function BattleFlow({ formation, targetNode, onComplete, onBattle
     const eng = new BattleEngineV3({
       playerSide: playerUnits, enemySide: enemyUnits,
       mode: isDefense ? 'defense' : 'attack', battleCapacity: BATTLE_CAP, battleMode,
+      affinity, enemyAffinity: {},
       // M2: 撤退含む全終了をここに一本化
       onBattleEnd: (wins) => {
         const e = engineRef.current;
@@ -1329,6 +1354,7 @@ export default function BattleFlow({ formation, targetNode, onComplete, onBattle
           deadMobIds,
           defeatedEnemyCharIds,
           unitResults,
+          round: e?.round ?? 0,
         };
         setWinner(playerWins ? 'player' : 'enemy');
         setPhase('battleend');
@@ -1386,14 +1412,13 @@ export default function BattleFlow({ formation, targetNode, onComplete, onBattle
 
     engineRef.current = eng;
 
-    // strategyWinner / strategyBonus を engine から生成
-    const { side, bonus, winnerChar } = eng.strategyMult;
-    if (winnerChar) {
-      setStrategyWinner({ char: winnerChar, bonus, side });
+    // カップリング表示データを engine から生成（名前は playerSide から引く）
+    const { player, enemy, playerPairs } = eng.couplingBonus;
+    const nameOf = id => eng.playerSide.find(u => u.char.id === id)?.char.name ?? id;
+    setCoupleBonus({ player, enemy });
+    if (playerPairs.length) {
+      setCouplePairs(playerPairs.map(p => ({ ...p, aName: nameOf(p.a), bName: nameOf(p.b) })));
       setCutinVisible(true);
-    }
-    if (side) {
-      setStrategyBonus({ side, bonus });
     }
 
     // battle_start 通知（初期化フローでの1回のみ）。描画ロジック非変更。
@@ -1495,7 +1520,7 @@ export default function BattleFlow({ formation, targetNode, onComplete, onBattle
         log={log}
         winner={winner}
         phase={phase}
-        strategyBonus={strategyBonus}
+        coupleBonus={coupleBonus}
         battleCapacity={BATTLE_CAP}
         animState={animState}
         bgUrl={bgUrl}
@@ -1504,9 +1529,10 @@ export default function BattleFlow({ formation, targetNode, onComplete, onBattle
         onReturn={handleReturn}
       />
 
-      {/* R9: 作戦カットイン */}
-      {cutinVisible && strategyWinner && (
-        <StrategyCutin winner={strategyWinner} onSkip={() => setCutinVisible(false)} bgUrl={bgUrl}/>
+      {/* R9: カップリングカットイン（成立ペア0組なら出さない） */}
+      {cutinVisible && couplePairs.length > 0 && (
+        <StrategyCutin pairs={couplePairs} total={coupleBonus?.player ?? 0}
+          onSkip={() => setCutinVisible(false)} bgUrl={bgUrl}/>
       )}
 
       {/* R15: 戦闘アニメーションオーバーレイ */}

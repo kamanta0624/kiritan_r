@@ -1,0 +1,46 @@
+---
+id: char_065
+name: KAITO
+factionId: faction_new03
+isLeader: false
+isTemplate: false
+role: attacker
+attackType: melee
+charHp: 150
+charMaxHp: 150
+charAttack: 70
+charDefense: 0
+charSong: 20
+attack: 70
+defense: 70
+attackCount: 8
+soldiers: 500
+maxSoldiers: 1000
+soldierAtk: 10
+soldierDef: 8
+strategyRate: 20
+skills: []
+kana: null
+hireCost: 0
+joinCondition: null
+description: ''
+battleBonus:
+  attack:
+    soldierAtk: 0
+    soldierDef: 0
+    charAttack: 0
+  defense:
+    soldierAtk: 0
+    soldierDef: 0
+    charAttack: 0
+  dungeon:
+    soldierAtk: 0
+    soldierDef: 0
+    charAttack: 0
+portrait: /characters/portraits/char_065.png
+companionLines: null
+secretaryLines: null
+tags:
+  - type/character
+  - faction/faction_new03
+---

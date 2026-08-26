@@ -1,26 +1,16 @@
 {
   "factions": [
     {
-      "id": "東北家",
-      "name": "東北家",
-      "color": "#c4427a",
-      "isPlayer": true,
-      "treasury": 500,
-      "atWarWith": [
-        "faction_red"
-      ],
-      "warFlags": {}
-    },
-    {
-      "id": "faction_red",
-      "name": "大都会",
-      "color": "#7300ff",
+      "id": "faction_new04",
+      "name": "AHS（仮）",
+      "color": "#426ed7",
       "isPlayer": false,
-      "treasury": 400,
-      "atWarWith": [
-        "東北家"
-      ],
-      "warFlags": {}
+      "treasury": 300,
+      "atWarWith": [],
+      "warFlags": {
+        "canDeclareWar": false,
+        "eventTriggered": false
+      }
     },
     {
       "id": "faction_green",
@@ -33,6 +23,29 @@
         "canDeclareWar": false,
         "eventTriggered": false
       }
+    },
+    {
+      "id": "faction_new03",
+      "name": "ボーカル界",
+      "color": "#d75d42",
+      "isPlayer": false,
+      "treasury": 300,
+      "atWarWith": [],
+      "warFlags": {
+        "canDeclareWar": false,
+        "eventTriggered": false
+      }
+    },
+    {
+      "id": "faction_red",
+      "name": "大都会",
+      "color": "#7300ff",
+      "isPlayer": false,
+      "treasury": 400,
+      "atWarWith": [
+        "東北家"
+      ],
+      "warFlags": {}
     },
     {
       "id": "faction_yellow",
@@ -59,33 +72,20 @@
       }
     },
     {
+      "id": "東北家",
+      "name": "東北家",
+      "color": "#c4427a",
+      "isPlayer": true,
+      "treasury": 500,
+      "atWarWith": [
+        "faction_red"
+      ],
+      "warFlags": {}
+    },
+    {
       "id": "faction_new02",
       "name": "自由都市",
       "color": "#2d4e37",
-      "isPlayer": false,
-      "treasury": 300,
-      "atWarWith": [],
-      "warFlags": {
-        "canDeclareWar": false,
-        "eventTriggered": false
-      }
-    },
-    {
-      "id": "faction_new03",
-      "name": "ボーカル界",
-      "color": "#d75d42",
-      "isPlayer": false,
-      "treasury": 300,
-      "atWarWith": [],
-      "warFlags": {
-        "canDeclareWar": false,
-        "eventTriggered": false
-      }
-    },
-    {
-      "id": "faction_new04",
-      "name": "AHS（仮）",
-      "color": "#426ed7",
       "isPlayer": false,
       "treasury": 300,
       "atWarWith": [],

@@ -1,133 +1,138 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { PK, PK2, AC, AC2, TEAL } from '../shared/tokens.js';
-import { getEventById } from '../game/systems/EventEngine.js';
-import ADVScene from './ADVScene.jsx';
+import { requiredMeme } from '../game/data/crowdfundingConfig.js';
 
 // ═══════════════════════════════════════════════════════════
-//   DungeonScene — 迷宮探索
-//   phase: select → floor_intro → battle → floor_result
-//          → (adv) → next_or_escape / dungeon_cleared
+//   DungeonScene — クラファン挑戦・浅層探索
+//   phase: select → (battle は App.jsx が担当) → wave_result
+//          → continue_or_rest ⇄ (進む で次波へ)
+//   仕様: docs/DESIGN_CROWDFUNDING.md
 // ═══════════════════════════════════════════════════════════
 
 export default function DungeonScene({
-  dungeon,
-  progress,
+  dungeonKind,       // 'crowdfunding' | 'shallow'
+  goals,             // クラファンのゴール一覧（dungeons.json の goals）。浅層探索では未使用
   availableChars,
-  dungeonExploredThisTurn,
-  battleResult,
-  resumeFloor,
-  resumeCharId,
-  onStartBattle,
-  onFloorClear,
-  onDefeat,
+  remainingRounds,
+  waveIndex,         // 直近に戦った（これから戦う）波の番号。0 = まだ未着手
+  goalAchieved,      // クラファン: 進捗100%（ゴール）達成済みか
+  progressPoints,    // クラファン: 累積進捗ポイント
+  progressRequired,  // クラファン: 100%到達に必要な進捗ポイント
+  battleResult,      // 'win' | 'lose' | null — 直近の波の結果
+  sessionEnded,      // true なら結果表示後マップへ自動遷移
+  rewardInfo,        // 直近の波で発生した報酬 { kind, delta, charNames } | null
+  milestoneHit,      // 直近の波で進捗の100%刻みに新たに到達したか
+  onConfirm,         // (charIds, goalId) => void — 挑戦開始／探索開始
+  onContinue,        // () => void — 「進む」（次の波へ）
+  onRest,            // () => void — 「休む」（HP全回復・ラウンド5消費）
+  onEndSession,      // () => void — 「終了する」（クラファンは成果を確定してマップへ）
   onNavigate,
 }) {
+  const isCF = dungeonKind === 'crowdfunding';
+  const progressPercent = isCF && progressRequired > 0
+    ? Math.floor((progressPoints / progressRequired) * 100)
+    : null;
+
   const initialPhase = () => {
-    if (battleResult === 'win' || battleResult === 'lose') return 'floor_result';
-    return 'select';
+    if (battleResult === 'win' || battleResult === 'lose') return 'wave_result';
+    return waveIndex > 0 ? 'continue_or_rest' : 'select';
   };
 
-  const [phase, setPhase]             = useState(initialPhase);
-  const [selectedCharId, setSelected] = useState(resumeCharId ?? null);
-  const [currentFloor, setFloor]      = useState(resumeFloor ?? (progress.clearedFloors + 1));
-  const [currentEventId, setEventId]  = useState(null);
-  const [lastRewardItem, setLastRewardItem] = useState(null);
-  const clearedCalledRef              = useRef(false);
+  const [phase, setPhase]                     = useState(initialPhase);
+  const [selectedCharIds, setSelectedCharIds] = useState([]);
+  const [selectedGoalId, setSelectedGoalId]   = useState(null);
 
-  // 敗北時: onDefeat を呼んで2秒後にmap
+  // wave_result: 結果を一定時間表示してから次へ進む
   useEffect(() => {
-    if (phase !== 'floor_result' || battleResult !== 'lose') return;
-    onDefeat(resumeCharId);
-    const t = setTimeout(() => onNavigate('map'), 2000);
+    if (phase !== 'wave_result') return;
+    const t = setTimeout(() => {
+      if (sessionEnded) onNavigate('map');
+      else setPhase('continue_or_rest');
+    }, 1400);
     return () => clearTimeout(t);
-  }, [phase, battleResult]); // eslint-disable-line
+  }, [phase]); // eslint-disable-line
 
-  // 勝利時: onFloorClear → adv or next_or_escape or dungeon_cleared
-  useEffect(() => {
-    if (phase !== 'floor_result' || battleResult !== 'win') return;
-    if (clearedCalledRef.current) return;
-    clearedCalledRef.current = true;
-
-    const floorData    = dungeon.floors.find(f => f.floor === currentFloor);
-    const isLastFloor  = currentFloor >= dungeon.totalFloors;
-    const rewardItemId = floorData?.rewardItemId ?? null;
-    const eventId      = floorData?.eventId ?? null;
-
-    const rewardItem = rewardItemId
-      ? { instanceId: `${rewardItemId}_${Date.now()}`, itemId: rewardItemId }
-      : null;
-
-    setLastRewardItem(rewardItem);
-
-    onFloorClear({
-      dungeonId:      dungeon.id,
-      clearedFloors:  currentFloor,
-      isFullyCleared: isLastFloor,
-      rewardItem,
-    });
-
-    if (eventId) {
-      setEventId(eventId);
-      setPhase('adv');
-    } else if (isLastFloor) {
-      setPhase('dungeon_cleared');
-    } else {
-      setPhase('next_or_escape');
-    }
-  }, [phase, battleResult]); // eslint-disable-line
+  const dungeonName = isCF ? 'クラファン挑戦' : '浅層探索';
 
   // ── select フェーズ ──
   if (phase === 'select') {
-    const isFullyCleared = progress.isFullyCleared;
-    const noChars        = availableChars.length === 0;
-    const blocked        = dungeonExploredThisTurn || isFullyCleared || noChars;
-    const blockReason    = dungeonExploredThisTurn
-      ? '本日探索済み'
-      : isFullyCleared
-        ? '探索完了済み'
-        : noChars
-          ? '出撃可能なキャラがいない'
-          : null;
+    const eligibleChars = isCF
+      ? availableChars.filter(c => (c.maxSoldiers ?? 0) >= requiredMeme(c.cfChallengeCount ?? 0))
+      : availableChars;
+    const noChars   = eligibleChars.length === 0;
+    const needsGoal = isCF && !selectedGoalId;
 
     return (
-      <DungeonShell dungeon={dungeon} floor={progress.clearedFloors + 1} totalFloors={dungeon.totalFloors}>
+      <DungeonShell name={dungeonName} remainingRounds={remainingRounds} progressPercent={progressPercent}>
         <div style={{ display:'flex', flexDirection:'column', gap:16, maxWidth:480, margin:'0 auto' }}>
-          <SectionTitle>探索者を選択</SectionTitle>
 
-          {blocked && (
+          {isCF && (
+            <>
+              <SectionTitle>ゴールを選択</SectionTitle>
+              <div style={{ display:'flex', flexWrap:'wrap', gap:8 }}>
+                {(goals ?? []).map(g => (
+                  <button key={g.id}
+                    onClick={() => setSelectedGoalId(g.id)}
+                    style={{
+                      padding:'8px 14px', borderRadius:6, cursor:'pointer',
+                      background: selectedGoalId === g.id ? `${AC}33` : 'rgba(255,255,255,.05)',
+                      border: `1px solid ${selectedGoalId === g.id ? AC : 'rgba(255,255,255,.15)'}`,
+                      color:'#fff', fontFamily:"'Noto Sans JP'", fontSize:12,
+                    }}>
+                    {g.name}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+
+          <SectionTitle>参加キャラを選択（最大4名）</SectionTitle>
+
+          {noChars && (
             <div style={{ padding:'12px 18px', borderRadius:8,
               background:'rgba(255,80,80,.12)', border:'1px solid rgba(255,80,80,.4)',
               color:'rgba(255,160,160,.9)', fontSize:13, fontFamily:"'Noto Sans JP'" }}>
-              {blockReason}
+              {isCF ? '必要ミームを満たすキャラがいない' : '出撃可能なキャラがいない'}
             </div>
           )}
 
           <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
-            {availableChars.map(c => (
-              <button key={c.id}
-                onClick={() => setSelected(c.id)}
-                style={{
-                  padding:'12px 16px', borderRadius:8, border:'none', cursor:'pointer',
-                  textAlign:'left', transition:'all .15s',
-                  background: selectedCharId === c.id
-                    ? `linear-gradient(135deg, ${AC}33, ${AC}11)`
-                    : 'rgba(255,255,255,.05)',
-                  borderLeft: `3px solid ${selectedCharId === c.id ? AC : 'rgba(255,255,255,.1)'}`,
-                  color:'#fff', fontFamily:"'Noto Sans JP'", fontSize:13,
-                }}>
-                <span style={{ fontWeight:700 }}>{c.name}</span>
-                <span style={{ marginLeft:12, fontSize:11, color:'rgba(255,255,255,.5)',
-                  fontFamily:'Rajdhani' }}>
-                  HP {c.charHp}/{c.charMaxHp} · SP {c.soldiers}
-                </span>
-              </button>
-            ))}
+            {eligibleChars.map(c => {
+              const selected = selectedCharIds.includes(c.id);
+              const disallow = !selected && selectedCharIds.length >= 4;
+              return (
+                <button key={c.id}
+                  disabled={disallow}
+                  onClick={() => setSelectedCharIds(ids =>
+                    ids.includes(c.id) ? ids.filter(id => id !== c.id)
+                      : ids.length >= 4 ? ids : [...ids, c.id]
+                  )}
+                  style={{
+                    padding:'12px 16px', borderRadius:8, border:'none',
+                    cursor: disallow ? 'not-allowed' : 'pointer',
+                    textAlign:'left', transition:'all .15s',
+                    opacity: disallow ? .4 : 1,
+                    background: selected
+                      ? `linear-gradient(135deg, ${AC}33, ${AC}11)`
+                      : 'rgba(255,255,255,.05)',
+                    borderLeft: `3px solid ${selected ? AC : 'rgba(255,255,255,.1)'}`,
+                    color:'#fff', fontFamily:"'Noto Sans JP'", fontSize:13,
+                  }}>
+                  <span style={{ fontWeight:700 }}>{c.name}</span>
+                  <span style={{ marginLeft:12, fontSize:11, color:'rgba(255,255,255,.5)',
+                    fontFamily:'Rajdhani' }}>
+                    HP {c.charHp}/{c.charMaxHp} · ミーム上限 {c.maxSoldiers}
+                    {isCF && ` (必要 ${requiredMeme(c.cfChallengeCount ?? 0)})`}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
           <div style={{ display:'flex', gap:10, marginTop:8 }}>
-            <DungeonBtn label="探索開始" color={TEAL} primary
-              disabled={!selectedCharId || blocked}
-              onClick={() => setPhase('floor_intro')} />
+            <DungeonBtn label={isCF ? '挑戦開始' : '探索開始'} color={TEAL} primary
+              disabled={selectedCharIds.length === 0 || needsGoal || noChars}
+              onClick={() => onConfirm(selectedCharIds, isCF ? selectedGoalId : null)} />
             <DungeonBtn label="戻る" color="rgba(255,255,255,.7)"
               onClick={() => onNavigate('map')} />
           </div>
@@ -136,143 +141,54 @@ export default function DungeonScene({
     );
   }
 
-  // ── floor_intro フェーズ ──
-  if (phase === 'floor_intro') {
-    const floorData = dungeon.floors.find(f => f.floor === currentFloor);
-    return (
-      <DungeonShell dungeon={dungeon} floor={currentFloor} totalFloors={dungeon.totalFloors}>
-        <div style={{ display:'flex', flexDirection:'column', gap:20, maxWidth:480, margin:'0 auto' }}>
-          <SectionTitle>B{currentFloor} — 探索</SectionTitle>
-
-          <InfoCard>
-            <Row label="ダンジョン">{dungeon.name}</Row>
-            <Row label="階層">B{currentFloor} / B{dungeon.totalFloors}</Row>
-          </InfoCard>
-
-          <InfoCard title="出現する敵">
-            <Row label="名前">{floorData?.enemy?.name}</Row>
-            <Row label="兵力">{floorData?.enemy?.soldiers}</Row>
-          </InfoCard>
-
-          <div style={{ display:'flex', gap:10 }}>
-            <DungeonBtn label="戦闘開始" color={PK} primary
-              onClick={() => onStartBattle(selectedCharId, currentFloor, floorData)} />
-            <DungeonBtn label="退却" color="rgba(255,255,255,.7)"
-              onClick={() => onNavigate('map')} />
-          </div>
-        </div>
-      </DungeonShell>
-    );
-  }
-
-  // ── floor_result フェーズ ──
-  if (phase === 'floor_result') {
-    if (battleResult === 'lose') {
-      const char = availableChars.find(c => c.id === resumeCharId);
-      return (
-        <DungeonShell dungeon={dungeon} floor={currentFloor} totalFloors={dungeon.totalFloors}>
-          <div style={{ display:'flex', flexDirection:'column', gap:16, maxWidth:480, margin:'0 auto',
-            alignItems:'center', textAlign:'center' }}>
-            <div style={{ fontSize:28, fontWeight:900, color:PK,
-              fontFamily:"'Zen Maru Gothic'", textShadow:`0 0 20px ${PK}88` }}>
-              探索失敗
-            </div>
-            <div style={{ fontSize:16, color:'rgba(255,255,255,.8)',
-              fontFamily:"'Noto Sans JP'" }}>
-              {char?.name ?? '探索者'} は倒れた
-            </div>
-            <div style={{ fontSize:13, color:'rgba(255,200,200,.7)',
-              fontFamily:"'Noto Sans JP'" }}>
-              2ターンの休養が必要です
-            </div>
-            <div style={{ fontSize:11, color:'rgba(255,255,255,.4)',
-              fontFamily:'Rajdhani' }}>
-              マップへ自動的に戻ります…
-            </div>
-          </div>
-        </DungeonShell>
-      );
-    }
-    // 勝利中は useEffect が処理するので Loading 表示
-    return (
-      <DungeonShell dungeon={dungeon} floor={currentFloor} totalFloors={dungeon.totalFloors}>
-        <div style={{ color:'rgba(255,255,255,.6)', fontFamily:'Rajdhani', letterSpacing:'.2em' }}>
-          PROCESSING…
-        </div>
-      </DungeonShell>
-    );
-  }
-
-  // ── adv フェーズ ──
-  if (phase === 'adv') {
-    const eventDef = currentEventId ? getEventById(currentEventId) : null;
+  // ── wave_result フェーズ ──
+  if (phase === 'wave_result') {
+    const isWin = battleResult === 'win';
+    const title = isWin
+      ? (isCF ? (milestoneHit ? `達成！ 進捗 ${progressPercent}%` : '撃破！') : '探索成功！')
+      : (isCF ? 'クラファン失敗…' : '撤退…');
+    const sub = isCF
+      ? (milestoneHit
+          ? null // reward list が代わりに出る
+          : (isWin ? `進捗 ${progressPercent}% まで前進` : 'ミーム上限は必要量まで戻る'))
+      : (isWin ? 'ミームと好感度を獲得した' : '');
 
     return (
-      <ADVScene
-        script={eventDef?.script ?? [{ type:'end' }]}
-        effects={eventDef?.effects ?? null}
-        onExit={() => {
-          const isLastFloor = currentFloor >= dungeon.totalFloors;
-          setPhase(isLastFloor ? 'dungeon_cleared' : 'next_or_escape');
-        }}
-      />
-    );
-  }
-
-  // ── next_or_escape フェーズ ──
-  if (phase === 'next_or_escape') {
-    return (
-      <DungeonShell dungeon={dungeon} floor={currentFloor} totalFloors={dungeon.totalFloors}>
+      <DungeonShell name={dungeonName} remainingRounds={remainingRounds} progressPercent={progressPercent}>
         <div style={{ display:'flex', flexDirection:'column', gap:16, maxWidth:480, margin:'0 auto',
           alignItems:'center', textAlign:'center' }}>
-          <div style={{ fontSize:24, fontWeight:900, color:AC2,
+          <div style={{ fontSize:28, fontWeight:900, color: isWin ? AC2 : PK,
+            fontFamily:"'Zen Maru Gothic'", textShadow:`0 0 20px ${isWin ? AC2 : PK}88` }}>
+            {title}
+          </div>
+          {sub && (
+            <div style={{ fontSize:14, color:'rgba(255,255,255,.75)', fontFamily:"'Noto Sans JP'" }}>
+              {sub}
+            </div>
+          )}
+          {rewardInfo && <RewardList rewardInfo={rewardInfo} />}
+        </div>
+      </DungeonShell>
+    );
+  }
+
+  // ── continue_or_rest フェーズ（進む／休む／終了する） ──
+  if (phase === 'continue_or_rest') {
+    return (
+      <DungeonShell name={dungeonName} remainingRounds={remainingRounds} progressPercent={progressPercent}>
+        <div style={{ display:'flex', flexDirection:'column', gap:16, maxWidth:480, margin:'0 auto',
+          alignItems:'center', textAlign:'center' }}>
+          <div style={{ fontSize:20, fontWeight:900, color:AC2,
             fontFamily:"'Zen Maru Gothic'", textShadow:`0 0 16px ${AC2}88` }}>
-            B{currentFloor} クリア！
+            {isCF && goalAchieved ? 'ストレッチゴール継続中' : '次の行動を選択'}
           </div>
-          {lastRewardItem && (
-            <div style={{ fontSize:13, color:'rgba(255,220,100,.8)',
-              fontFamily:"'Noto Sans JP'" }}>
-              アイテムを入手した
-            </div>
-          )}
-          <div style={{ display:'flex', gap:10, marginTop:8 }}>
-            <DungeonBtn label="次の階へ" color={TEAL} primary
-              onClick={() => {
-                setFloor(f => f + 1);
-                clearedCalledRef.current = false;
-                setPhase('floor_intro');
-              }} />
-            <DungeonBtn label="退却する" color="rgba(255,255,255,.7)"
-              onClick={() => onNavigate('map')} />
-          </div>
-        </div>
-      </DungeonShell>
-    );
-  }
-
-  // ── dungeon_cleared フェーズ ──
-  if (phase === 'dungeon_cleared') {
-    return (
-      <DungeonShell dungeon={dungeon} floor={currentFloor} totalFloors={dungeon.totalFloors}>
-        <div style={{ display:'flex', flexDirection:'column', gap:16, maxWidth:480, margin:'0 auto',
-          alignItems:'center', textAlign:'center' }}>
-          <div style={{ fontSize:28, fontWeight:900, color:AC,
-            fontFamily:"'Zen Maru Gothic'", textShadow:`0 0 20px ${AC}88` }}>
-            迷宮クリア！
-          </div>
-          <div style={{ fontSize:15, color:'rgba(255,255,255,.7)',
-            fontFamily:"'Noto Sans JP'" }}>
-            {dungeon.name} を制覇した
-          </div>
-          {lastRewardItem && (
-            <div style={{ fontSize:13, color:'rgba(255,220,100,.8)',
-              fontFamily:"'Noto Sans JP'" }}>
-              アイテムを入手した
-            </div>
-          )}
-          <div style={{ marginTop:8 }}>
-            <DungeonBtn label="マップへ戻る" color={AC} primary
-              onClick={() => onNavigate('map')} />
+          <div style={{ display:'flex', gap:10, marginTop:8, flexWrap:'wrap', justifyContent:'center' }}>
+            <DungeonBtn label="進む" color={TEAL} primary onClick={onContinue} />
+            <DungeonBtn label="休む" color={AC2}
+              disabled={remainingRounds < 5}
+              onClick={onRest} />
+            <DungeonBtn label="終了する" color="rgba(255,255,255,.7)"
+              onClick={onEndSession} />
           </div>
         </div>
       </DungeonShell>
@@ -284,7 +200,7 @@ export default function DungeonScene({
 
 // ── 共通レイアウトシェル ──
 
-function DungeonShell({ dungeon, floor, totalFloors, children }) {
+function DungeonShell({ name, remainingRounds, progressPercent, children }) {
   return (
     <div style={{
       width:'100vw', height:'100vh', position:'relative', overflow:'hidden',
@@ -306,26 +222,40 @@ function DungeonShell({ dungeon, floor, totalFloors, children }) {
         <div style={{ padding:'6px 14px', borderRadius:4,
           background:'rgba(0,0,0,.55)', border:'1px solid rgba(255,255,255,.12)',
           fontFamily:"'Zen Maru Gothic'", fontSize:14, fontWeight:900, color:'#fff', letterSpacing:'.1em' }}>
-          ◤ {dungeon.name}
+          ◤ {name}
         </div>
         <div style={{ fontFamily:'Rajdhani', fontSize:11, fontWeight:700,
           letterSpacing:'.32em', color:'rgba(255,255,255,.5)' }}>
-          DUNGEON · EXPLORATION
+          DUNGEON
         </div>
-        <div style={{ marginLeft:'auto', display:'flex', alignItems:'baseline', gap:8,
-          padding:'8px 18px', borderRadius:6,
-          background:'rgba(0,0,0,.55)', border:`1px solid ${AC}55`,
-          boxShadow:`0 0 18px ${AC}33` }}>
-          <span style={{ fontFamily:'Rajdhani', fontSize:10, letterSpacing:'.22em', color:AC2 }}>FLOOR</span>
-          <span style={{ fontFamily:'Rajdhani', fontWeight:900, fontSize:26, color:AC2,
-            textShadow:`0 0 12px ${AC}aa` }}>B{floor}</span>
-          <span style={{ fontSize:11, color:'rgba(255,255,255,.4)' }}>/ B{totalFloors}</span>
+        <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:10 }}>
+          {progressPercent != null && (
+            <div style={{ display:'flex', alignItems:'baseline', gap:8,
+              padding:'8px 18px', borderRadius:6,
+              background:'rgba(0,0,0,.55)', border:`1px solid ${AC}55`,
+              boxShadow:`0 0 18px ${AC}33` }}>
+              <span style={{ fontFamily:'Rajdhani', fontSize:10, letterSpacing:'.22em', color:AC2 }}>PROGRESS</span>
+              <span style={{ fontFamily:'Rajdhani', fontWeight:900, fontSize:26, color:AC2,
+                textShadow:`0 0 12px ${AC}aa` }}>{progressPercent}%</span>
+            </div>
+          )}
+          {remainingRounds != null && (
+            <div style={{ display:'flex', alignItems:'baseline', gap:8,
+              padding:'8px 18px', borderRadius:6,
+              background:'rgba(0,0,0,.55)', border:`1px solid ${PK}55`,
+              boxShadow:`0 0 18px ${PK}33` }}>
+              <span style={{ fontFamily:'Rajdhani', fontSize:10, letterSpacing:'.22em', color:PK2 }}>ROUNDS</span>
+              <span style={{ fontFamily:'Rajdhani', fontWeight:900, fontSize:26, color:PK2,
+                textShadow:`0 0 12px ${PK}aa` }}>{Math.max(0, remainingRounds)}</span>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* main content */}
+      {/* main content。キャラ数が多いと縦に長くなるため、固定top barと重ならないよう
+          スクロール可能な上詰めレイアウトにする（下詰め中央寄せだと長いリストが top bar に潜り込む）*/}
       <div style={{ position:'absolute', inset:0, display:'flex',
-        alignItems:'center', justifyContent:'center', paddingTop:80 }}>
+        justifyContent:'center', overflowY:'auto', paddingTop:96, paddingBottom:32 }}>
         {children}
       </div>
     </div>
@@ -343,34 +273,22 @@ function SectionTitle({ children }) {
   );
 }
 
-function InfoCard({ title, children }) {
+// 増えたパラメータを具体値で一覧表示（DESIGN_CROWDFUNDING.md §4-2）。
+// delta は全参加キャラ共通なので、参加者名をまとめて出し内訳は1回だけ表示する。
+function RewardList({ rewardInfo }) {
+  const { delta, charNames } = rewardInfo;
+  const entries = Object.entries(delta ?? {});
+  if (!entries.length) return null;
   return (
-    <div style={{ padding:'14px 18px', borderRadius:8,
-      background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.1)' }}>
-      {title && (
-        <div style={{ fontFamily:'Rajdhani', fontSize:10, fontWeight:700,
-          letterSpacing:'.22em', color:'rgba(255,255,255,.4)', marginBottom:8 }}>
-          {title.toUpperCase()}
-        </div>
-      )}
-      <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
-        {children}
+    <div style={{ padding:'12px 18px', borderRadius:8,
+      background:'rgba(255,220,100,.08)', border:'1px solid rgba(255,220,100,.35)',
+      display:'flex', flexDirection:'column', gap:6, textAlign:'left' }}>
+      <div style={{ fontSize:12, fontWeight:700, color:'rgba(255,220,100,.9)', fontFamily:"'Noto Sans JP'" }}>
+        {(charNames ?? []).join('・')}
       </div>
-    </div>
-  );
-}
-
-function Row({ label, children }) {
-  return (
-    <div style={{ display:'flex', alignItems:'baseline', gap:8 }}>
-      <span style={{ fontSize:11, color:'rgba(255,255,255,.4)',
-        fontFamily:'Rajdhani', fontWeight:700, minWidth:80 }}>
-        {label}
-      </span>
-      <span style={{ fontSize:14, color:'rgba(255,255,255,.85)',
-        fontFamily:"'Noto Sans JP'" }}>
-        {children}
-      </span>
+      <div style={{ fontSize:12, color:'rgba(255,255,255,.85)', fontFamily:'Rajdhani', letterSpacing:'.02em' }}>
+        {entries.map(([field, amount]) => `${field} +${amount}`).join(' / ')}
+      </div>
     </div>
   );
 }
@@ -379,7 +297,7 @@ function DungeonBtn({ label, color, onClick, disabled, primary }) {
   return (
     <button onClick={onClick} disabled={disabled}
       style={{
-        padding:'11px 24px', borderRadius:6, border:'none',
+        padding:'11px 24px', borderRadius:6,
         cursor: disabled ? 'not-allowed' : 'pointer',
         background: disabled
           ? 'rgba(255,255,255,.05)'

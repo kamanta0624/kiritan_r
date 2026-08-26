@@ -5,6 +5,10 @@ export const TEAL='#1a8a96';
 export const TX='#1c1020', TXD='rgba(28,16,32,.55)', TXF='rgba(28,16,32,.24)';
 export const BR='rgba(0,0,0,.08)';
 
+// 明色系（QA画面のオーバーレイ等、暗い立ち絵プレビュー上でも文字が読める必要がある場所用）
+export const BG_LIGHT='rgba(248,246,244,1)', BG_LIGHT2='rgba(240,234,228,1)';
+export const PANEL_LIGHT='rgba(255,253,251,.94)'; // 半透明の明色パネル背景
+
 export const glass = (extra={}) => ({
   background:'rgba(255,253,251,.92)',
   backdropFilter:'blur(16px)', WebkitBackdropFilter:'blur(16px)',
@@ -83,6 +87,9 @@ export const CHARS = [
   {id:'c15', name:'会津あおい', kana:'あいず あおい', portrait:null,
    role:'support', atk:3, def:5, meme:0, memeMax:290, spd:6,
    origin:'東北', skill:'???', skillDesc:'???', joined:false, quote:''},
+  {id:'c16', name:'四国めたん', kana:'しこく めたん', portrait:null,
+   role:'front', atk:10, def:5, meme:400, memeMax:400, spd:5,
+   origin:'東北', skill:'???', skillDesc:'???', joined:true, quote:''},
 ];
 
 // export to window

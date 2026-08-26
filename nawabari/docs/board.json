@@ -1,0 +1,27 @@
+{
+  "_note": "エリア隣接定義。公式図からの導出のため差し替え前提でここ1箇所に集約する。",
+  "areas": [
+    { "id": "oppBase", "label": "相手のベースエリア", "owner": "opponent", "isBase": true },
+    { "id": "oppL", "label": "相手側 左", "owner": "opponent", "isBase": false },
+    { "id": "oppR", "label": "相手側 右", "owner": "opponent", "isBase": false },
+    { "id": "center", "label": "センターエリア", "owner": "neutral", "isBase": false, "capacityPerPlayer": 1 },
+    { "id": "myL", "label": "自分側 左", "owner": "self", "isBase": false },
+    { "id": "myR", "label": "自分側 右", "owner": "self", "isBase": false },
+    { "id": "myBase", "label": "自分のベースエリア", "owner": "self", "isBase": true }
+  ],
+  "adjacency": {
+    "myBase": ["myL", "myR"],
+    "myL": ["myBase", "myR", "center", "oppL"],
+    "myR": ["myBase", "myL", "center", "oppR"],
+    "center": ["myL", "myR", "oppL", "oppR"],
+    "oppL": ["oppBase", "oppR", "center", "myL"],
+    "oppR": ["oppBase", "oppL", "center", "myR"],
+    "oppBase": ["oppL", "oppR"]
+  },
+  "mirror": {
+    "_note": "P2視点への反転マップ。同一グラフを両プレイヤーで共有するために使う。",
+    "myBase": "oppBase", "myL": "oppR", "myR": "oppL",
+    "center": "center",
+    "oppL": "myR", "oppR": "myL", "oppBase": "myBase"
+  }
+}

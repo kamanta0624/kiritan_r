@@ -2,3 +2,11 @@ node_modules/
 dist/
 .DS_Store
 *.DS_Store
+tools/_scratch/
+build/data/
+_deprecated_parts_20260820/
+
+# 大容量アセット（リポジトリ外で配布）
+public/characters/ymm4/
+public/audio/
+docs/assets/psd/

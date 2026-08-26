@@ -5,6 +5,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { BattleEngineV3 } from '../game/systems/BattleEngineV3.js';
 import { BattleAI }       from '../game/systems/BattleAI.js';
+import { allPairs, pairKey, AFFINITY_MAX } from '../game/utils/Affinity.js';
 
 // ────────────────────────────────────────────────
 // インラインテストキャラ
@@ -14,61 +15,49 @@ const TEST_CHARS = {
     id: 'tc_front_melee', name: '前衛近接', attackType: 'melee',
     soldiers: 200, maxSoldiers: 200, charHp: 100, charMaxHp: 100,
     charAttack: 20, charDefense: 10, attackCount: 8,
-    soldierAtk: 10, soldierDef: 8, strategyRate: 30,
+    soldierAtk: 10, soldierDef: 8,
   },
   rear_melee: {
     id: 'tc_rear_melee', name: '後衛近接', attackType: 'melee',
     soldiers: 300, maxSoldiers: 300, charHp: 100, charMaxHp: 100,
     charAttack: 20, charDefense: 10, attackCount: 8,
-    soldierAtk: 10, soldierDef: 8, strategyRate: 30,
+    soldierAtk: 10, soldierDef: 8,
   },
   rear_ranged: {
     id: 'tc_rear_ranged', name: '後衛射撃', attackType: 'ranged',
     soldiers: 150, maxSoldiers: 150, charHp: 80, charMaxHp: 80,
     charAttack: 15, charDefense: 6, attackCount: 10,
-    soldierAtk: 12, soldierDef: 6, strategyRate: 40,
+    soldierAtk: 12, soldierDef: 6,
   },
   rear_song: {
     id: 'tc_rear_song', name: '後衛歌唱', attackType: 'song',
     soldiers: 100, maxSoldiers: 100, charHp: 60, charMaxHp: 60,
     charAttack: 10, charDefense: 5, attackCount: 5,
-    charSong: 80, soldierAtk: 8, soldierDef: 5, strategyRate: 50,
+    charSong: 80, soldierAtk: 8, soldierDef: 5,
   },
   enemy_front: {
     id: 'tc_enemy_front', name: '敵前衛', attackType: 'melee',
     soldiers: 250, maxSoldiers: 250, charHp: 120, charMaxHp: 120,
     charAttack: 18, charDefense: 10, attackCount: 8,
-    soldierAtk: 12, soldierDef: 10, strategyRate: 25,
+    soldierAtk: 12, soldierDef: 10,
   },
   enemy_rear: {
     id: 'tc_enemy_rear', name: '敵後衛', attackType: 'melee',
     soldiers: 200, maxSoldiers: 200, charHp: 100, charMaxHp: 100,
     charAttack: 15, charDefense: 8, attackCount: 6,
-    soldierAtk: 10, soldierDef: 8, strategyRate: 25,
+    soldierAtk: 10, soldierDef: 8,
   },
   tanky: {
     id: 'tc_tanky', name: '超タンク', attackType: 'melee',
     soldiers: 500, maxSoldiers: 500, charHp: 999, charMaxHp: 999,
     charAttack: 1, charDefense: 99, attackCount: 1,
-    soldierAtk: 1, soldierDef: 50, strategyRate: 10,
+    soldierAtk: 1, soldierDef: 50,
   },
   tanky_enemy: {
     id: 'tc_tanky_enemy', name: '超タンク敵', attackType: 'melee',
     soldiers: 500, maxSoldiers: 500, charHp: 999, charMaxHp: 999,
     charAttack: 1, charDefense: 99, attackCount: 1,
-    soldierAtk: 1, soldierDef: 50, strategyRate: 10,
-  },
-  strat_high: {
-    id: 'tc_strat_high', name: '高策略', attackType: 'melee',
-    soldiers: 200, maxSoldiers: 200, charHp: 100, charMaxHp: 100,
-    charAttack: 20, charDefense: 10, attackCount: 8,
-    soldierAtk: 10, soldierDef: 8, strategyRate: 90,
-  },
-  strat_low: {
-    id: 'tc_strat_low', name: '低策略敵', attackType: 'melee',
-    soldiers: 200, maxSoldiers: 200, charHp: 100, charMaxHp: 100,
-    charAttack: 20, charDefense: 10, attackCount: 8,
-    soldierAtk: 10, soldierDef: 8, strategyRate: 0,
+    soldierAtk: 1, soldierDef: 50,
   },
 };
 
@@ -315,16 +304,26 @@ const SCENARIOS = [
   },
   {
     id: 'QA-E12',
-    label: 'E12 作戦補正',
-    expected: 'strategyRate差=90 → 初期化ログに「作戦成功（player）」が出てSPダメ補正が乗ること。',
+    label: 'E12 カップリング補正',
+    expected: '全6ペアLv3（好感度40）→ カップリング P +50%、敵側 +0%。同じ編成なら毎回同じ値になること。',
     battleMode: 'normal',
     battleCapacity: 300,
     build() {
-      const a = cloneChar(TEST_CHARS.strat_high, 'a');
-      const d = cloneChar(TEST_CHARS.strat_low, 'd');
+      const a1 = cloneChar(TEST_CHARS.front_melee,  'a1');
+      const a2 = cloneChar(TEST_CHARS.front_melee,  'a2');
+      const a3 = cloneChar(TEST_CHARS.rear_ranged,  'a3');
+      const a4 = cloneChar(TEST_CHARS.rear_ranged,  'a4');
+      const d  = cloneChar(TEST_CHARS.enemy_front,  'd');
+      const ids = [a1, a2, a3, a4].map(c => c.id);
+      const affinity = {};
+      allPairs(ids).forEach(([x, y]) => { affinity[pairKey(x, y)] = AFFINITY_MAX; });
       return {
-        playerUnits: [buildAt(a, 'attack', 'front')],
+        playerUnits: [
+          buildAt(a1, 'attack', 'front'), buildAt(a2, 'attack', 'front'),
+          buildAt(a3, 'attack', 'rear'),  buildAt(a4, 'attack', 'rear'),
+        ],
         enemyUnits:  [buildAt(d, 'defense', 'front')],
+        affinity,
       };
     },
   },
@@ -360,15 +359,17 @@ const SCENARIOS = [
   },
   {
     id: 'QA-E15',
-    label: 'E15 winnerChar',
-    expected: 'strategyRate差=90 → strategyMult.winnerChar に高strategyRateキャラが入ること（console.log確認）。',
+    label: 'E15 メイン全滅で決着',
+    expected: 'プレイヤーのメイン（front）1名が倒れた時点で、サブ（rear）が生存していても防衛側勝利になること。',
     battleMode: 'normal',
     battleCapacity: 300,
     build() {
-      const a = cloneChar(TEST_CHARS.strat_high, 'a');
-      const d = cloneChar(TEST_CHARS.strat_low, 'd');
+      // メインは即死寸前・SP1（本体被弾しやすい）。サブは撤退しない ranged にする。
+      const a  = cloneChar(TEST_CHARS.front_melee, 'a', { charHp: 1, charMaxHp: 1, soldiers: 1, maxSoldiers: 200 });
+      const as = cloneChar(TEST_CHARS.rear_ranged, 'as');
+      const d  = cloneChar(TEST_CHARS.enemy_front, 'd');
       return {
-        playerUnits: [buildAt(a, 'attack', 'front')],
+        playerUnits: [buildAt(a, 'attack', 'front'), buildAt(as, 'attack', 'rear')],
         enemyUnits:  [buildAt(d, 'defense', 'front')],
       };
     },
@@ -454,11 +455,6 @@ function UnitCard({ unit, engine }) {
           penaltyTurns: {unit.char.penaltyTurns}
         </div>
       )}
-      {unit.char.strategyRate !== undefined && (
-        <div style={{ fontSize: 10, color: '#666', marginTop: 1 }}>
-          策略: {unit.char.strategyRate}
-        </div>
-      )}
     </div>
   );
 }
@@ -523,7 +519,7 @@ export default function BattleFullQAScene({ onBack }) {
     setResult(null);
     setWbResult(null);
 
-    const { playerUnits, enemyUnits } = scenario.build();
+    const { playerUnits, enemyUnits, affinity } = scenario.build();
 
     const eng = new BattleEngineV3({
       playerSide:    playerUnits,
@@ -531,6 +527,7 @@ export default function BattleFullQAScene({ onBack }) {
       mode:          'attack',
       battleCapacity: scenario.battleCapacity,
       battleMode:    scenario.battleMode,
+      affinity:      affinity ?? {},
       onLog:         (msg) => { logRef.current.push(msg); setLog([...logRef.current]); },
       onCardUpdate:  () => {},
       onShake:       () => {},
@@ -552,9 +549,9 @@ export default function BattleFullQAScene({ onBack }) {
     pushLog(`攻撃側: ${playerUnits.map(u => `${u.char.name}(${u.position})`).join(', ')}`);
     pushLog(`防衛側: ${enemyUnits.map(u => `${u.char.name}(${u.position})`).join(', ')}`);
     pushLog(`allowRetreat=${eng.allowRetreat} maxRounds=${eng.maxRounds === Infinity ? '∞' : eng.maxRounds}`);
-    const wc = eng.strategyMult.winnerChar;
-    if (wc) { pushLog(`[E15] winnerChar: ${wc.name} (strategyRate=${wc.strategyRate})`); console.log('[E15] winnerChar', wc); }
-    else pushLog(`winnerChar: null（互角）`);
+    const cb = eng.couplingBonus;
+    pushLog(`カップリング: P +${Math.round(cb.player*100)}%（${cb.playerPairs.length}組） / E +${Math.round(cb.enemy*100)}%`);
+    console.log('[coupling]', cb);
 
     // E14: duel 撤退deny の即時検証
     if (scenario.id === 'QA-E14') {
@@ -653,9 +650,9 @@ export default function BattleFullQAScene({ onBack }) {
     setLog([]);
   };
 
-  const stratInfo = engine?.strategyMult?.side
-    ? `${engine.strategyMult.side} +${(engine.strategyMult.bonus * 100) | 0}%`
-    : '互角';
+  const stratInfo = engine
+    ? `P +${(engine.couplingBonus.player * 100) | 0}% / E +${(engine.couplingBonus.enemy * 100) | 0}%`
+    : '—';
 
   return (
     <div style={S.root}>
@@ -743,8 +740,8 @@ export default function BattleFullQAScene({ onBack }) {
                 <span style={{ color: '#bbb' }}>{String(engine.allowRetreat)}</span>
               </div>
               <div>
-                <span style={{ color: '#555' }}>strategy </span>
-                <span style={{ color: engine.strategyMult?.side ? '#aaffaa' : '#555' }}>{stratInfo}</span>
+                <span style={{ color: '#555' }}>coupling </span>
+                <span style={{ color: engine.couplingBonus.player > 0 ? '#aaffaa' : '#555' }}>{stratInfo}</span>
               </div>
             </div>
           </div>

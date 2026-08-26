@@ -21,6 +21,7 @@ import { ItemSystem }     from '../game/systems/ItemSystem.js';
 import { LegionAI }       from '../game/systems/LegionAI.js';
 import { EventEngine }    from '../game/systems/EventEngine.js';
 import { BattleEngineV3 } from '../game/systems/BattleEngineV3.js';
+import { allPairs, gainAffinity } from '../game/utils/Affinity.js';
 
 import factionsData   from '../game/data/factions.json';
 import basesData      from '../game/data/bases.json';
@@ -29,7 +30,6 @@ import itemsData      from '../game/data/items.json';
 import skillsData     from '../game/data/skills.json';
 import legionsData    from '../game/data/legions.json';
 import researchData   from '../game/data/facilities.json';
-import dungeonsData   from '../game/data/dungeons.json';
 
 // ─────────────────────────────────────────────────────────────
 // 初期状態生成
@@ -68,9 +68,9 @@ function createInitialState() {
       return inv;
     })(),
     buildings:         [],          // 研究済みID配列（kiritan: worldScene.buildings）
-    dungeonProgress:   Object.fromEntries(
-      dungeonsData.dungeons.map(d => [d.id, { clearedFloors: 0, isFullyCleared: false }])
-    ),
+    // dungeons.json はプール方式（クラファン用／浅層探索用）に変更済み。
+    // 個別ダンジョンのクリア進捗という概念が無くなったため空で初期化する。
+    dungeonProgress:   {},
     dungeonExploredThisTurn: false,
     eventFlags:        {},
     occurredEvents:    {},
@@ -83,6 +83,7 @@ function createInitialState() {
     researchQueue:     null,        // null | { id: string, turnsRemaining: number }
     upgradeUnlocks:    ['sp_refill', 'sp_max_up'],
     secretaryId:       null,        // null | charId string
+    affinity:          {},          // { [pairKey]: number } 疎管理・0のペアは持たない
   };
 }
 
@@ -192,6 +193,7 @@ function gameReducer(state, action) {
         defenderBaseId, winnerFactionId,
         unitResults,   // [{ id, soldiers, charHp }] — 実際の戦闘後ステータス
         deadMobIds,
+        isDungeon,
       } = action.payload;
 
       // unitResultsがあれば実値で上書き、なければpenaltyのみ
@@ -200,15 +202,24 @@ function gameReducer(state, action) {
         unitResults.forEach(u => { charMap[u.id] = u; });
       }
 
+      // 同時出撃した非モブの全ペアに +2。ミーム上限成長（攻撃戦・防衛戦のみ）もこの集合を使う
+      const mobIds = new Set(
+        state.characters.filter(c => c._isMobInstance === true).map(c => c.id)
+      );
+      const affinityIds = (usedCharIds ?? []).filter(id => !mobIds.has(id));
+      const growthIds = new Set(isDungeon ? [] : affinityIds);
+
       const characters = state.characters
         .filter(c => !(deadMobIds ?? []).includes(c.id))
         .map(c => {
           const result = charMap[c.id];
+          const growth = growthIds.has(c.id) ? 100 * (1 + (c.memeGrowthMult ?? 0)) : 0;
           return {
             ...c,
             usedThisTurn: usedCharIds.includes(c.id) ? true : c.usedThisTurn,
             soldiers:     result ? Math.max(0, result.soldiers) : c.soldiers,
             charHp:       result ? Math.max(0, result.charHp)   : c.charHp,
+            maxSoldiers:  (c.maxSoldiers ?? 1000) + growth,
             penaltyTurns: (deadCharIds ?? []).includes(c.id) && !(c.penaltyTurns > 0)
               ? 2 : c.penaltyTurns,
           };
@@ -220,10 +231,17 @@ function gameReducer(state, action) {
           )
         : state.bases;
 
+      // ダンジョン戦闘（クラファン・浅層探索）は加算量が経路ごとに異なるため、
+      // ここでは加算しない。App.jsx 側で DESIGN_CROWDFUNDING.md §4 の量を明示的に加算する。
+      const affinity = isDungeon
+        ? state.affinity
+        : gainAffinity(state.affinity, allPairs(affinityIds), 2);
+
       return {
         ...state,
         characters,
         bases,
+        affinity,
         conqueredThisTurn: conquered || state.conqueredThisTurn,
       };
     }
@@ -369,6 +387,9 @@ function gameReducer(state, action) {
       return { ...state, characters: [...baseChars, ...savedMobs] };
     }
 
+    // @deprecated C-3（クラファン挑戦・浅層探索）はこの action を呼ばなくなった。
+    // rewardItem 付与は DESIGN_CROWDFUNDING.md §3-1 により廃止（P1積み残しの解決）。
+    // items.json / ItemSystem.js / state.inventory は内部温存原則どおり残置。
     case 'DUNGEON_FLOOR_CLEAR': {
       const { dungeonId, clearedFloors, isFullyCleared, rewardItem } = action.payload;
       return {
@@ -385,11 +406,12 @@ function gameReducer(state, action) {
       return { ...state, dungeonExploredThisTurn: true };
 
     case 'DUNGEON_DEFEAT': {
-      const { charId } = action.payload;
+      const { charIds } = action.payload;
+      const defeatedIds = new Set(charIds);
       return {
         ...state,
         characters: state.characters.map(c =>
-          c.id !== charId ? c : {
+          !defeatedIds.has(c.id) ? c : {
             ...c,
             charHp:       1,
             soldiers:     0,
@@ -416,6 +438,7 @@ const PURE_EFFECT_TYPES = new Set([
   'treasury', 'charJoin', 'charLeave', 'charParam', 'baseIncome', 'battleCap',
   'baseTransfer', 'warFlag', 'attackUnlock', 'setFlag', 'setFlagWithTurn', 'clearFlag',
   'actionPointsBonus', 'dungeonUnlock', 'charUsedThisTurn', 'baseTransferSingle', 'itemLose',
+  'affinityGain',
 ]);
 
 function applyEffectToState(state, eff) {
@@ -561,6 +584,12 @@ function applyEffectToState(state, eff) {
         inventory: [...state.inventory.slice(0, idx), ...state.inventory.slice(idx + 1)],
       };
     }
+    case 'affinityGain': {
+      return {
+        ...state,
+        affinity: gainAffinity(state.affinity, eff.pairs ?? [], eff.amount ?? 0),
+      };
+    }
     default:
       return state;
   }
@@ -570,7 +599,7 @@ function applyEffectToState(state, eff) {
 // セーブ・シリアライズ（SaveSystem v7互換）
 // ─────────────────────────────────────────────────────────────
 
-const SAVE_VERSION  = 9;
+const SAVE_VERSION  = 12;
 const STORAGE_KEY   = slot => `kiritan_save_${slot}`;
 
 function serializeState(state, legionAI) {
@@ -597,6 +626,8 @@ function serializeState(state, legionAI) {
         factionId:         c.factionId,
         soldiers:          c.soldiers,
         maxSoldiers:       c.maxSoldiers,
+        memeGrowthMult:    c.memeGrowthMult ?? 0,
+        cfChallengeCount:  c.cfChallengeCount ?? 0,
         usedThisTurn:      c.usedThisTurn,
         charHp:            c.charHp,
         charMaxHp:         c.charMaxHp,
@@ -639,6 +670,7 @@ function serializeState(state, legionAI) {
     eventFlags:     { ...(state.eventFlags     ?? {}) },
     occurredEvents: { ...(state.occurredEvents ?? {}) },
     flagTimestamps: { ...(state.flagTimestamps ?? {}) },
+    affinity:       { ...(state.affinity       ?? {}) },
   };
 }
 
@@ -666,6 +698,8 @@ function deserializeToState(data, itemSystem) {
       factionId:         saved.factionId,
       soldiers:          saved.soldiers,
       maxSoldiers:       saved.maxSoldiers,
+      memeGrowthMult:    saved.memeGrowthMult    ?? 0,
+      cfChallengeCount:  saved.cfChallengeCount  ?? 0,
       usedThisTurn:      saved.usedThisTurn      ?? false,
       charHp:            saved.charHp            ?? def.charMaxHp,
       charMaxHp:         saved.charMaxHp         ?? def.charMaxHp,
@@ -706,13 +740,12 @@ function deserializeToState(data, itemSystem) {
     characters:     restoredChars,
     inventory,
     buildings:      data.buildings      ?? [],
-    dungeonProgress: data.dungeonProgress ?? Object.fromEntries(
-      dungeonsData.dungeons.map(d => [d.id, { clearedFloors: 0, isFullyCleared: false }])
-    ),
+    dungeonProgress: data.dungeonProgress ?? {},
     dungeonExploredThisTurn: false,
     eventFlags:     data.eventFlags     ?? {},
     occurredEvents: data.occurredEvents ?? {},
     flagTimestamps: data.flagTimestamps ?? {},
+    affinity:       data.affinity       ?? {},   // v9以前のセーブは {} で補填
     gamePhase:      'playing',
   };
 }
@@ -1178,12 +1211,10 @@ export function GameProvider({ children }) {
   const applyEffects = useCallback((effects) => {
     if (!effects || effects.length === 0) return;
 
-    // 1. 副作用: itemGain → ItemSystemでインスタンス生成 → ADD_ITEM
-    //    （itemLose より先に行い、同一バッチ内 gain→lose の順序を担保）
+    // 1. 副作用: itemGain → P1 で no-op 化（JSON 側の itemGain 記述は温存、effect 参照は残す）
     effects.forEach(eff => {
       if (eff.type !== 'itemGain') return;
-      const item = systemsRef.current.itemSystem.createInstance(eff.itemId);
-      if (item) dispatch({ type: 'ADD_ITEM', payload: { item } });
+      // no-op
     });
 
     // 2. 純粋分（applyEffectToState 対応の全種・itemLose含む）→ 一括dispatch
@@ -1286,7 +1317,7 @@ export function GameProvider({ children }) {
       setSecretary: (charId) => dispatch({ type: 'SET_SECRETARY', payload: charId }),
       dungeonFloorClear: (payload) => dispatch({ type: 'DUNGEON_FLOOR_CLEAR', payload }),
       dungeonExplored:   ()        => dispatch({ type: 'DUNGEON_EXPLORED' }),
-      dungeonDefeat:     (charId)  => dispatch({ type: 'DUNGEON_DEFEAT', payload: { charId } }),
+      dungeonDefeat:     (charIds) => dispatch({ type: 'DUNGEON_DEFEAT', payload: { charIds } }),
     },
     buildBattleUnit: BattleEngineV3.buildUnit,
     checkVictory:    () => checkVictoryCondition(stateRef.current),

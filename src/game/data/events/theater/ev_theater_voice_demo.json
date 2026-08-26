@@ -1,0 +1,60 @@
+{
+  "id": "theater_voice_demo",
+  "name": "音声デモ",
+  "trigger": "theater",
+  "category": "recurring",
+  "title": "VOICEVOX音声デモ",
+  "description": "VOICEVOX音声合成の動作確認用イベント",
+  "cost": {
+    "actionPoints": 1
+  },
+  "conditions": [],
+  "probability": 1,
+  "priority": 0,
+  "maxOccurrences": -1,
+  "script": [
+    {
+      "type": "narration",
+      "text": "音声合成のテストを開始します。",
+      "voice": {
+        "speakerId": 3,
+        "file": "/audio/voice/theater_voice_demo/000.wav"
+      }
+    },
+    {
+      "type": "conversation",
+      "lines": [
+        {
+          "characterId": "kiritan",
+          "position": "left",
+          "text": "きりたんぽです。よろしくお願いします。",
+          "voice": {
+            "speakerId": 8,
+            "file": "/audio/voice/theater_voice_demo/001.wav"
+          }
+        },
+        {
+          "characterId": "zunko",
+          "position": "right",
+          "text": "ずんだもんなのだ！",
+          "voice": {
+            "speakerId": 3,
+            "file": "/audio/voice/theater_voice_demo/002.wav"
+          }
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "characterId": "kiritan",
+      "position": "left",
+      "text": "音声なしのステップも正常に動きます。"
+    },
+    {
+      "type": "end"
+    }
+  ],
+  "effects": {
+    "default": []
+  }
+}

@@ -194,9 +194,9 @@ export default function BattleQAScene({ onBack }) {
               <div><span style={{ color:'#6a5a8a' }}>gameOver </span><span style={{ color: engine.gameOver ? '#ff4444' : '#44ffaa' }}>{String(engine.gameOver)}</span></div>
               <div><span style={{ color:'#6a5a8a' }}>battleMode </span><span style={{ color:'#f0ece4' }}>{engine.battleMode}</span></div>
               <div><span style={{ color:'#6a5a8a' }}>allowRetreat </span><span style={{ color:'#f0ece4' }}>{String(engine.allowRetreat)}</span></div>
-              <div><span style={{ color:'#6a5a8a' }}>strategyMult </span>
-                <span style={{ color: engine.strategyMult?.side ? '#44ffaa' : '#6a5a8a' }}>
-                  {engine.strategyMult?.side ? `${engine.strategyMult.side} +${(engine.strategyMult.bonus*100)|0}%` : '互角'}
+              <div><span style={{ color:'#6a5a8a' }}>couplingBonus </span>
+                <span style={{ color: engine.couplingBonus?.player > 0 ? '#44ffaa' : '#6a5a8a' }}>
+                  {`P +${((engine.couplingBonus?.player ?? 0)*100)|0}% / E +${((engine.couplingBonus?.enemy ?? 0)*100)|0}%`}
                 </span>
               </div>
             </div>

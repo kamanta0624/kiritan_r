@@ -149,7 +149,8 @@ const server = http.createServer(async (req, res) => {
         const dungeons       = readJSONSafe(path.join(DATA, 'dungeons.json'),   { dungeons: [] });
         const legions        = readJSONSafe(path.join(DATA, 'legions.json'),    { legions: [] });
         const facilities     = readJSONSafe(path.join(DATA, 'facilities.json'), { research: [], upgradeCommands: [] });
-        const payload = JSON.stringify({ characters, items, factions, bases, companionLines, skills, dungeons, legions, facilities });
+        const promotionCommands = readJSONSafe(path.join(DATA, 'promotion_commands.json'), []);
+        const payload = JSON.stringify({ characters, items, factions, bases, companionLines, skills, dungeons, legions, facilities, promotionCommands });
         res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-cache, no-store, must-revalidate' });
         res.end(payload);
         return;
@@ -362,6 +363,14 @@ const server = http.createServer(async (req, res) => {
         return;
       }
 
+      if (pathname === '/api/save/promotion') {
+        const body = await readBody(req);
+        writeJSON(path.join(DATA, 'promotion_commands.json'), JSON.parse(body.toString()));
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true }));
+        return;
+      }
+
       if (pathname === '/api/save/legions') {
         const body = await readBody(req);
         writeJSON(path.join(DATA, 'legions.json'), JSON.parse(body.toString()));
@@ -427,6 +436,82 @@ const server = http.createServer(async (req, res) => {
         files.forEach(f => fs.unlinkSync(path.join(dir, f)));
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ok: true }));
+        return;
+      }
+
+      if (pathname === '/api/voice/generate') {
+        const body = await readBody(req);
+        const { eventId } = JSON.parse(body.toString());
+        if (!eventId) { res.writeHead(400, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'eventId is required' })); return; }
+
+        const indexPath = path.join(DATA, 'events', '_index.json');
+        const indexData = readJSONSafe(indexPath, { events: [] });
+        const entry = indexData.events.find(e => e.id === eventId);
+        if (!entry) { res.writeHead(404, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'Event not found: ' + eventId })); return; }
+
+        const evPath = path.join(DATA, 'events', entry.path);
+        const ev = readJSON(evPath);
+
+        const voiceSteps = [];
+        (ev.script || []).forEach(step => {
+          if (step.voice?.speakerId != null) {
+            voiceSteps.push({ step, text: step.text });
+          }
+          if (step.type === 'conversation') {
+            (step.lines || []).forEach(line => {
+              if (line.voice?.speakerId != null) {
+                voiceSteps.push({ step: line, text: line.text });
+              }
+            });
+          }
+        });
+
+        if (voiceSteps.length === 0) {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ generated: 0, failed: [] }));
+          return;
+        }
+
+        const ENGINE = 'http://localhost:50021';
+        try {
+          const check = await fetch(ENGINE + '/version');
+          if (!check.ok) throw new Error('Engine not responding');
+        } catch (e) {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'VOICEVOX Engine is not running (localhost:50021)' }));
+          return;
+        }
+
+        const outDir = path.join(ASSETS, 'audio', 'voice', eventId);
+        if (fs.existsSync(outDir)) fs.rmSync(outDir, { recursive: true, force: true });
+        fs.mkdirSync(outDir, { recursive: true });
+
+        let generated = 0;
+        const failed = [];
+        for (let i = 0; i < voiceSteps.length; i++) {
+          const { step: s, text } = voiceSteps[i];
+          const seq = String(i).padStart(3, '0');
+          try {
+            const qr = await fetch(`${ENGINE}/audio_query?text=${encodeURIComponent(text)}&speaker=${s.voice.speakerId}`, { method: 'POST' });
+            if (!qr.ok) throw new Error('audio_query failed: ' + qr.status);
+            const query = await qr.json();
+            const sr = await fetch(`${ENGINE}/synthesis?speaker=${s.voice.speakerId}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(query) });
+            if (!sr.ok) throw new Error('synthesis failed: ' + sr.status);
+            const buf = Buffer.from(await sr.arrayBuffer());
+            fs.writeFileSync(path.join(outDir, seq + '.wav'), buf);
+            s.voice.file = `/audio/voice/${eventId}/${seq}.wav`;
+            generated++;
+          } catch (e) {
+            failed.push({ index: i, text, error: e.message });
+          }
+        }
+
+        if (failed.length === 0) {
+          writeJSON(evPath, ev);
+        }
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ generated, failed }));
         return;
       }
 

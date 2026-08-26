@@ -48,5 +48,7 @@ lsof -i :5173 -i :5174 -i :5175 | grep LISTEN
 ## ドキュメント
 
 - `KNOWLEDGE.md` — テックリード引き継ぎ（仕様・実装状況・残タスク）。**作業前に必読**
-- `docs/prompts/` — 作業中の Code 引き継ぎプロンプト
-- `docs/archive/` — 完了済み・旧ドキュメント
+- `docs/SCENARIO_DRAMA_NOTES.md` — シナリオ軸SSOT（ドラマチック場面・世界観裏設定）
+- `docs/IMPL_INDEX.md` — コード早引き
+- `docs/DESIGN_YMM4_SYSTEM.md` + `docs/ymm4/` — 演出システムSSOT
+- `docs/archive/` — 破棄済み・完了済み・旧ドキュメント（参照専用）

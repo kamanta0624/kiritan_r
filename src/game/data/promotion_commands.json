@@ -1,0 +1,17 @@
+[
+  {
+    "id": "official_assets",
+    "name": "公式素材供給",
+    "limited": false
+  },
+  {
+    "id": "song",
+    "name": "歌",
+    "limited": false
+  },
+  {
+    "id": "video",
+    "name": "動画収録",
+    "limited": false
+  }
+]
