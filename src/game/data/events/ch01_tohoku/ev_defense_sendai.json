@@ -3,8 +3,14 @@
   "name": "[仙台防衛]防衛前ADV",
   "trigger": "base_defense",
   "conditions": [
-    { "type": "attackerFaction", "factionId": "faction_red" },
-    { "type": "noFlag", "flag": "flag_sendai_defense_adv" }
+    {
+      "type": "attackerFaction",
+      "factionId": "faction_red"
+    },
+    {
+      "type": "noFlag",
+      "flag": "flag_sendai_defense_adv"
+    }
   ],
   "probability": 1,
   "priority": 900,
@@ -13,14 +19,23 @@
     {
       "type": "conversation",
       "lines": [
-        { "characterId": "char_004", "position": "center", "text": "仙台防衛前ADV　セリフダミー" }
+        {
+          "characterId": "char_004",
+          "position": "center",
+          "text": "仙台防衛前ADV　セリフダミー"
+        }
       ]
     },
-    { "type": "end" }
+    {
+      "type": "end"
+    }
   ],
   "effects": {
     "default": [
-      { "type": "setFlag", "flag": "flag_sendai_defense_adv" }
+      {
+        "type": "setFlag",
+        "flag": "flag_sendai_defense_adv"
+      }
     ]
   }
 }

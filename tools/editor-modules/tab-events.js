@@ -101,6 +101,7 @@ let _filterChapter = 'all';
 let _filterTrigger = 'all';
 let _showFlagPanel = false;
 let _flagListEl    = null;
+let _speakers      = null; // VOICEVOX speakers cache (null = not fetched, [] = unavailable)
 
 // ----------------------------------------------------------------
 // 初期化
@@ -109,8 +110,16 @@ let _flagListEl    = null;
 export async function initEventsTab(container, data) {
   _container = container;
   _data      = data;
-  await _loadEvents();
+  await Promise.all([_loadEvents(), _loadSpeakers()]);
   _render();
+}
+
+async function _loadSpeakers() {
+  try {
+    const r = await fetch('http://localhost:50021/speakers');
+    if (!r.ok) { _speakers = []; return; }
+    _speakers = await r.json();
+  } catch { _speakers = []; }
 }
 
 async function _loadEvents() {
@@ -405,6 +414,39 @@ function _buildList(wrap) {
   saveBtn.textContent = '保存';
   saveBtn.onclick = _save;
   footer.appendChild(saveBtn);
+
+  const voiceBtn = document.createElement('button');
+  voiceBtn.className = 'ev-btn';
+  voiceBtn.textContent = '音声一括生成';
+  voiceBtn.style.marginLeft = '8px';
+  voiceBtn.onclick = async () => {
+    const ev = _events[_selIdx];
+    if (!ev) { showToast('イベントを選択してください', 'error'); return; }
+    voiceBtn.disabled = true;
+    voiceBtn.textContent = '生成中…';
+    try {
+      const r = await fetch('/api/voice/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ eventId: ev.id }),
+      });
+      const result = await r.json();
+      if (!r.ok) { showToast(result.error || '生成失敗', 'error'); return; }
+      if (result.failed?.length > 0) {
+        showToast(`生成: ${result.generated}件, 失敗: ${result.failed.length}件`, 'error');
+      } else {
+        showToast(`音声 ${result.generated}件 生成完了`);
+        await _loadEvents();
+        _render();
+      }
+    } catch (e) {
+      showToast('音声生成エラー: ' + e.message, 'error');
+    } finally {
+      voiceBtn.disabled = false;
+      voiceBtn.textContent = '音声一括生成';
+    }
+  };
+  footer.appendChild(voiceBtn);
   wrap.appendChild(footer);
 }
 
@@ -645,10 +687,14 @@ function _buildScript(pane, ev) {
         _row('キャラ', _charSelectWithGroup(step, 'characterId')),
         _row('位置', _posRow(step, i)),
         _row('テキスト', _area(step, 'text', 'セリフ・テキスト')),
+        _row('話者', _voiceSelect(step)),
       );
     }
     if (step.type === 'narration') {
-      card.appendChild(_row('地の文', _area(step, 'text', 'ナレーション')));
+      card.append(
+        _row('地の文', _area(step, 'text', 'ナレーション')),
+        _row('話者', _voiceSelect(step)),
+      );
     }
     if (step.type === 'conversation') {
       const summary = document.createElement('div');
@@ -828,7 +874,7 @@ function _buildConvPane(pane, ev) {
 
       const headerRow = document.createElement('div');
       headerRow.className = 'ev-conv-table-header';
-      ['キャラ', 'テキスト', '位置', ''].forEach(h => {
+      ['キャラ', 'テキスト', '位置', '話者', ''].forEach(h => {
         const cell = document.createElement('div');
         cell.textContent = h;
         headerRow.appendChild(cell);
@@ -858,7 +904,9 @@ function _buildConvPane(pane, ev) {
         delBtn.textContent = '✕';
         delBtn.onclick = () => { step.lines.splice(li, 1); buildTable(); };
 
-        row.append(charSel, textArea, posSel, delBtn);
+        const voiceSel = _voiceSelect(line);
+
+        row.append(charSel, textArea, posSel, voiceSel, delBtn);
         table.appendChild(row);
       });
 
@@ -1443,4 +1491,41 @@ function _num(obj, key, min, max, step) {
   inp.type = 'number'; inp.value = obj[key] ?? 0; inp.min = min; inp.max = max; inp.step = step;
   inp.oninput = () => { obj[key] = parseFloat(inp.value); };
   return inp;
+}
+
+function _voiceSelect(obj) {
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'display:flex;align-items:center;gap:6px';
+
+  if (_speakers && _speakers.length > 0) {
+    const sel = document.createElement('select');
+    const none = document.createElement('option');
+    none.value = ''; none.textContent = '音声なし';
+    sel.appendChild(none);
+    _speakers.forEach(sp => {
+      sp.styles.forEach(st => {
+        const o = document.createElement('option');
+        o.value = st.id;
+        o.textContent = `${sp.name} - ${st.name} (${st.id})`;
+        if (obj.voice?.speakerId === st.id) o.selected = true;
+        sel.appendChild(o);
+      });
+    });
+    sel.onchange = () => {
+      if (sel.value === '') { delete obj.voice; }
+      else { obj.voice = { speakerId: parseInt(sel.value) }; }
+    };
+    wrap.appendChild(sel);
+  } else {
+    const inp = document.createElement('input');
+    inp.type = 'number'; inp.min = 0; inp.placeholder = '話者ID（Engine未起動）';
+    inp.style.width = '160px';
+    inp.value = obj.voice?.speakerId ?? '';
+    inp.oninput = () => {
+      if (inp.value === '') { delete obj.voice; }
+      else { obj.voice = { speakerId: parseInt(inp.value) }; }
+    };
+    wrap.appendChild(inp);
+  }
+  return wrap;
 }

@@ -12,7 +12,7 @@
 |-----------|--------------|----------------|
 | `title` | `TitleScene` | — |
 | `map` | `MapScene` | `focusBaseId`, `_onReady` |
-| `base_menu` | `BaseMenuScene` | `node`, `isOwned`, `canAttack`, `hasDungeon` |
+| `base_menu` | `BaseMenuScene` | `node`, `isOwned`, `canAttack` |
 | `formation` | `AttackFormationScene` | `targetNode` |
 | `battle` | `BattleScene` | `formation`, `targetNode`, `battleCapacity`, `_dungeonEnemy` |
 | `enemy_turn` | `EnemyTurnScene` | `faction`, `attackQueue`, `playerTurnMode`, `_onComplete` |
@@ -22,7 +22,8 @@
 | `theater` | `TheaterScene` | — |
 | `save` | `SaveScene` | `mode` ('save'\|'load'), `returnTo` |
 | `game_end` | `GameEndScene` | `isVictory`, `currentTurn`, `playerBaseCount`, `totalBaseCount` |
-| `dungeon` | `DungeonScene` | `baseNode`, `_battleResult`, `_resumeFloor`, `_resumeCharId` |
+| `dungeon_select` | （インラインJSX） | — クラファン挑戦／浅層探索の選択。`dungeonSession` を初期化 |
+| `dungeon` | `DungeonScene` | `_battleResult`, `_sessionEnded` |
 | `new_game_plus` | `NewGamePlusScene` | — |
 | `adv` | `ADVScene` | `script`, `effects`, `dialogId`, `onExit` |
 
@@ -37,6 +38,54 @@ QAモード（URL `?qa=battle|battlefull|worldmap`）はルーター手前で分
 
 ### navigate(dest, params)
 `useState` ベースのシーン切り替え。`sceneParams` に params を格納してからシーン再描画。
+
+### ダンジョンセッション state（クラファン挑戦・浅層探索。C-3で刷新・C-4で進捗ポイント制へ改訂）
+`dungeonSession` state: `{ dungeonKind: 'crowdfunding'|'shallow', charIds, waveIndex,
+  remainingRounds, goalId, requiredMemeByChar, goalAchieved,
+  progressPoints, progressRequired, waveEnemyPointMap }`。
+セーブ不可のため `GameContext.state` には載せず App.jsx ローカルで保持（`DESIGN_CROWDFUNDING.md` §1）。
+`DUNGEON_ROUND_LIMIT`（crowdfunding:40 / shallow:20）・`DUNGEON_REST_COST`（5）はモジュール定数。
+
+**ゴールは進捗ポイント制**（`DESIGN_CROWDFUNDING.md` §2-3。C-4で「1波目撃破=ゴール」から改訂）。
+敵を1体撃破するごとに `waveEnemyPointMap[敵id]`（撃破した敵の `progressPoint`）を `progressPoints` に加算し、
+`progressPoints >= progressRequired` の倍数を跨ぐたびに達成（100%=ゴール、200%/300%…=ストレッチ）。
+`progressRequired = requiredProgress(Σ 参加キャラの必要ミーム)`（`crowdfundingConfig.js`。係数は仮置き）。
+`waveEnemyPointMap` は波開始時（`startDungeonWave`）に `buildDungeonEnemies` が返す id→progressPoint を
+控えたもので、`result.defeatedEnemyCharIds` と突き合わせて撃破分の合計を出す。
+挑戦終了（成功・失敗問わず。負けた波 or 残ラウンド切れ）時、`requiredMemeByChar` のスナップショット値まで
+`maxSoldiers`/`soldiers` を戻し、`cfChallengeCount` を+1する（この部分はC-3のまま。C-4では触っていない）。
+
+敵はプール抽選（`buildDungeonEnemies` / `drawEnemyDefs` / `drawTieredEnemyDefs` / `drawShallowEnemyDefs` /
+`scaleEnemyDef` / `computeStrengthScore`。乱数を使うものは App.jsx モジュールスコープの純関数
+（`drawTieredEnemyDefs` は `crowdfundingConfig.js` 側）、`react-hooks/purity` 対策でコンポーネント外に配置）。
+クラファンは選出数をプレイヤー編成人数と常に対称化。`tier`（強さ帯）はプレイヤー側の強さスコア
+（`computeStrengthScore` = 参加キャラの `charHp+charAttack+charDefense+soldierAtk+soldierDef` 合計 ＋
+必要ミーム合計。`maxSoldiers` は挑戦中0になるため指標に使わない）で重み付け抽選（`pickEnemyTier` /
+`TIER_WEIGHTS_BY_BAND` / `STRENGTH_TIER_THRESHOLDS`）。`BOSS_FREQUENCY` 波ごとに選出数の代わりに
+ステータス・進捗ポイントへ `BOSS_MULT` を掛ける。浅層探索は対称化・強さ連動なし、
+`SHALLOW_ENEMY_COUNT_RANGE` からランダム人数を抽選するのみ（tier/progressPoint は付与するが未使用）。
+
+報酬・好感度加算・ミーム回復は App.jsx の `applyGoalReward` / `applyStretchReward` / `applyShallowReward` /
+`endCrowdfundingSession` が担う（`game.actions.updateChar` + `game.actions.applyEffects([{type:'affinityGain',...}])`）。
+各 apply* は `{ kind, delta, charNames }` を返し、`onComplete` がそれを `sceneParams._rewardInfo` に載せて
+`DungeonScene` の `wave_result` フェーズへ渡す（`RewardList` コンポーネントがフィールド名+増加量を具体値で列挙。
+「参加キャラが強化された」のような曖昧文言は不可、`DESIGN_CROWDFUNDING.md` §4-2）。
+1波で複数の100%刻みを跨いだ場合は `mergeDeltas` で合算して1回にまとめる。
+`battleEnd` の dispatch 直後は `characters` に未反映のため、charHp/soldiers の起点は
+`result.unitResults` から作った `hpMap`/`spMap` を使う（stale read で戦闘結果を上書きしないため）。
+`GameContext.jsx` の `BATTLE_END` は `isDungeon:true` のとき好感度+2を自動加算しない
+（クラファン/浅層探索は加算量が異なるため App.jsx 側で明示的に加算）。
+
+進捗表示は `DungeonShell` の `progressPercent` prop（`Math.floor(progressPoints/progressRequired*100)`。
+100%超は240%のようにそのまま表示。浅層探索は概念が無いため常に非表示）。
+
+報酬・必要ミーム・ボス頻度倍率・進捗ポイントの係数・強さ抽選テーブルなど仮置き数値は
+`src/game/data/crowdfundingConfig.js` に集約。
+`src/game/data/dungeons.json` は `crowdfundingPool[]` / `shallowPool[]` / `goals[]`
+（`{id,name,rewardType}`。`rewardType` は `'song'|'stat'|'memeGrowthMult'` でレジストリ解決、
+ハードコードなし）の構成。各敵エントリに `tier` / `progressPoint` を持つ（C-4で追加）。
+`dungeonFloorClear` action は現在どこからも呼ばれない（`@deprecated`。rewardItem付与は
+`DESIGN_CROWDFUNDING.md` §3-1 により廃止）。`dungeonProgress` は空オブジェクトのまま未使用。
 
 ---
 
@@ -71,7 +120,7 @@ secretaryId: string | null
 | `LOAD_SAVE` | state スナップショット |
 | `START_NEW_GAME` | — |
 | `NEXT_TURN` | `{ incomeBonus, mobAdditions }` |
-| `BATTLE_END` | `{ usedCharIds, deadCharIds, deadMobIds, conquered, defenderBaseId, winnerFactionId, unitResults, defeatedEnemyCharIds }` |
+| `BATTLE_END` | `{ usedCharIds, deadCharIds, deadMobIds, conquered, defenderBaseId, winnerFactionId, unitResults, defeatedEnemyCharIds, isDungeon }` |
 | `APPLY_EFFECTS` | `{ effects }` |
 | `DECLARE_WAR` | `{ targetFactionId }` |
 | `UPDATE_CHAR` | char オブジェクト（id 必須） |
@@ -91,7 +140,7 @@ secretaryId: string | null
 | `LOAD_SAVE_MOBS` | `{ mobs }` |
 | `DUNGEON_FLOOR_CLEAR` | `{ dungeonId, clearedFloors, isFullyCleared, rewardItem }` |
 | `DUNGEON_EXPLORED` | — |
-| `DUNGEON_DEFEAT` | `{ charId }` |
+| `DUNGEON_DEFEAT` | `{ charIds }` |
 
 ### actions（`useGame().actions`）
 ```js
@@ -120,9 +169,9 @@ save(slot)  /  load(slot)  /  getSaveSlots()
 startResearch(id)                        // キュー登録（turns対応）
 setActionPoints(n)
 setSecretary(charId)
-dungeonFloorClear(payload)
-dungeonExplored()
-dungeonDefeat(charId)
+dungeonFloorClear(payload)               // @deprecated 未使用。C-3以降 dungeons.json は floors 形式を持たない
+dungeonExplored()                        // @deprecated 未使用（C-3で dungeonExploredThisTurn の制限を撤廃）
+dungeonDefeat(charIds)                   // @deprecated 未使用（C-3のクラファン/浅層探索は endCrowdfundingSession 等で処理）
 ```
 
 ### stateRef パターン
@@ -134,7 +183,35 @@ dungeonDefeat(charId)
 3. 全敵首都を制圧 → victory
 
 ### セーブバージョン
-`SAVE_VERSION = 9`、キー: `kiritan_save_${slot}`
+`SAVE_VERSION = 12`（C-3で `cfChallengeCount` 追加のため11→12）、キー: `kiritan_save_${slot}`
+v9以前のロード時は `affinity: {}` を補填。
+
+---
+
+## src/game/utils/Affinity.js — 好感度（純関数）
+
+仕様は `docs/DESIGN_AFFINITY_BATTLE.md` §1。React / GameContext 非依存。
+
+| export | 内容 |
+|--------|------|
+| `AFFINITY_MAX` | `40`（Lv3＝カンスト） |
+| `AFFINITY_THRESHOLDS` | `[8, 20, 40]`（Lv1 / Lv2 / Lv3） |
+| `pairKey(a, b)` | charId をソートして `__` 連結。`'char_004__char_016'` |
+| `getAffinity(affinity, a, b)` | 未登録なら 0 |
+| `getAffinityLv(affinity, a, b)` | 0〜3 |
+| `allPairs(ids)` | ID配列 → 全ペア（4件 → 6組） |
+| `gainAffinity(affinity, pairs, amount)` | 新オブジェクトを返す。上限40でクランプ |
+
+`state.affinity` は**疎（sparse）管理**。値0のペアはキーを持たない。
+
+### 加算経路
+
+| 経路 | 加算 | 実装箇所 |
+|------|------|---------|
+| 通常戦闘（同時出撃） | +2 | `GameContext.jsx` `BATTLE_END`（`usedCharIds` から `_isMobInstance` を除外して `allPairs`） |
+| `affinityGain` effect | 任意 | `applyEffectToState` |
+| クラファン挑戦（同行） | +2 | `App.jsx` `endCrowdfundingSession`（挑戦終了時に1回） |
+| 浅層探索（同行） | +1 | `App.jsx` `applyShallowReward`（波の勝利ごと） |
 
 ---
 
@@ -183,8 +260,24 @@ level, targetId
 - `instant` 型: rally（味方攻撃+20%）, pierce（防御無視）, fortress（被ダメ無効）, volley（乱撃）
 - `charge` 型: focus（集中） → special（必殺発動）
 
-### 作戦補正（`_initStrategy`）
-`strategyRate` 差分で SP ダメージを ±10% / ±50% 補正。コンストラクタ時に1回決定。
+### カップリング補正（`_initCoupling`）— 旧「作戦補正」
+
+`strategyRate` ベースの作戦システムは 2026-08-14 に廃止。好感度（`state.affinity`）ベースのカップリングボーナスへ置換。**乱数なし。**コンストラクタで1回決定。
+
+```
+COUPLING_LV_BASE = [0, 0.05, 0.10, 0.18]   // Lv0〜Lv3
+COUPLING_CAP     = 0.60                     // 合計上限（理論最大 0.504）
+階層係数: メイン×メイン 1.0 / メイン×サブ 0.4 / サブ×サブ 0.2
+```
+
+`couplingBonus = { player, enemy, playerPairs, enemyPairs }`。`*Pairs` は成立ペア（Lv1以上）のみ `{ a, b, lv, bonus }`。
+`_strat(isAtkPlayer)` は `1 + couplingBonus[side]` を返す（形は維持、呼び出し元 `:409` は無改修）。
+コンストラクタ opts に `affinity` / `enemyAffinity`（敵側は現状常に `{}`）。
+
+### 勝利判定（`checkGameOver` / `_mainAlive`）
+
+**`position === 'front'`（メインキャスト）のみで生死を判定。** サブキャスト生存でもメイン全滅なら敗北。
+front 不在サイドは side 全体で判定するフォールバックあり（QAシナリオ保護。実戦では編成4枠に必ず front が居るため到達しない）。
 
 ---
 
@@ -222,6 +315,7 @@ getEventById(id)                                     // named export → EventDe
 ### effect types（`applyEffectToState` / `applyEffects` オーケストレータ）
 | type | 処理先 | 主なフィールド |
 |------|--------|-------------|
+| `affinityGain` | APPLY_EFFECTS | `pairs: [[charId, charId], ...]`, `amount` |
 | `treasury` | APPLY_EFFECTS | `factionId?`, `delta` |
 | `charJoin` | APPLY_EFFECTS | `charId`, `factionId?` |
 | `charLeave` | APPLY_EFFECTS | `charId` |
@@ -422,6 +516,8 @@ purchasedUpgrades    string[]      // runtime
 // 戦闘パラメータ
 soldiers             number
 maxSoldiers          number
+memeGrowthMult       number        // ミーム上限成長の上乗せ率。既定0（?? 0）。戦闘参加時 +100*(1+this)
+cfChallengeCount     number        // クラファン挑戦回数（キャラ単位）。既定0（?? 0）。C-3で追加
 charHp               number
 charMaxHp            number
 charAttack           number
@@ -431,7 +527,7 @@ soldierAtk           number
 soldierDef           number
 attackCount          number        // 将軍本人の攻撃回数 (BattleEngineV3: ?? 8)
 strategyRate         number        // 作戦補正率
-recoveryRate         number | null // null = デフォルト(HP5%/SP+50)
+recoveryRate         number | null // null = デフォルト(HP5%/ミーム+50)
 skillId              string | null
 specialType          string | null // 'char_strike' | 'sp_strike'
 battleCapacity       number        // このキャラが守る拠点容量（モブ用）
@@ -458,3 +554,73 @@ _isMobInstance: true
 _legionId: string | null
 _slotId: string | null
 ```
+
+---
+
+## tools/editor.cjs — 音声一括生成
+
+### `/api/voice/generate`（POST）
+```
+body: { eventId }
+```
+イベント JSON の script 内で `voice.speakerId` を持つステップを走査し、ローカル VOICEVOX ENGINE（`http://localhost:50021`）に `audio_query` → `synthesis` を逐次リクエスト。生成 wav を `public/audio/voice/<eventId>/<連番>.wav` に書き出し、各ステップの `voice.file` を更新してイベント JSON を上書き保存する。
+
+---
+
+## tools/psd_extract.cjs — PSD展開ツール
+
+### 実行
+```bash
+node tools/psd_extract.cjs <psdファイル> <charKey>
+```
+PSD バイナリを直接パース（npm 依存なし・Node 組み込み zlib のみ）し、全画像レイヤーをレイヤー境界クロップの RGBA PNG として出力。RLE / Raw 圧縮対応（ZIP 圧縮は停止・報告）。
+
+### 出力先
+```
+public/characters/parts/<charKey>/
+  <連番3桁>_<サニタイズ名>.png   ← 各レイヤー画像
+  parts.json                      ← レイヤーメタデータ
+```
+
+### parts.json 形式
+```json
+{
+  "canvas": { "w": 518, "h": 800 },
+  "layers": [
+    { "id": 1, "name": "本体", "group": "", "left": 82, "top": 103,
+      "w": 336, "h": 650, "opacity": 255, "visible": true, "file": "000_本体.png" }
+  ]
+}
+```
+グループ / 空レイヤーは `file: null`。PSD の重ね順（bottom-to-top）を保持。
+
+### rig.json 形式（手書き）
+```json
+{
+  "base": [1, 2, 16, 22, 26, 67, 103],
+  "blink": { "frames": [[67], [66], [65], [64]] }
+}
+```
+- `base`: 常時表示レイヤー id 配列（重ね順）
+- `blink.frames`: 開→閉の各フレームで表示する目レイヤー id 群。StandingChar が base 内の目レイヤーを差し替えて自動まばたき再生
+
+---
+
+## src/scenes/ADVScene.jsx — StandingChar パーツ合成
+
+### フォールバック方式
+`useRigData(charKey)` が `/characters/parts/<charKey>/rig.json` + `parts.json` を fetch。
+
+- **成功**: `CompositeChar` でパーツ合成表示 + 自動まばたき（2〜6秒ランダム間隔、1フレーム50ms）
+- **失敗（404等）**: `rigData = null` → 従来の静止画 PNG（`/characters/portraits/<charKey>.png`）にフォールバック。例外は ADV に伝播しない
+
+### 対応済みキャラ
+| charKey | キャラ | blink段階 |
+|---------|--------|----------|
+| `char_006` | 彩澄しゅお | 4段階（普通→ちょっと閉じ→半目→閉じ） |
+| `char_017` | 四国めたん | 3段階（普通→半目→閉じ） |
+
+他60キャラは rig.json 不在のため静止画 PNG 表示（変更なし）。
+
+### 音声再生
+`scenario[idx].voice.file` が存在する場合、`new Audio(voice.file)` で再生。ステップ切替時に前の audio を停止。音声ファイルは事前生成方式（`/api/voice/generate` で生成済みの wav を参照）。

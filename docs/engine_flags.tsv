@@ -1,0 +1,109 @@
+# kiritan_r エンジン保有フラグ調査 / 値: 1=保有 0=非保有 ?=要確認
+# 読み上げ: VV=VOICEVOX VR=VOICEROID/A.I.VOICE CeT=CeVIO_Talk VP=Voicepeak CoI=COEIROINK CoF=CoeFont
+# 歌唱: CeS=CeVIO_Song NEU=NEUTRINO UTU=UTAU SV=SynthesizerV VOC=VOCALOID
+# 除外: ガイノイドTalk/VoiSona/VOICEGER/Seiren/ボイチェン系/音声素材集(ぴた声等)
+id	name	faction	VV	VR	CeT	VP	CoI	CoF	CeS	NEU	UTU	SV	VOC	notes
+char_004	東北きりたん	東北家	1	1	0	1	0	0	1	1	?	0	0	UTUは公式デモ有/音源公式かは要確認
+char_005	音街ウナ	東北家	0	0	0	0	0	0	0	0	0	0	1	Talk版はガイノイドTalk(対象外)
+char_006	彩澄しゅお	東北家	0	0	0	1	0	0	0	0	0	1	0	SVは Synthesizer V 2
+char_014	東北ずんこ	東北家	1	1	0	?	0	0	?	0	?	0	0	
+char_015	東北イタコ	東北家	1	1	0	0	0	0	0	0	?	0	0	
+char_016	ずんだもん	東北家	1	1	0	1	0	0	0	0	0	?	0	VRはA.I.VOICE2
+char_017	四国めたん	東北家	1	?	0	1	0	0	0	0	0	0	0	
+char_018	九州そら	東北家	1	?	0	?	0	0	0	0	0	0	0	
+char_019	中国うさぎ	東北家	1	?	0	0	0	0	0	0	0	0	0	
+char_039	重音テト	東北家	0	0	0	1	0	0	0	0	1	1	0	
+char_084	猫使アル	東北家	1	0	0	0	0	0	?	0	0	0	0	VOICEVOX song機能の扱い要確認
+char_085	猫使ビィ	東北家	1	0	0	0	0	0	?	0	0	0	0	
+char_100	藍田ノエル	東北家	?	?	?	?	?	?	?	?	?	?	?	情報薄/別途調査
+char_101	ROSA	東北家	0	0	1	0	0	0	?	0	0	0	0	CeVIO AI ROSA Talk
+char_107	あんこもん	東北家	1	0	0	0	0	0	0	0	0	0	0	
+char_109	里石ユカ	東北家	1	0	0	0	0	0	0	0	1	0	0	
+char_020	大江戸ちゃんこ	faction_red	0	0	0	1	0	0	0	1	1	0	0	VOICEPEAK/NEUTRINO/UTAU
+char_021	中部つるぎ	faction_red	1	0	0	0	0	0	0	0	0	0	0	VOICEVOX制作決定情報あり/要最終確認
+char_022	関西しのび	faction_red	?	0	0	0	0	0	0	0	?	0	0	大都会関連/音源実態要確認
+char_023	沖縄あわも	faction_red	?	0	0	0	0	0	0	0	?	0	0	大都会関連/音源実態要確認
+char_024	北海道めろん	faction_red	?	0	0	0	0	0	0	0	?	0	0	大都会関連/音源実態要確認
+char_073	鳴花ヒメ	faction_red	0	1	0	0	0	0	0	0	0	0	1	VRはA.I.VOICE2/ガイノイドTalk対象外/VOCALOID
+char_074	鳴花ミコト	faction_red	0	1	0	0	0	0	0	0	0	0	1	VRはA.I.VOICE2/ガイノイドTalk対象外/VOCALOID
+char_064	MEIKO	faction_new03	0	0	0	0	0	0	0	0	0	0	1	VOCALOID
+char_065	KAITO	faction_new03	0	0	0	0	0	0	0	0	0	0	1	VOCALOID
+char_067	鏡音リン	faction_new03	0	0	0	0	0	0	0	0	0	0	1	VOCALOID
+char_068	鏡音レン	faction_new03	0	0	0	0	0	0	0	0	0	0	1	VOCALOID
+char_069	巡音ルカ	faction_new03	0	0	0	0	0	0	0	0	0	0	1	VOCALOID
+char_070	猫村いろは	faction_new03	0	0	0	0	0	0	0	0	0	0	1	VOCALOID
+char_071	歌愛ユキ	faction_new03	0	0	0	0	0	0	0	0	0	0	1	VOCALOID
+char_076	可不	faction_new03	0	0	0	0	0	0	1	0	0	?	0	CeVIO AI Song/SynthV企画は扱い要確認
+char_077	星界	faction_new03	0	0	0	1	0	0	1	0	0	0	0	CeVIO AI Song/VOICEPEAK Talk Extension
+char_078	裏命	faction_new03	0	0	0	1	0	0	1	0	0	0	0	CeVIO AI Song/VOICEPEAK Talk Extension
+char_079	狐子	faction_new03	0	0	0	1	0	0	1	0	0	0	0	CeVIO AI Song/VOICEPEAK Talk Extension
+char_080	羽累	faction_new03	0	0	0	1	0	0	1	0	0	0	0	CeVIO AI Song/VOICEPEAK Talk Extension
+char_083	GUMI	faction_new03	0	1	0	0	0	0	0	0	0	1	1	A.I.VOICE/A.I.VOICE2・SynthV Megpoid・VOCALOID/Megpoid Talk対象外
+char_088	欲音ルコ	faction_new03	0	0	0	0	0	0	0	0	1	0	0	UTAU
+char_044	栗田まろん	faction_green	1	1	0	0	0	0	0	0	0	0	0	VOICEVOX/A.I.VOICE
+char_048	No.7	faction_green	1	0	0	0	0	0	0	?	0	0	0	VOICEVOX/NEUTRINOは要確認
+char_049	雨晴はう	faction_green	1	0	0	0	0	0	0	0	0	0	0	VOICEVOX
+char_050	冥鳴ひまり	faction_green	1	0	0	0	0	0	0	0	0	0	0	VOICEVOX
+char_051	もち子	faction_green	1	0	0	0	0	0	0	0	0	0	0	VOICEVOX
+char_052	小夜/SAYO	faction_green	1	0	0	0	0	0	0	0	?	0	0	VOICEVOX/UTAU要確認
+char_053	ナースロボ＿タイプＴ	faction_green	1	0	0	0	0	0	0	0	?	0	0	VOICEVOX/UTAU要確認
+char_057	リリン	faction_green	0	0	0	0	1	0	0	0	0	0	0	COEIROINK(Lusty*Kiss)
+char_058	クロワ	faction_green	0	0	0	0	1	0	0	0	0	0	0	COEIROINK(Lusty*Kiss)
+char_059	WhiteCUL	faction_green	1	0	0	0	0	0	0	0	0	0	0	VOICEVOX
+char_060	アンジー	faction_green	0	0	0	0	1	0	0	0	0	0	0	COEIROINK(Lusty*Kiss)
+char_061	ディア	faction_green	0	0	0	0	1	0	0	0	0	0	0	COEIROINK(Lusty*Kiss)
+char_062	アルマ	faction_green	0	0	0	0	1	0	0	0	0	0	0	COEIROINK(Lusty*Kiss)
+char_063	アメノ	faction_green	0	0	0	0	1	0	0	0	0	0	0	COEIROINK(Lusty*Kiss)
+char_075	春日部つむぎ	faction_green	1	?	0	0	0	0	0	0	0	0	0	VOICEVOX/A.I.VOICE系の有無要確認
+char_086	Voidoll	faction_green	1	0	0	0	0	0	0	0	0	0	0	VOICEVOX/ボイスチェンジVoidolは対象外
+char_087	ユーレイちゃん	faction_green	1	0	0	0	0	0	0	0	0	0	0	VOICEVOX
+char_089	波音リツ	faction_green	1	0	0	0	0	0	0	0	1	0	0	VOICEVOX/UTAU
+char_094	後鬼	faction_green	1	0	0	0	0	0	0	0	0	0	0	VOICEVOX
+char_095	櫻歌ミコ	faction_green	1	0	0	0	0	0	0	0	1	0	0	VOICEVOX/UTAU
+char_097	春歌ナナ	faction_green	1	0	0	0	0	0	0	0	1	0	0	VOICEVOX/UTAU
+char_098	琴詠ニア	faction_green	1	0	0	0	0	0	0	0	0	0	0	VOICEVOX
+char_108	暁記ミタマ	faction_green	1	0	0	0	0	0	0	0	0	0	0	VOICEVOX
+char_008	琴葉茜	faction_new04	0	1	0	0	0	0	0	0	0	1	0	VOICEROID/A.I.VOICE・SynthV
+char_009	琴葉葵	faction_new04	0	1	0	0	0	0	0	0	0	1	0	VOICEROID/A.I.VOICE・SynthV
+char_010	紲星あかり	faction_new04	0	1	0	0	0	0	0	0	0	0	1	VOICEROID/A.I.VOICE・VOCALOID
+char_011	結月ゆかり	faction_new04	0	1	0	?	0	0	1	0	0	0	1	VOICEROID/A.I.VOICE・CeVIO AI Song(麗)・VOCALOID/VOICEPEAK要確認
+char_012	弦巻マキ	faction_new04	0	1	1	?	0	0	1	0	0	1	0	VOICEROID/A.I.VOICE・CeVIO AI Talk/Song・SynthV/VOICEPEAK要確認
+char_013	彩澄りりせ	(none)	0	0	0	1	0	0	0	0	0	1	0	VOICEPEAK・SynthV2
+char_025	小春六花	faction_yellow	0	0	1	?	0	0	0	0	0	1	0	CeVIO AI Talk・SynthV/VOICEPEAK要確認
+char_026	夏色花梨	faction_yellow	0	0	1	?	0	0	0	0	0	1	0	CeVIO AI Talk・SynthV/VOICEPEAK要確認
+char_027	花隈千冬	faction_yellow	0	0	1	?	0	0	0	0	0	1	0	CeVIO AI Talk・SynthV/VOICEPEAK要確認
+char_028	さとうささら	faction_new01	0	0	1	0	0	0	1	0	0	0	0	CeVIO Talk/Song
+char_029	すずきつづみ	faction_new01	0	0	1	0	0	0	0	0	0	0	0	CeVIO Talk
+char_030	タカハシ	faction_new01	0	0	1	0	0	0	0	0	0	0	0	CeVIO Talk
+char_031	ONE	faction_new01	0	0	1	0	0	0	1	0	0	0	0	CeVIO Talk/Song
+char_032	IA	faction_new01	0	0	1	0	0	0	1	0	0	0	0	CeVIO Talk/Song
+char_033	双葉湊音	(none)	0	0	1	0	0	0	1	0	0	0	0	CeVIO AI Talk/Song
+char_034	桜乃そら	(none)	0	1	0	?	0	0	0	0	0	0	1	VOICEROID/A.I.VOICE・VOCALOID/VOICEPEAK要確認
+char_035	フリモメン	(none)	0	?	0	1	0	0	0	0	0	0	0	VOICEPEAK/A.I.VOICE要確認
+char_036	宮舞モカ	faction_new04	0	0	0	1	0	0	0	0	0	1	0	VOICEPEAK・SynthV
+char_037	ついなちゃん	faction_new04	0	1	0	?	0	0	0	0	0	1	0	VOICEROID/A.I.VOICE・SynthV/VOICEPEAK要確認
+char_038	京町セイカ	faction_new04	0	1	0	?	0	0	0	0	0	1	0	VOICEROID/A.I.VOICE・SynthV/VOICEPEAK要確認
+char_040	月読アイ	faction_new04	0	1	0	0	0	0	0	0	0	0	0	VOICEROID
+char_041	タンゲコトエ	faction_new04	0	1	0	?	0	0	0	0	0	0	0	A.I.VOICE/VOICEPEAK要確認
+char_042	紡乃世詞音	faction_new04	0	1	0	?	0	0	0	0	0	0	0	A.I.VOICE/VOICEPEAK要確認
+char_043	夜語トバリ	faction_new04	1	1	0	0	0	0	0	0	0	0	0	VOICEVOX・A.I.VOICE
+char_045	足立レイ	faction_new02	0	1	0	0	0	0	0	0	1	0	0	A.I.VOICE・UTAU
+char_046	カキョウヨサリ	faction_new04	0	1	0	?	0	0	0	0	0	0	0	A.I.VOICE/VOICEPEAK要確認
+char_047	つくよみちゃん	(none)	0	0	0	0	1	0	0	0	1	0	0	COEIROINK・UTAU
+char_054	アリアル	(none)	0	0	0	0	0	1	0	0	0	0	0	CoeFont
+char_055	ミリアル	(none)	0	0	0	0	0	1	0	0	0	0	0	CoeFont
+char_056	アベルーニ	(none)	0	0	0	0	0	1	0	0	0	0	0	CoeFont
+char_066	初音ミク	(none)	0	0	0	0	0	0	0	0	0	0	1	VOCALOID
+char_072	ギャラ子	(none)	0	0	0	0	0	0	0	0	0	0	1	VOCALOID/ギャラ子Talkは対象外
+char_081	フィーちゃん	faction_new01	0	0	1	0	0	0	0	0	0	0	0	CeVIO AI Talk
+char_082	知声	(none)	0	0	0	0	0	0	0	0	0	0	0	VoiSona対象外
+char_090	邪神ちゃん	(none)	0	0	0	1	0	0	0	0	0	0	0	VOICEPEAK
+char_091	flower	(none)	0	0	0	0	0	0	?	0	0	0	1	VOCALOID/Ci flower(CeVIO AI Song)同一扱い要確認
+char_092	スーパーフリモたん	faction_new01	?	?	0	?	0	0	0	0	0	0	0	フリモメン派生/対象エンジン要確認
+char_093	唯世かのん	(none)	?	?	?	?	?	?	?	?	?	?	?	情報薄/別途調査
+char_096	高遠咲	faction_new04	?	?	?	?	?	?	?	?	?	?	?	情報薄/別途調査
+char_099	満別花丸	faction_yellow	1	0	0	0	0	0	0	0	0	0	0	VOICEVOX
+char_102	羽ノ華	faction_new04	0	1	0	?	0	0	0	0	0	0	0	A.I.VOICE/VOICEPEAK要確認
+char_103	RIA	faction_new04	0	1	0	?	0	0	0	0	0	0	0	A.I.VOICE/VOICEPEAK要確認
+char_104	来果	faction_new04	0	1	0	?	0	0	0	0	0	0	0	A.I.VOICE/VOICEPEAK要確認
+char_106	サーラちゃんさま	faction_new04	0	1	0	?	0	0	0	0	0	0	0	A.I.VOICE/VOICEPEAK要確認

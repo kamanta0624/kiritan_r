@@ -37,8 +37,6 @@ export function TopBar({ scene, areaName, currentArea, breadcrumb, rightSlot, tu
           {[
             {label:'⚡',    val: actionPoints != null ? `${actionPoints}/${maxActionPoints ?? 5}` : null, c:AC2},
             {label:'ターン', val: turn != null ? String(turn) : String(GAME_STATE.turn), c:TX},
-            {label:'ミーム', val: meme != null ? fmtN(meme) : String(GAME_STATE.meme), c:PK},
-            {label:'収入',   val: income != null ? `+${fmtN(income)}/T` : `+${GAME_STATE.income}/T`, c:AC},
             {label:'拠点',   val: bases != null ? bases : GAME_STATE.bases, c:TX},
           ].filter(item => item.val != null).map((item,i) => (
             <div key={i} style={{display:'flex', alignItems:'center', gap:4,
@@ -51,22 +49,15 @@ export function TopBar({ scene, areaName, currentArea, breadcrumb, rightSlot, tu
         </>
       )}
 
-      {breadcrumb && (actionPoints != null || meme != null) && (
+      {breadcrumb && actionPoints != null && (
         <div style={{marginLeft:'auto', display:'flex', alignItems:'center', gap:8, marginRight:8}}>
-          {actionPoints != null && (
-            <span style={{fontFamily:'Rajdhani', fontWeight:700, fontSize:12, color:AC2, whiteSpace:'nowrap'}}>
-              ⚡ {actionPoints}/{maxActionPoints ?? 5}
-            </span>
-          )}
-          {meme != null && (
-            <span style={{fontFamily:'Rajdhani', fontWeight:700, fontSize:12, color:PK, whiteSpace:'nowrap'}}>
-              ミーム {fmtN(meme)}
-            </span>
-          )}
+          <span style={{fontFamily:'Rajdhani', fontWeight:700, fontSize:12, color:AC2, whiteSpace:'nowrap'}}>
+            ⚡ {actionPoints}/{maxActionPoints ?? 5}
+          </span>
         </div>
       )}
       {rightSlot && (
-        <div style={{marginLeft: breadcrumb && (actionPoints == null && meme == null) ? 'auto' : 0}}>
+        <div style={{marginLeft: breadcrumb && actionPoints == null ? 'auto' : 0}}>
           {rightSlot}
         </div>
       )}
@@ -91,10 +82,9 @@ export function BottomBar({ scene, onNavigate, onNextTurn, extraLeft, extraRight
       {isMap && (
         <>
           <NavButton label="≡ メニュー"   onClick={() => onNavigate('save', {mode:'save'})} activeColor={TEAL} activeBg='rgba(26,138,150,.08)'/>
-          <NavButton label="研究"         onClick={() => onNavigate('research')}  activeColor={AC}   activeBg='rgba(192,112,16,.08)'/>
-          <NavButton label="アイテム"     onClick={() => onNavigate('items')}     activeColor={AC}   activeBg='rgba(192,112,16,.08)'/>
           <NavButton label="仲間"         onClick={() => onNavigate('characters')} activeColor={TEAL} activeBg='rgba(26,138,150,.12)'/>
           <NavButton label="劇場"         onClick={() => onNavigate('theater')}    activeColor={PK}   activeBg='rgba(196,66,122,.08)'/>
+          <NavButton label="ダンジョン"   onClick={() => onNavigate('dungeon_select')} activeColor={AC2}  activeBg='rgba(212,160,68,.08)'/>
           <div style={{flex:1}}/>
           <button
             onClick={() => { if (onNextTurn) onNextTurn(); else onNavigate('enemy_turn'); }}

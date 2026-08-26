@@ -2,6 +2,9 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { PK, PK2, AC, AC2, TEAL, TX, TXD, TXF, BR, glass, GAME_STATE, ROLES, CHARS } from '../shared/tokens.js';
 import { TopBar } from '../shared/SharedUI.jsx';
 import { useGame } from '../context/GameContext.jsx';
+import { getViewBottomCm, getViewTopCm, BASE_HEIGHT_CM, computeGroundedFrame, ANCHOR_RATIO } from '../shared/portraitScale.js';
+import characterHeightData from '../game/data/characterHeight.json';
+import portraitDefaultsData from '../game/data/portraitDefaults.json';
 
 // ── Scenario data ────────────────────────────────────────
 // expr: 'normal' (default), 'smile', 'angry', 'surprised', 'thinking'
@@ -9,9 +12,8 @@ import { useGame } from '../context/GameContext.jsx';
 // type: 'narration' (no speaker, full-width gray box), 'dialog' (speaker label + text)
 //       'cutin' (special — full-screen close-up with quote, ペルソナ風カットイン)
 export const DEMO_CAST = [
-  { id:'c1', pos:'left' },
-  { id:'c4', pos:'center' },
-  { id:'c3', pos:'right' },
+  { id:'c1', pos:'left', charKey:'char_004' },
+  { id:'c3', pos:'right', charKey:'char_006' },
 ];
 export const DEMO_BG = 'assets/bg_battle.jpg';
 export const DEMO_LOCATION = '東北 — 仙台城本丸';
@@ -69,15 +71,84 @@ function getPortrait(charKey) {
   return charKey ? `/characters/portraits/${charKey}.png` : null;
 }
 
-// ── Standing portrait ────────────────────────────────────
-function StandingChar({ char, charKey, pos, isSpeaking }) {
+// ── Standing portrait (YMM4 portrait.json composite / static PNG fallback) ──
+function usePortraitData(charKey) {
+  const [data, setData] = useState(null);
+  useEffect(() => {
+    if (!charKey) { setData(null); return; }
+    let cancelled = false;
+    fetch(`/characters/ymm4/${charKey}/portrait.json`)
+      .then(r => r.ok ? r.json() : null)
+      .then(json => { if (!cancelled) setData(json); })
+      .catch(() => { if (!cancelled) setData(null); });
+    return () => { cancelled = true; };
+  }, [charKey]);
+  return data;
+}
+
+/**
+ * 表情選択の解決順（PROMPT_adv_camera_and_defaults.md §2）:
+ *   portrait.json.default → portraitDefaults.json で上書き → face(presets) → parts(勝つ)。
+ * portraitDefaults.json 側で空文字 "" が指定されたカテゴリは非表示（後/他用）。
+ * face が presets に無ければ default のまま console.warn（エラーにしない）。
+ */
+function resolvePortraitSelection(portrait, face, parts) {
+  let sel = { ...(portrait.default || {}) };
+  const override = portraitDefaultsData[portrait.charKey];
+  if (override) {
+    for (const [cat, file] of Object.entries(override)) {
+      if (file === '') delete sel[cat];
+      else sel[cat] = file;
+    }
+  }
+  if (face) {
+    const preset = portrait.presets?.[face];
+    if (preset) {
+      sel = { ...sel, ...preset };
+    } else {
+      console.warn(`[portrait] preset "${face}" not found in ${portrait.charKey}.presets, falling back to default`);
+    }
+  }
+  if (parts) sel = { ...sel, ...parts };
+  return sel;
+}
+
+/** viewport高(px)を追従取得する。resize に追従。 */
+function useViewportHeight() {
+  const [h, setH] = useState(() => window.innerHeight);
+  useEffect(() => {
+    const onResize = () => setH(window.innerHeight);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  return h;
+}
+
+function CompositeChar({ portrait, charKey, selection }) {
+  return (
+    <div style={{ position:'absolute', inset:0 }}>
+      {portrait.drawOrder.map(cat => {
+        const file = selection[cat];
+        if (!file) return null;
+        return (
+          <img key={cat} src={`/characters/ymm4/${charKey}/${cat}/${file}`} alt=""
+            style={{ position:'absolute', inset:0, width:'100%', height:'100%', pointerEvents:'none' }}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+function StandingChar({ char, charKey, pos, isSpeaking, face, parts, isHighlighted }) {
+  const portrait = usePortraitData(charKey);
   const src = getPortrait(charKey);
-  // 規約パスが読めなければ（404 / HTML フォールバック）プレースホルダへ。
   const [imgSrc, setImgSrc] = useState(src);
   useEffect(() => { setImgSrc(src); }, [src]);
   const handleError = () => setImgSrc(null);
+  const viewportH = useViewportHeight();
 
-  if(!imgSrc) {
+  if(!imgSrc && !portrait) {
     return (
       <div style={{
         position:'absolute',
@@ -112,39 +183,58 @@ function StandingChar({ char, charKey, pos, isSpeaking }) {
     );
   }
 
-  // Position offset
-  const baseLeft = pos==='left' ? '6%' : pos==='center' ? '50%' : 'auto';
-  const baseRight = pos==='right' ? '6%' : 'auto';
-  const baseTransform = pos==='center' ? 'translateX(-50%)' : 'none';
+  const useComposite = !!portrait;
+  const selection = useComposite ? resolvePortraitSelection(portrait, face, parts) : null;
+
+  // カメラ(cm座標系)配置（PROMPT_adv_camera_and_defaults.md §1-1）:
+  // 全キャラ共通の地面ラインに body.bottom（足元）を揃え、横位置は body の中心を
+  // アンカー(left/center/right)に揃える（画像の端/中心ではない。修正2）。
+  let frame = null;
+  if (useComposite) {
+    const heightCm = characterHeightData[charKey] ?? BASE_HEIGHT_CM;
+    frame = computeGroundedFrame(portrait, heightCm, getViewBottomCm(), getViewTopCm(), viewportH);
+  }
+  // 発言時にわずかに浮かせる演出（旧 bottom:-2%/-6% の代替）。地面ラインの計算とは独立。
+  const speakingLiftPx = isSpeaking ? 8 : 0;
+  const zIndex = isHighlighted ? 20 : (isSpeaking ? 5 : 2);
+  const anchorPercent = (ANCHOR_RATIO[pos] ?? 0.5) * 100;
 
   return (
     <div style={{
       position:'absolute',
-      bottom: isSpeaking ? '-2%' : '-6%',
-      left:  baseLeft,
-      right: baseRight,
-      transform: `${baseTransform} ${isSpeaking ? 'scale(1.04)' : 'scale(1)'}`,
-      transformOrigin: pos==='center' ? '50% 100%' : pos==='left' ? '10% 100%' : '90% 100%',
-      width:'min(32vw, 460px)',
-      height:'92%',
+      top: useComposite ? frame.imgTop - speakingLiftPx : undefined,
+      bottom: useComposite ? undefined : (isSpeaking ? '-2%' : '-6%'),
+      left:  useComposite ? `${anchorPercent}%` : (pos==='left' ? '6%' : pos==='center' ? '50%' : 'auto'),
+      right: useComposite ? undefined : (pos==='right' ? '6%' : 'auto'),
+      // 体の中心（bodyCenterXPercent、画像内でのX位置%）が left:{anchorPercent}% の位置に
+      // 来るよう translateX する。この % は要素自身の幅基準なので、コンテナ幅の実測は不要。
+      transform: useComposite
+        ? `translateX(-${frame.bodyCenterXPercent}%) scale(${isSpeaking ? 1.04 : 1})`
+        : `${pos==='center' ? 'translateX(-50%)' : 'none'} ${isSpeaking ? 'scale(1.04)' : 'scale(1)'}`,
+      transformOrigin: useComposite ? `${frame.bodyCenterXPercent}% 100%` : (pos==='center' ? '50% 100%' : pos==='left' ? '10% 100%' : '90% 100%'),
+      width: useComposite ? frame.imgW : 'min(32vw, 460px)',
+      height: useComposite ? frame.imgH : '92%',
       transition:'all .45s cubic-bezier(.16,1,.3,1), filter .3s',
       filter: isSpeaking
         ? 'brightness(1.05) saturate(1.1) drop-shadow(0 12px 30px rgba(0,0,0,.5))'
         : 'brightness(.4) saturate(.5) drop-shadow(0 4px 14px rgba(0,0,0,.5))',
-      zIndex: isSpeaking ? 5 : 2,
+      zIndex,
       pointerEvents:'none',
     }}>
-      <img
-        src={imgSrc}
-        alt={char.name}
-        onError={handleError}
-        style={{
-          width:'100%', height:'100%',
-          objectFit:'contain', objectPosition:'bottom center',
-          display:'block',
-        }}
-      />
-      {/* Speaker glow ring (only when speaking) */}
+      {useComposite ? (
+        <CompositeChar portrait={portrait} charKey={charKey} selection={selection} />
+      ) : (
+        <img
+          src={imgSrc}
+          alt={char.name}
+          onError={handleError}
+          style={{
+            width:'100%', height:'100%',
+            objectFit:'contain', objectPosition:'bottom center',
+            display:'block',
+          }}
+        />
+      )}
       {isSpeaking && (
         <div style={{
           position:'absolute', inset:'auto -8% -3% -8%', height:'30%',
@@ -577,6 +667,7 @@ const CHAR_ID_MAP = {
   'char_016': 'c4',  // ずんだもん
   'char_024': 'c5',  // 北海道めろん
   'char_023': 'c7',  // 沖縄あわも
+  'char_017': 'c16', // 四国めたん
 };
 const resolveCharId = id => CHAR_ID_MAP[id] ?? id;
 
@@ -600,6 +691,8 @@ function buildScenario(script = []) {
           type: 'dialog', speaker: resolveCharId(line.characterId),
           charKey: line.characterId,
           expr: line.expr ?? 'normal', text: line.text,
+          face: line.face, parts: line.parts,
+          ...(line.voice ? { voice: line.voice } : {}),
         }));
         break;
       case 'text':
@@ -607,16 +700,20 @@ function buildScenario(script = []) {
           type: 'dialog', speaker: resolveCharId(step.characterId),
           charKey: step.characterId,
           expr: step.expr ?? 'normal', text: step.text,
+          face: step.face, parts: step.parts,
+          ...(step.voice ? { voice: step.voice } : {}),
         });
         break;
       case 'narration':
-        scenario.push({ type: 'narration', text: step.text });
+        scenario.push({ type: 'narration', text: step.text, ...(step.voice ? { voice: step.voice } : {}) });
         break;
       case 'cutin':
         scenario.push({
           type: 'cutin', speaker: resolveCharId(step.speaker ?? step.characterId),
           charKey: step.speaker ?? step.characterId,
           expr: step.expr ?? 'normal', text: step.text, subtext: step.subtext,
+          face: step.face, parts: step.parts,
+          ...(step.voice ? { voice: step.voice } : {}),
         });
         break;
       case 'dialog': // 既に内部形式（DEMO_SCENARIO 等）
@@ -706,13 +803,13 @@ function ChoiceUI({ entry, onSelect }) {
 //   effects : { default: [...], <key>: [...] }（イベント effects 形式）。end 到達時に
 //             default を applyEffects で適用する。choice の effects は選択時に即時適用。
 //   onExit  : 終了通知。戻り先制御・直列化（次イベント起動）は呼び出し元が onExit に閉じる。
-export default function ADVScene({ script = [], effects = null, onExit, transparent: transparentProp }) {
+export default function ADVScene({ script = [], effects = null, onExit, transparent: transparentProp, castOverride, highlightCharKey }) {
   const { actions: { applyEffects } } = useGame();
 
   const { scenario, cast, indexMap, meta } = useMemo(() => {
     const { scenario, stepIndexMap } = buildScenario(script);
-    return { scenario, cast: buildCast(script), indexMap: stepIndexMap, meta: script?.meta ?? {} };
-  }, [script]);
+    return { scenario, cast: castOverride ?? buildCast(script), indexMap: stepIndexMap, meta: script?.meta ?? {} };
+  }, [script, castOverride]);
 
   const bg          = meta.bg ?? null;
   const location    = meta.location ?? '';
@@ -746,6 +843,20 @@ export default function ADVScene({ script = [], effects = null, onExit, transpar
     if (c.type === 'dialog' || c.type === 'narration' || c.type === 'cutin') {
       setHistory(h => [...h, { speaker: c.speaker, text: c.text }]);
     }
+  }, [idx, scenario]);
+
+  // Voice playback (pre-generated wav files)
+  const audioRef = useRef(null);
+  useEffect(() => {
+    const c = scenario[idx];
+    if (!c?.voice?.file) return;
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+    const a = new Audio(c.voice.file);
+    audioRef.current = a;
+    a.play().catch(() => {});
+    return () => {
+      if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+    };
   }, [idx, scenario]);
 
   // Auto mode
@@ -845,6 +956,9 @@ export default function ADVScene({ script = [], effects = null, onExit, transpar
             charKey={c.charKey}
             pos={c.pos}
             isSpeaking={isSpeaking}
+            face={isSpeaking ? current.face : undefined}
+            parts={isSpeaking ? current.parts : undefined}
+            isHighlighted={!!highlightCharKey && c.charKey === highlightCharKey}
           />
         );
       })}
@@ -929,3 +1043,6 @@ export default function ADVScene({ script = [], effects = null, onExit, transpar
 })();
 
 Object.assign(window, { ADVScene, DEMO_SCENARIO });
+
+// ?qa=portrait / ?qa=adv 検証QA画面から再利用するための export
+export { usePortraitData, resolvePortraitSelection, CompositeChar, useViewportHeight, DEMO_SCENARIO };

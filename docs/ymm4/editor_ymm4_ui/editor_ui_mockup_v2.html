@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>editor_ui_mockup_v2</title>
+<style>
+  :root{
+    --pk:#c4427a; --pk2:#9e2d5f; --ac:#b87010; --ac2:#d4a044;
+    --teal:#1a8a96; --tx:#1c1020; --bg:#141019; --panel:#1e1826;
+    --panel2:#241d30; --line:rgba(255,255,255,.08); --txt:rgba(255,255,255,.88);
+    --txt-dim:rgba(255,255,255,.45);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);font-family:'Noto Sans JP',sans-serif;color:var(--txt);}
+  .app{display:flex;flex-direction:column;height:100vh;}
+
+  .menubar{
+    display:flex;align-items:center;gap:18px;padding:6px 14px;
+    background:var(--panel2);border-bottom:1px solid var(--line);
+    font-size:12px;color:var(--txt-dim);
+  }
+  .menubar b{color:var(--txt);font-size:13px;margin-right:12px;}
+  .menubar span{cursor:pointer;padding:4px 8px;border-radius:4px;}
+  .menubar span:hover{background:rgba(255,255,255,.06);color:var(--txt);}
+
+  .mainrow{display:flex;flex:1;min-height:0;}
+
+  .preview-wrap{flex:1;display:flex;flex-direction:column;background:var(--bg);padding:14px;min-width:0;}
+  .preview-label{font-size:10px;letter-spacing:.2em;color:var(--txt-dim);margin-bottom:6px;}
+  .preview{
+    flex:1;position:relative;background:#0a0610;border:1px solid var(--line);
+    border-radius:4px;overflow:hidden;
+    background-image:linear-gradient(180deg, rgba(60,20,50,.5), rgba(10,6,16,.9));
+  }
+  .preview .charimg{
+    position:absolute;bottom:0;left:38%;width:150px;height:260px;
+    background:linear-gradient(180deg, var(--pk), var(--pk2));
+    clip-path:polygon(30% 0%,70% 0%,90% 15%,90% 100%,10% 100%,10% 15%);
+    opacity:.9;
+  }
+  .preview .dialogbox{
+    position:absolute;left:20px;right:20px;bottom:16px;
+    background:rgba(10,5,15,.9);border-top:2px solid var(--pk);
+    border-radius:4px;padding:14px 18px;font-size:13px;line-height:1.6;
+  }
+  .preview .speakertag{
+    position:absolute;left:20px;bottom:96px;background:var(--pk);
+    padding:4px 16px;font-size:11px;font-weight:700;border-radius:2px;
+    transform:skewX(-10deg);
+  }
+  .preview .playhead-time{
+    position:absolute;top:8px;right:10px;font-size:10px;color:var(--txt-dim);
+    font-family:monospace;
+  }
+  .preview .beat-badge{
+    position:absolute;top:8px;left:10px;font-size:9px;color:var(--ac2);
+    letter-spacing:.15em;border:1px solid var(--ac2);border-radius:10px;
+    padding:2px 10px;
+  }
+
+  .proppanel{
+    width:280px;background:var(--panel);border-left:1px solid var(--line);
+    padding:14px;overflow-y:auto;font-size:12px;
+  }
+  .proppanel h4{
+    margin:0 0 10px 0;font-size:11px;letter-spacing:.15em;color:var(--ac2);
+    text-transform:uppercase;
+  }
+  .proprow{margin-bottom:10px;}
+  .proprow label{display:block;font-size:10px;color:var(--txt-dim);margin-bottom:3px;}
+  .proprow input, .proprow select{
+    width:100%;background:var(--panel2);border:1px solid var(--line);
+    color:var(--txt);padding:5px 8px;border-radius:3px;font-size:12px;
+  }
+  .proprow.split{display:flex;gap:8px;}
+  .proprow.split > div{flex:1;}
+  .section-div{border-top:1px solid var(--line);margin:14px 0;padding-top:12px;}
+  .regen-btn{
+    width:100%;background:var(--ac);border:none;color:#fff;padding:8px;
+    border-radius:4px;font-size:12px;cursor:pointer;font-weight:700;
+    margin-top:6px;
+  }
+  .regen-hint{font-size:10px;color:var(--txt-dim);margin-top:4px;}
+
+  /* timeline */
+  .timeline-wrap{height:300px;display:flex;flex-direction:column;border-top:1px solid var(--line);background:var(--panel2);position:relative;}
+  .tl-toolbar{
+    display:flex;align-items:center;gap:10px;padding:6px 12px;
+    border-bottom:1px solid var(--line);font-size:11px;color:var(--txt-dim);
+  }
+  .tl-toolbar .btn{
+    background:var(--panel);border:1px solid var(--line);border-radius:3px;
+    padding:3px 10px;cursor:pointer;color:var(--txt);
+  }
+  .tl-toolbar .btn.accent{background:var(--pk);border-color:var(--pk);color:#fff;font-weight:700;}
+  .tl-toolbar .search{
+    margin-left:auto;background:var(--panel);border:1px solid var(--line);
+    border-radius:3px;padding:3px 10px;width:160px;color:var(--txt-dim);
+  }
+
+  .tl-body{flex:1;display:flex;flex-direction:column;min-height:0;overflow-y:auto;}
+
+  .tl-zone{display:flex;border-bottom:2px solid rgba(255,255,255,.18);}
+  .tl-zone-label{
+    writing-mode:vertical-rl;text-orientation:mixed;width:22px;flex:0 0 22px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:10px;letter-spacing:.2em;color:var(--txt-dim);
+    background:var(--panel);border-right:1px solid var(--line);
+  }
+  .tl-zone.zone-char .tl-zone-label{color:var(--pk);}
+  .tl-zone-body{flex:1;display:flex;flex-direction:column;}
+
+  .tl-layers{
+    width:130px;background:var(--panel);border-right:1px solid var(--line);
+    display:flex;flex-direction:column;flex:0 0 130px;
+  }
+  .tl-layer-label{
+    height:36px;display:flex;align-items:center;gap:6px;padding:0 10px;
+    font-size:10px;color:var(--txt-dim);border-bottom:1px solid var(--line);
+  }
+  .tl-layer-label .dot{width:8px;height:8px;border-radius:50%;background:var(--teal);flex:0 0 8px;}
+
+  .tl-row{display:flex;}
+  .tl-tracks{flex:1;position:relative;overflow-x:auto;}
+  .tl-ruler{
+    height:18px;border-bottom:1px solid var(--line);position:relative;
+    font-size:9px;color:var(--txt-dim);
+  }
+  .tl-ruler span{position:absolute;top:2px;}
+  .tl-track{height:36px;border-bottom:1px solid var(--line);position:relative;}
+  .tl-item{
+    position:absolute;top:4px;bottom:4px;border-radius:3px;
+    font-size:10px;display:flex;align-items:center;padding:0 8px;
+    color:#fff;white-space:nowrap;overflow:hidden;cursor:pointer;
+    box-shadow:0 1px 4px rgba(0,0,0,.4);
+  }
+  .it-char{background:linear-gradient(180deg,var(--pk),var(--pk2));}
+  .it-sub{background:linear-gradient(180deg,var(--teal),#0e5a63);}
+  .it-voice{background:linear-gradient(180deg,var(--ac),#8a5408);}
+  .it-bg{background:linear-gradient(180deg,#555,#333);}
+  .it-bgm{background:linear-gradient(180deg,#4a3a6a,#2c2340);}
+  .it-expr{background:linear-gradient(180deg,#6a3a5a,#40233a);}
+  .it-selected{outline:2px solid #fff;}
+
+  .beat-div{
+    position:absolute;top:0;bottom:0;width:0;border-left:1px dashed rgba(255,255,255,.25);
+  }
+  .beat-tag{
+    position:absolute;top:-16px;font-size:8px;color:var(--txt-dim);letter-spacing:.1em;
+  }
+
+  .playhead{
+    position:absolute;top:0;bottom:0;width:1px;background:#fff;
+    box-shadow:0 0 6px #fff;z-index:5;
+  }
+  .playhead::before{
+    content:'';position:absolute;top:0;left:-4px;width:9px;height:9px;
+    background:#fff;clip-path:polygon(0 0,100% 0,50% 100%);
+  }
+
+  /* script import overlay */
+  .script-overlay{
+    position:absolute;top:34px;left:0;right:0;bottom:0;z-index:20;
+    background:rgba(14,10,20,.97);display:flex;flex-direction:column;padding:16px 22px;
+  }
+  .script-overlay h4{margin:0 0 10px;font-size:12px;letter-spacing:.15em;color:var(--ac2);}
+  .script-overlay textarea{
+    flex:1;background:var(--panel2);border:1px solid var(--line);color:var(--txt);
+    border-radius:4px;padding:12px;font-size:13px;line-height:1.8;resize:none;
+    font-family:'Noto Sans JP',sans-serif;
+  }
+  .script-overlay .actions{display:flex;gap:10px;margin-top:10px;justify-content:flex-end;}
+  .script-overlay .actions .btn{
+    background:var(--panel);border:1px solid var(--line);border-radius:3px;
+    padding:6px 16px;cursor:pointer;color:var(--txt);font-size:12px;
+  }
+  .script-overlay .actions .btn.accent{background:var(--pk);border-color:var(--pk);font-weight:700;color:#fff;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="menubar">
+    <b>kiritan_r editor — theater</b>
+    <span>ファイル</span><span>編集</span><span>表示</span>
+    <span>キャラクター編集</span><span>設定</span>
+  </div>
+
+  <div class="mainrow">
+    <div class="preview-wrap">
+      <div class="preview-label">PREVIEW — 1920×1080</div>
+      <div class="preview">
+        <div class="beat-badge">BEAT 4 / 12</div>
+        <div class="playhead-time">00:03.2 / 00:18.0</div>
+        <div class="charimg"></div>
+        <div class="speakertag">彩澄しゅお</div>
+        <div class="dialogbox">
+          長きにわたる遠征を経て、東北家は仙台へと帰還した…
+        </div>
+      </div>
+    </div>
+
+    <div class="proppanel">
+      <h4>アイテム編集 — ボイスアイテム（ビート4）</h4>
+      <div class="proprow split">
+        <div><label>フレーム位置</label><input value="96"></div>
+        <div><label>長さ（自動）</label><input value="120" disabled></div>
+      </div>
+      <div class="proprow"><label>所属キャラ</label><input value="彩澄しゅお" disabled></div>
+
+      <div class="section-div"></div>
+      <h4>話者・音声</h4>
+      <div class="proprow"><label>話者</label><select><option>彩澄しゅお（ノーマル）</option></select></div>
+      <div class="proprow split">
+        <div><label>音量</label><input value="100"></div>
+        <div><label>速度</label><input value="1.0"></div>
+      </div>
+      <button class="regen-btn">▶ この行だけ再生成</button>
+      <div class="regen-hint">全体一括生成とは別に、選択中の1行のみVOICEVOXへ再リクエストする</div>
+
+      <div class="section-div"></div>
+      <h4>字幕テキスト（連動）</h4>
+      <div class="proprow"><textarea style="width:100%;height:60px;background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:3px;padding:6px;font-size:12px;">長きにわたる遠征を経て、東北家は仙台へと帰還した…</textarea></div>
+    </div>
+  </div>
+
+  <div class="timeline-wrap">
+    <div class="tl-toolbar">
+      <span class="btn accent">📝 台本入力</span>
+      <span class="btn">✂ カット</span>
+      <span class="btn">隙間を削除</span>
+      <span class="btn">グループ化</span>
+      <input class="search" placeholder="🔍 アイテム検索">
+    </div>
+
+    <div class="tl-body">
+
+      <!-- 一般アイテムゾーン -->
+      <div class="tl-zone">
+        <div class="tl-zone-label">一般</div>
+        <div class="tl-zone-body">
+          <div class="tl-row">
+            <div class="tl-layers"><div class="tl-layer-label" style="height:18px;border-bottom:1px solid var(--line);"></div></div>
+            <div class="tl-tracks">
+              <div class="tl-ruler">
+                <span style="left:20px">00:00</span>
+                <span style="left:220px">00:05</span>
+                <span style="left:420px">00:10</span>
+                <span style="left:620px">00:15</span>
+              </div>
+            </div>
+          </div>
+          <div class="tl-row">
+            <div class="tl-layers"><div class="tl-layer-label"><span class="dot" style="background:#555"></span>00: 背景</div></div>
+            <div class="tl-tracks"><div class="tl-track">
+              <div class="tl-item it-bg" style="left:20px;width:780px;">bg_battle.jpg（シーン全体）</div>
+            </div></div>
+          </div>
+          <div class="tl-row">
+            <div class="tl-layers"><div class="tl-layer-label"><span class="dot" style="background:var(--teal)"></span>01: 一般字幕</div></div>
+            <div class="tl-tracks"><div class="tl-track">
+              <div class="tl-item it-sub" style="left:20px;width:780px;">ナレーション「東北家は仙台へと帰還した」等（キャラ非紐付き）</div>
+            </div></div>
+          </div>
+          <div class="tl-row">
+            <div class="tl-layers"><div class="tl-layer-label"><span class="dot" style="background:#4a3a6a"></span>02: BGM</div></div>
+            <div class="tl-tracks"><div class="tl-track">
+              <div class="tl-item it-bgm" style="left:20px;width:780px;">bgm_calm.wav（シーン全体、ビート跨ぎ）</div>
+            </div></div>
+          </div>
+          <div class="tl-row">
+            <div class="tl-layers"><div class="tl-layer-label"><span class="dot" style="background:#888"></span>03: SE</div></div>
+            <div class="tl-tracks"><div class="tl-track"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- キャラ専用ゾーン -->
+      <div class="tl-zone zone-char">
+        <div class="tl-zone-label">キャラ素材</div>
+        <div class="tl-zone-body">
+          <div class="tl-row">
+            <div class="tl-layers" style="background:var(--panel2);"><div class="tl-layer-label" style="font-weight:700;color:var(--pk);border-bottom:1px solid var(--line);">彩澄しゅお（char_006）</div></div>
+            <div class="tl-tracks"></div>
+          </div>
+          <div class="tl-row">
+            <div class="tl-layers"><div class="tl-layer-label"><span class="dot" style="background:var(--pk)"></span>立ち絵</div></div>
+            <div class="tl-tracks"><div class="tl-track">
+              <div class="tl-item it-char" style="left:20px;width:780px;">c1（base+blink、シーン全体）</div>
+            </div></div>
+          </div>
+          <div class="tl-row">
+            <div class="tl-layers"><div class="tl-layer-label"><span class="dot" style="background:var(--ac)"></span>ボイス</div></div>
+            <div class="tl-tracks"><div class="tl-track">
+              <div class="tl-item it-voice it-selected" style="left:180px;width:150px;">voice_004.wav</div>
+              <div class="tl-item it-voice" style="left:340px;width:180px;">voice_005.wav</div>
+              <div class="beat-div" style="left:180px;"></div>
+              <div class="beat-tag" style="left:184px;">BEAT4</div>
+              <div class="beat-div" style="left:340px;"></div>
+              <div class="beat-tag" style="left:344px;">BEAT5</div>
+              <div class="beat-div" style="left:520px;"></div>
+            </div></div>
+          </div>
+          <div class="tl-row">
+            <div class="tl-layers"><div class="tl-layer-label"><span class="dot" style="background:#6a3a5a"></span>表情</div></div>
+            <div class="tl-tracks"><div class="tl-track">
+              <div class="tl-item it-expr" style="left:180px;width:150px;">smile</div>
+              <div class="tl-item it-expr" style="left:340px;width:180px;">normal</div>
+            </div></div>
+          </div>
+          <div class="playhead" style="left:200px;top:0;height:1200px;"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

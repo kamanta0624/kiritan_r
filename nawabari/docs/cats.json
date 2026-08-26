@@ -1,0 +1,109 @@
+{
+  "_source": "https://gashapon.jp/nawabari/play/cat-figures-list/",
+  "_note": "frontEffects/backEffect のキーは docs/RULES.md 第9・10章に対応。text は原文の要約表現。",
+  "territories": [
+    { "id": "pb01", "name": "ねこcaféのなわばり", "centerEffect": null },
+    { "id": "pb02", "name": "セレブハウスのなわばり", "centerEffect": null },
+    { "id": "go01", "name": "したまちのなわばり", "centerEffect": { "key": "ranged_attack", "text": "このエリアにいる猫は「はなれて攻撃」を持つ。" } }
+  ],
+  "dice": [
+    { "face": "paw1", "damage": 1, "count": 2 },
+    { "face": "paw2", "damage": 2, "count": 1 },
+    { "face": "x", "damage": 0, "count": 2 },
+    { "face": "sleep", "damage": 0, "count": 1, "stopsRolling": true, "attackFails": true }
+  ],
+  "cats": [
+    {
+      "number": "S01-01", "territory": "pb01", "slug": "pirozhki",
+      "name": "ピロシキ", "breed": "ロシアンブルー", "level": 3, "isBoss": false,
+      "frontEffects": ["chokugeki"],
+      "backEffect": { "name": "猫パンチ", "cost": 1, "timing": "instead_of_attack", "text": "攻撃のかわりに使う。同じエリアにいる相手の猫1匹に1ダメージ。" }
+    },
+    {
+      "number": "S01-02", "territory": "pb01", "slug": "maro",
+      "name": "マロ", "breed": "ミックス", "level": 2, "isBoss": false,
+      "frontEffects": ["oshidashi", "damage_minus1"],
+      "backEffect": { "name": "おひかえなすって", "cost": 1, "timing": "on_defense", "text": "この猫が自分のボス猫と同じエリアにいるときに使える。自分のボス猫の防御時に使う。相手の攻撃を無効にする。" }
+    },
+    {
+      "number": "S01-03", "territory": "pb01", "slug": "chocomaca",
+      "name": "チョコマカ", "breed": "マンチカン", "level": 1, "isBoss": false,
+      "frontEffects": ["move2"],
+      "backEffect": { "name": "へそてん", "cost": 1, "timing": "on_defense", "text": "防御時に使う。相手の攻撃を無効にする。次の自分のターン、この猫は移動も攻撃もできない。" }
+    },
+    {
+      "number": "S01-04", "territory": "pb01", "slug": "cleopatra",
+      "name": "クレオパトラ", "breed": "アビシニアン", "level": 2, "isBoss": false,
+      "frontEffects": ["nenai"],
+      "backEffect": { "name": "にゃん・つー", "cost": 1, "timing": "on_attack", "text": "攻撃時に使う。この攻撃中、この猫は「サイコロ+2回」を持つ。" }
+    },
+    {
+      "number": "S01-05", "territory": "pb01", "slug": "ekizo",
+      "name": "エキゾ", "breed": "エキゾチックショートヘア", "level": 3, "isBoss": true,
+      "frontEffects": ["damage_plus1"],
+      "backEffect": { "name": "もふもふサービス", "cost": 6, "timing": "nekobaba", "text": "同じエリアにいる相手の子猫すべてに2ダメージ。" }
+    },
+
+    {
+      "number": "S02-01", "territory": "pb02", "slug": "shadow",
+      "name": "シャドウ", "breed": "ミックス", "level": 2, "isBoss": false,
+      "frontEffects": ["ranged_attack"],
+      "backEffect": { "name": "ひらりっ！", "cost": 1, "timing": "on_defense", "text": "防御時に使う。相手の攻撃を無効にする。" }
+    },
+    {
+      "number": "S02-02", "territory": "pb02", "slug": "pochachin",
+      "name": "ポチャチン", "breed": "チンチラ", "level": 1, "isBoss": false,
+      "frontEffects": ["damage_minus1"],
+      "backEffect": { "name": "ポチャ拳", "cost": 1, "timing": "on_defense", "text": "防御時に使う。この攻撃中、この猫は「はんげき」を持つ。" }
+    },
+    {
+      "number": "S02-03", "territory": "pb02", "slug": "sham",
+      "name": "シャム", "breed": "シャム猫", "level": 3, "isBoss": false,
+      "frontEffects": ["move2"],
+      "backEffect": { "name": "ドランクキャット", "cost": 1, "timing": "on_dice_sleep", "text": "攻撃のサイコロでsleepが出たときに使う。そのサイコロをpaw2（2ダメージ）に変更する。" }
+    },
+    {
+      "number": "S02-04", "territory": "pb02", "slug": "ame",
+      "name": "アメ", "breed": "アメリカンショートヘア", "level": 2, "isBoss": false,
+      "frontEffects": ["toosenbo"],
+      "backEffect": { "name": "にらめっこ", "cost": 1, "timing": "after_opponent_ura", "text": "相手がウラ効果を使った直後に使う。その効果を無効にする。" }
+    },
+    {
+      "number": "S02-05", "territory": "pb02", "slug": "oddeyes",
+      "name": "オッドアイズ", "breed": "メインクーン", "level": 3, "isBoss": true,
+      "frontEffects": ["dice_plus2"],
+      "backEffect": { "name": "こばんなげ", "cost": 6, "timing": "nekobaba", "text": "相手の子猫1匹に3ダメージ。" }
+    },
+
+    {
+      "number": "G01-01", "territory": "go01", "slug": "snow",
+      "name": "スノー", "breed": "ミックス", "level": 3, "isBoss": false,
+      "frontEffects": ["move2"],
+      "backEffect": { "name": "きぃーっく", "cost": 2, "timing": "instead_of_attack", "text": "攻撃のかわりに使う。同じエリアにいる相手の猫1匹に2ダメージ。" }
+    },
+    {
+      "number": "G01-02", "territory": "go01", "slug": "kutsushita",
+      "name": "クツシタ", "breed": "ミックス", "level": 2, "isBoss": false,
+      "frontEffects": ["nenai"],
+      "backEffect": { "name": "そっくす移動", "cost": 2, "timing": "on_move", "text": "移動時に使う。このターン中、この猫は「移動3」を持つ。" }
+    },
+    {
+      "number": "G01-03", "territory": "go01", "slug": "hachi",
+      "name": "ハチ", "breed": "ミックス", "level": 1, "isBoss": false,
+      "frontEffects": ["renge2"],
+      "backEffect": { "name": "あっぱーかっと", "cost": 1, "timing": "on_dice_paw2", "text": "攻撃のサイコロでpaw2（2ダメージ）が出たときに使う。ダメージをさらに+2する。" }
+    },
+    {
+      "number": "G01-04", "territory": "go01", "slug": "chatrap",
+      "name": "チャトラップ", "breed": "ミックス", "level": 2, "isBoss": false,
+      "frontEffects": ["toosenbo", "oshidashi"],
+      "backEffect": { "name": "うら拳", "cost": 1, "timing": "before_attack", "text": "攻撃前に使う。この攻撃中、この猫は「ダメージ+1」を持つ。" }
+    },
+    {
+      "number": "G01-05", "territory": "go01", "slug": "suko",
+      "name": "スコ", "breed": "スコティッシュフォールド", "level": 3, "isBoss": true,
+      "frontEffects": ["hangeki"],
+      "backEffect": { "name": "したまちあんない", "cost": 6, "timing": "nekobaba", "text": "自分か相手の子猫1匹をすきなエリアに移動する。" }
+    }
+  ]
+}

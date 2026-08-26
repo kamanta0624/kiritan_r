@@ -1,82 +1,95 @@
 {
-  "dungeons": [
+  "crowdfundingPool": [
     {
-      "id": "dungeon_001",
-      "name": "龍泉洞",
-      "baseId": "base_012",
-      "totalFloors": 5,
-      "prerequisites": {
-        "eventFlags": [],
-        "requiredItemIds": [],
-        "requiredCharIds": []
-      },
-      "floors": [
-        {
-          "floor": 1,
-          "enemy": {
-            "name": "龍泉洞の番人 1",
-            "charHp": 30,
-            "charAttack": 10,
-            "soldiers": 200,
-            "soldierAtk": 8,
-            "soldierDef": 6
-          },
-          "rewardItemId": null,
-          "eventId": null
-        },
-        {
-          "floor": 2,
-          "enemy": {
-            "name": "龍泉洞の番人 2",
-            "charHp": 40,
-            "charAttack": 14,
-            "soldiers": 300,
-            "soldierAtk": 10,
-            "soldierDef": 8
-          },
-          "rewardItemId": null,
-          "eventId": null
-        },
-        {
-          "floor": 3,
-          "enemy": {
-            "name": "龍泉洞の番人 3",
-            "charHp": 50,
-            "charAttack": 18,
-            "soldiers": 400,
-            "soldierAtk": 12,
-            "soldierDef": 10
-          },
-          "rewardItemId": null,
-          "eventId": null
-        },
-        {
-          "floor": 4,
-          "enemy": {
-            "name": "龍泉洞の番人 4",
-            "charHp": 60,
-            "charAttack": 22,
-            "soldiers": 500,
-            "soldierAtk": 14,
-            "soldierDef": 12
-          },
-          "rewardItemId": null,
-          "eventId": null
-        },
-        {
-          "floor": 5,
-          "enemy": {
-            "name": "龍泉洞の番人 5",
-            "charHp": 70,
-            "charAttack": 26,
-            "soldiers": 600,
-            "soldierAtk": 16,
-            "soldierDef": 14
-          },
-          "rewardItemId": null,
-          "eventId": null
-        }
-      ]
+      "name": "クラファン妨害者 1",
+      "tier": 1,
+      "progressPoint": 10,
+      "charHp": 30,
+      "charAttack": 10,
+      "soldiers": 200,
+      "soldierAtk": 8,
+      "soldierDef": 6
+    },
+    {
+      "name": "クラファン妨害者 2",
+      "tier": 1,
+      "progressPoint": 15,
+      "charHp": 40,
+      "charAttack": 14,
+      "soldiers": 300,
+      "soldierAtk": 10,
+      "soldierDef": 8
+    },
+    {
+      "name": "クラファン妨害者 3",
+      "tier": 2,
+      "progressPoint": 25,
+      "charHp": 50,
+      "charAttack": 18,
+      "soldiers": 400,
+      "soldierAtk": 12,
+      "soldierDef": 10
+    },
+    {
+      "name": "クラファン妨害者 4",
+      "tier": 2,
+      "progressPoint": 35,
+      "charHp": 60,
+      "charAttack": 22,
+      "soldiers": 500,
+      "soldierAtk": 14,
+      "soldierDef": 12
+    },
+    {
+      "name": "クラファン妨害者 5",
+      "tier": 3,
+      "progressPoint": 50,
+      "charHp": 70,
+      "charAttack": 26,
+      "soldiers": 600,
+      "soldierAtk": 16,
+      "soldierDef": 14
     }
+  ],
+  "shallowPool": [
+    {
+      "name": "野良荒らし 1",
+      "tier": 1,
+      "progressPoint": 5,
+      "charHp": 15,
+      "charAttack": 5,
+      "soldiers": 80,
+      "soldierAtk": 4,
+      "soldierDef": 3
+    },
+    {
+      "name": "野良荒らし 2",
+      "tier": 1,
+      "progressPoint": 7,
+      "charHp": 18,
+      "charAttack": 6,
+      "soldiers": 100,
+      "soldierAtk": 5,
+      "soldierDef": 4
+    },
+    {
+      "name": "野良荒らし 3",
+      "tier": 1,
+      "progressPoint": 8,
+      "charHp": 20,
+      "charAttack": 7,
+      "soldiers": 120,
+      "soldierAtk": 5,
+      "soldierDef": 4
+    }
+  ],
+  "goals": [
+    { "id": "goal_vocal",       "name": "ボーカルソフト化",   "rewardType": "song" },
+    { "id": "goal_tts",         "name": "読み上げソフト化",   "rewardType": "stat" },
+    { "id": "goal_stamp_rally", "name": "スタンプラリー",     "rewardType": "memeGrowthMult" },
+    { "id": "goal_live",        "name": "ライブ",             "rewardType": "memeGrowthMult" },
+    { "id": "goal_goods",       "name": "グッズ制作",         "rewardType": "memeGrowthMult" },
+    { "id": "goal_anime",       "name": "アニメ制作",         "rewardType": "memeGrowthMult" },
+    { "id": "goal_game",        "name": "ゲーム制作",         "rewardType": "memeGrowthMult" }
   ]
 }

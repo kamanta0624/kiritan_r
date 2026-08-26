@@ -9,14 +9,21 @@
  *
  * 主要機能:
  *   - 戦闘モード (normal / dungeon / duel / event)
- *   - 作戦システム (strategyRate差分でSPダメージ±10/50%補正)
+ *   - カップリングボーナス (好感度Lv×階層係数でSP与ダメージ加算補正)
  *   - 特技システム (skills.json 定義: instant / charge)
  */
 
 import { resolveBonus } from '../utils/BattleBonus.js';
+import { allPairs, getAffinityLv } from '../utils/Affinity.js';
 import skillsData from '../data/skills.json';
 
 const MAX_ROUNDS_NORMAL = 5;
+
+/** 好感度Lv → 基礎ボーナス（Lv0 = 不成立） */
+const COUPLING_LV_BASE = [0, 0.05, 0.10, 0.18];
+
+/** カップリングボーナス合計の上限 */
+const COUPLING_CAP = 0.60;
 
 // ────────────────────────────────────────────────
 // モジュールユーティリティ
@@ -48,6 +55,8 @@ export class BattleEngineV3 {
    * @param {string}   [opts.battleMode]   'normal' | 'dungeon' | 'duel' | 'event'
    * @param {number}   [opts.maxRounds]    省略時: normal=5、それ以外=無制限
    * @param {boolean}  [opts.allowRetreat] 省略時: dungeon/duel以外=true
+   * @param {object}   [opts.affinity]      プレイヤー側の state.affinity（疎管理）。省略時 {}
+   * @param {object}   [opts.enemyAffinity] 敵側の好感度。Phase B では常に {}
    */
   constructor(opts) {
     this.playerSide     = opts.playerSide;
@@ -57,6 +66,8 @@ export class BattleEngineV3 {
     this.battleMode     = opts.battleMode   ?? 'normal';
     this.maxRounds      = opts.maxRounds    ?? (this.battleMode === 'normal' ? MAX_ROUNDS_NORMAL : Infinity);
     this.allowRetreat   = opts.allowRetreat ?? (this.battleMode !== 'dungeon' && this.battleMode !== 'duel');
+    this.affinity       = opts.affinity      ?? {};
+    this.enemyAffinity  = opts.enemyAffinity ?? {};
 
     this._onLog              = opts.onLog             ?? (() => {});
     this._onCardUpdate       = opts.onCardUpdate      ?? (() => {});
@@ -71,9 +82,9 @@ export class BattleEngineV3 {
     this._initStats    = new Map();
     this._skills       = Object.fromEntries((skillsData.skills ?? []).map(s => [s.id, s]));
 
-    // 作戦補正（コンストラクタで1回だけ決定）
-    this.strategyMult  = { give: 1.0, take: 1.0, side: null, bonus: 0, winnerChar: null };
-    this._initStrategy();
+    // カップリングボーナス（コンストラクタで1回だけ決定・乱数なし）
+    this.couplingBonus = { player: 0, enemy: 0, playerPairs: [], enemyPairs: [] };
+    this._initCoupling();
   }
 
   // ────────────────────────────────────────────────
@@ -130,8 +141,8 @@ export class BattleEngineV3 {
   isDead(unit)   { return unit.charHp <= 0; }
 
   checkGameOver() {
-    const pAlive   = this.playerSide.some(u => this._isAlive(u));
-    const eAlive   = this.enemySide.some(u => this._isAlive(u));
+    const pAlive   = this._mainAlive(this.playerSide);
+    const eAlive   = this._mainAlive(this.enemySide);
     const atkAlive = this.mode === 'attack' ? pAlive : eAlive;
     const defAlive = this.mode === 'attack' ? eAlive : pAlive;
     if (!defAlive || !atkAlive) {
@@ -530,41 +541,52 @@ export class BattleEngineV3 {
   }
 
   // ────────────────────────────────────────────────
-  // 作戦システム
+  // カップリングボーナス
   // ────────────────────────────────────────────────
 
-  _initStrategy() {
-    const maxRate = side => Math.max(0, ...side.map(u => u.char.strategyRate ?? 0));
-    const pRate   = maxRate(this.playerSide);
-    const eRate   = maxRate(this.enemySide);
-    const diff    = Math.abs(pRate - eRate);
+  /**
+   * 出撃4名の全6ペアから好感度Lvと階層係数でボーナスを積む（乱数なし）。
+   * 階層係数: メイン×メイン ×1.0 / メイン×サブ ×0.4 / サブ×サブ ×0.2
+   */
+  _initCoupling() {
+    const calcSide = (side, affinity) => {
+      const byId = new Map(side.map(u => [u.char.id, u]));
+      const pairs = [];
+      let total = 0;
+      allPairs([...byId.keys()]).forEach(([idA, idB]) => {
+        const lv = getAffinityLv(affinity, idA, idB);
+        if (lv <= 0) return;
+        const posA = byId.get(idA).position;
+        const posB = byId.get(idB).position;
+        const tier = posA === 'front' && posB === 'front' ? 1.0
+                   : posA === 'rear'  && posB === 'rear'  ? 0.2
+                   : 0.4;
+        const bonus = COUPLING_LV_BASE[lv] * tier;
+        total += bonus;
+        pairs.push({ a: idA, b: idB, lv, bonus });
+      });
+      return { total: Math.min(COUPLING_CAP, total), pairs };
+    };
 
-    if (diff <= 0 || Math.random() >= diff / 100) {
-      this._onLog(`作戦: 両軍互角`);
-      return;
-    }
+    const p = calcSide(this.playerSide, this.affinity);
+    const e = calcSide(this.enemySide,  this.enemyAffinity);
+    this.couplingBonus = {
+      player:      p.total,
+      enemy:       e.total,
+      playerPairs: p.pairs,
+      enemyPairs:  e.pairs,
+    };
 
-    const side  = pRate > eRate ? 'player' : 'enemy';
-    const bonus = diff > 50 && Math.random() < (diff - 50) / 100 ? 0.5 : 0.1;
-    const winnerSide = side === 'player' ? this.playerSide : this.enemySide;
-    const winnerUnit = winnerSide.reduce((best, u) =>
-      (u.char.strategyRate ?? 0) > (best.char.strategyRate ?? 0) ? u : best
-    );
-    this.strategyMult = { give: 0, take: 0, side, bonus, winnerChar: winnerUnit.char };
-    this.strategyMult.give = side === 'player' ? 1 + bonus : 1 - bonus;
-    this.strategyMult.take = side === 'player' ? 1 - bonus : 1 + bonus;
-
-    this._onLog(`作戦成功（${side === 'player' ? 'プレイヤー' : '敵'}）: SPダメージ ${bonus === 0.5 ? '50' : '10'}%補正`);
+    this._onLog(p.pairs.length
+      ? `カップリング成立 ${p.pairs.length}組: SP与ダメージ +${Math.round(p.total * 100)}%`
+      : `カップリング: 成立なし`);
   }
 
   /**
-   * 攻撃側が受け取る作戦補正倍率（SP与ダメージに適用）
+   * 攻撃側が受け取るカップリング補正倍率（SP与ダメージに適用）
    */
   _strat(isAtkPlayer) {
-    const { side, bonus } = this.strategyMult;
-    if (!side) return 1.0;
-    const atkWins = (isAtkPlayer && side === 'player') || (!isAtkPlayer && side === 'enemy');
-    return atkWins ? 1 + bonus : 1 - bonus;
+    return 1 + (isAtkPlayer ? this.couplingBonus.player : this.couplingBonus.enemy);
   }
 
   // ────────────────────────────────────────────────
@@ -586,6 +608,13 @@ export class BattleEngineV3 {
   }
 
   _isAlive(unit)      { return !this.isDead(unit) && !unit.retreated; }
+
+  /** 決着判定: メインキャスト（front）のみを見る。front不在の編成のみ全体にフォールバック */
+  _mainAlive(side) {
+    const mains = side.filter(u => u.position === 'front');
+    return (mains.length ? mains : side).some(u => this._isAlive(u));
+  }
+
   _finish(atkWins)    { this.gameOver = true; this._onBattleEnd(atkWins); }
   _updateAllCards()   { [...this.playerSide, ...this.enemySide].forEach(u => this._onCardUpdate(u)); }
 }

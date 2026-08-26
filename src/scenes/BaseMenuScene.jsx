@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { PK, PK2, AC, AC2, TEAL, TX, TXD, TXF, BR, glass, GAME_STATE, ROLES, CHARS } from '../shared/tokens.js';
+import { PK, PK2, AC, TEAL, TX, TXD, TXF, BR, glass, GAME_STATE, ROLES, CHARS } from '../shared/tokens.js';
 import { TopBar } from '../shared/SharedUI.jsx';
 
 // ═══════════════════════════════════════════════════════════
 //   BaseMenuScene — 拠点メニュー (Modal)
 //   props: node {name, owner, troops, income, type, imageUrl?}
-//          isOwned (=自勢力), canAttack, hasDungeon
-//   遷移: → formation (攻撃) → adv (訪問) → dungeon (迷宮) → map (閉じる)
+//          isOwned (=自勢力), canAttack
+//   遷移: → formation (攻撃) → adv (訪問) → map (閉じる)
 // ═══════════════════════════════════════════════════════════
 
-export default function BaseMenuScene({ node, isOwned, canAttack, hasDungeon, onNavigate, onClose }) {
+export default function BaseMenuScene({ node, isOwned, canAttack, onNavigate, onClose }) {
   if(!node) return null;
   const typeLabel = ({city:'都市', town:'街', village:'村', fort:'砦'})[node.type] || node.type;
   const ownerKey = node.owner || (isOwned ? 'player' : 'enemy');
@@ -20,8 +20,6 @@ export default function BaseMenuScene({ node, isOwned, canAttack, hasDungeon, on
   const cmds = [];
   if(isOwned) {
     if(canAttack) cmds.push({ id:'attack', label:'攻撃', sub:'ATTACK', dest:'formation', color:PK, icon:'⚔' });
-    cmds.push({ id:'visit', label:'訪問', sub:'VISIT', dest:'adv', color:TEAL, icon:'❀' });
-    if(hasDungeon) cmds.push({ id:'dungeon', label:'迷宮', sub:'DUNGEON', dest:'dungeon', color:AC2, icon:'⌬' });
   } else {
     if(canAttack) cmds.push({ id:'attack', label:'攻撃', sub:'ATTACK', dest:'formation', color:PK, icon:'⚔' });
   }
@@ -30,7 +28,7 @@ export default function BaseMenuScene({ node, isOwned, canAttack, hasDungeon, on
     <div onClick={(e)=>{ if(e.target===e.currentTarget) onClose(); }}
       style={{
         position:'fixed', inset:0, zIndex:100,
-        background:'rgba(10,8,14,.72)', backdropFilter:'blur(10px)',
+        background:'transparent',
         display:'flex', alignItems:'center', justifyContent:'center',
         animation:'fadeIn .2s ease both',
         fontFamily:"'Noto Sans JP'",
@@ -79,12 +77,6 @@ export default function BaseMenuScene({ node, isOwned, canAttack, hasDungeon, on
               color:TX, letterSpacing:'.04em', lineHeight:1}}>{node.name}</div>
           </div>
 
-          {/* Stats row */}
-          <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:10}}>
-            <StatTile label="兵力" value={node.troops?.toLocaleString() ?? '---'} unit="兵" color={ownerColor}/>
-            <StatTile label="収入" value={`+${node.income ?? 0}`} unit="/T" color={AC}/>
-          </div>
-
           {/* Notes / flavor */}
           {node.note && (
             <div style={{fontSize:11, color:TXD, fontFamily:"'Noto Sans JP'",
@@ -114,20 +106,6 @@ export default function BaseMenuScene({ node, isOwned, canAttack, hasDungeon, on
             }}>閉じる</button>
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
-
-function StatTile({ label, value, unit, color }) {
-  return (
-    <div style={{padding:'12px 14px', borderRadius:8,
-      background:`${color}0d`, border:`1px solid ${color}33`}}>
-      <div style={{fontSize:9, fontFamily:'Rajdhani', fontWeight:700,
-        letterSpacing:'.18em', color:TXD, marginBottom:4}}>{label.toUpperCase()}</div>
-      <div style={{display:'flex', alignItems:'baseline', gap:3}}>
-        <span style={{fontFamily:'Rajdhani', fontWeight:900, fontSize:24, color, lineHeight:1}}>{value}</span>
-        <span style={{fontSize:10, color:TXD, fontFamily:"'Noto Sans JP'"}}>{unit}</span>
       </div>
     </div>
   );

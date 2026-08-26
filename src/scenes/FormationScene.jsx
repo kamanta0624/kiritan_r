@@ -308,16 +308,16 @@ function BattlefieldPreview({ formation, enemies, battleCapacity, battleMode=nul
         position:'absolute', top:30, bottom:24, left:10, right:10,
         display:'grid', gridTemplateColumns:'1fr 1fr 1fr 1fr', gap:6, zIndex:1,
       }}>
-        <Zone label="後衛" color={TEAL}>
+        <Zone label="サブキャスト" color={TEAL}>
           {playerRear.map((c, i) => <Slot key={`pr${i}`} char={c} color={TEAL}/>)}
         </Zone>
-        <Zone label="前衛" color={PK} highlight>
+        <Zone label="メインキャスト" color={PK} highlight>
           {playerFront.map((c, i) => <Slot key={`pf${i}`} char={c} color={PK}/>)}
         </Zone>
-        <Zone label="敵前衛" color={AC} highlight>
+        <Zone label="敵メインキャスト" color={AC} highlight>
           {enemyFront.map((c, i) => <Slot key={`ef${i}`} char={c} color={AC} flip/>)}
         </Zone>
-        <Zone label="敵後衛" color={AC2}>
+        <Zone label="敵サブキャスト" color={AC2}>
           {enemyRear.map((c, i) => <Slot key={`er${i}`} char={c} color={AC2} flip/>)}
         </Zone>
       </div>
@@ -405,19 +405,11 @@ function UnitMiniRow({ char, color, ally, battleCapacity }) {
 
 /* ── LaunchConfirmOverlay ── */
 function LaunchConfirmOverlay({ formation, picks, enemies, targetNode, isDefense, battleMode,
-  battleCapacity, playerStrategyRate, enemyStrategyRate, onLaunch, onCancel }) {
+  battleCapacity, onLaunch, onCancel }) {
   const allyTotal  = picks.reduce((s, c) => s + (c.soldiers ?? c.troops ?? 0), 0);
   const enemyTotal = enemies.reduce((s, e) => s + (e.maxSoldiers ?? e.soldiers ?? 0), 0);
   const sideLabel  = isDefense ? '防衛' : '攻撃';
   const sideColor  = isDefense ? TEAL : PK;
-
-  const diff = Math.abs(playerStrategyRate - enemyStrategyRate);
-  const bonus = diff > 50 ? 50 : 10;
-  const isPlayerAdv = playerStrategyRate > enemyStrategyRate;
-  let stratLabel, stratColor;
-  if (diff === 0)       { stratLabel = '作戦 互角'; stratColor = TXD; }
-  else if (isPlayerAdv) { stratLabel = `作戦成功率 ${diff}%（+${bonus}%）`; stratColor = TEAL; }
-  else                  { stratLabel = `作戦不利 ${diff}%（敵 +${bonus}%）`; stratColor = AC; }
 
   const attackForm = !isDefense ? (targetNode?.attackForm ?? null) : null;
 
@@ -531,17 +523,17 @@ function LaunchConfirmOverlay({ formation, picks, enemies, targetNode, isDefense
             </div>
           </div>
 
-          {/* 作戦成功率 + 戦闘域 */}
+          {/* 勝利条件 + 戦闘域 */}
           <div style={{ display:'flex', gap:14, flexShrink:0 }}>
             <div style={{
               flex:1, padding:'10px 16px', borderRadius:10,
-              border:`1.5px solid ${stratColor}55`, background:`${stratColor}10`,
+              border:`1.5px solid ${PK}55`, background:`${PK}10`,
               display:'flex', alignItems:'center', gap:12,
             }}>
               <span style={{ fontFamily:FONT_DISPLAY, fontSize:10, color:TXD,
-                letterSpacing:'.32em', flexShrink:0 }}>STRATEGY</span>
+                letterSpacing:'.32em', flexShrink:0 }}>勝利条件</span>
               <span style={{ fontFamily:FONT_DISPLAY, fontWeight:900, fontSize:14,
-                color:stratColor, letterSpacing:'.14em' }}>{stratLabel}</span>
+                color:PK, letterSpacing:'.14em' }}>メインキャスト2名が倒れると敗北</span>
             </div>
             <div style={{
               flex:1, padding:'10px 16px', borderRadius:10,
@@ -608,7 +600,6 @@ export default function AttackFormationScene({
   availableChars,
   isDefense       = false,
   battleCapacity  = 3500,
-  enemyStrategyRate = 0,
   enemyChars      = [],
 }) {
   const [picks, setPicks] = useState([]);
@@ -627,27 +618,6 @@ export default function AttackFormationScene({
     rear1:  picks[2] ? chars.find(c => c.id === picks[2]) ?? null : null,
     rear2:  picks[3] ? chars.find(c => c.id === picks[3]) ?? null : null,
   }), [picks, chars]);
-
-  const playerStrategyRate = useMemo(() => {
-    const sel = picks.map(id => chars.find(c => c.id === id)).filter(Boolean);
-    if (sel.length === 0) return 0;
-    return Math.max(...sel.map(c => c.strategyRate ?? 0));
-  }, [picks, chars]);
-
-  const diff      = Math.abs(playerStrategyRate - enemyStrategyRate);
-  const bonus     = diff > 50 ? 50 : 10;
-  const isPlayerAdv = playerStrategyRate > enemyStrategyRate;
-  let stratLabel, stratColor, stratBg, stratBorder;
-  if (diff === 0) {
-    stratLabel = '作戦 互角'; stratColor = TXD;
-    stratBg = 'rgba(28,16,32,.04)'; stratBorder = BR;
-  } else if (isPlayerAdv) {
-    stratLabel = `作戦成功率 ${diff}%（+${bonus}% ボーナス）`; stratColor = TEAL;
-    stratBg = `${TEAL}11`; stratBorder = `${TEAL}55`;
-  } else {
-    stratLabel = `作戦不利 ${diff}%（敵 +${bonus}%）`; stratColor = AC;
-    stratBg = `${AC}11`; stratBorder = `${AC}55`;
-  }
 
   const totalSelected = picks.length;
   const fullSlots = totalSelected >= 4;
@@ -685,16 +655,16 @@ export default function AttackFormationScene({
             letterSpacing:'.14em' }}>{isDefense ? '防衛編成' : '攻撃編成'}</div>
         </div>
         <div style={{ display:'flex', alignItems:'center', gap:14 }}>
-          {/* 作戦成功率 */}
+          {/* 勝利条件 */}
           <div style={{
             display:'flex', alignItems:'center', gap:6,
             padding:'6px 12px', borderRadius:6,
-            border:`1px solid ${stratBorder}`, background:stratBg,
+            border:`1px solid ${PK}55`, background:`${PK}11`,
             fontFamily:FONT_DISPLAY, fontSize:11, letterSpacing:'.16em',
-            color:stratColor, fontWeight:900,
+            color:PK, fontWeight:900,
           }}>
             <span style={{ fontSize:13, lineHeight:1 }}>⚔</span>
-            <span>{stratLabel}</span>
+            <span>メインキャスト2名が倒れると敗北</span>
           </div>
           <div style={{ fontFamily:FONT_DISPLAY, fontSize:11, color:TXD,
             letterSpacing:'.22em' }}>{isDefense ? '侵攻者' : '攻撃目標'}</div>
@@ -729,10 +699,10 @@ export default function AttackFormationScene({
               letterSpacing:'.22em', marginBottom:14 }}>EDITING — 編成スロット</div>
 
             <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-              <SlotRow slotLabel="① 前衛" color={PK}   char={formation.front1} onRemove={() => removeAt(0)}/>
-              <SlotRow slotLabel="② 前衛" color={PK}   char={formation.front2} onRemove={() => removeAt(1)}/>
-              <SlotRow slotLabel="③ 後衛" color={TEAL} char={formation.rear1}  onRemove={() => removeAt(2)}/>
-              <SlotRow slotLabel="④ 後衛" color={TEAL} char={formation.rear2}  onRemove={() => removeAt(3)}/>
+              <SlotRow slotLabel="① メイン" color={PK}   char={formation.front1} onRemove={() => removeAt(0)}/>
+              <SlotRow slotLabel="② メイン" color={PK}   char={formation.front2} onRemove={() => removeAt(1)}/>
+              <SlotRow slotLabel="③ サブ"   color={TEAL} char={formation.rear1}  onRemove={() => removeAt(2)}/>
+              <SlotRow slotLabel="④ サブ"   color={TEAL} char={formation.rear2}  onRemove={() => removeAt(3)}/>
             </div>
 
             <div style={{ marginTop:'auto', display:'flex', flexDirection:'column', gap:10, paddingTop:14 }}>
@@ -849,8 +819,6 @@ export default function AttackFormationScene({
           isDefense={isDefense}
           battleMode={isDefense ? battleMode : null}
           battleCapacity={effectiveBattleCapacity}
-          playerStrategyRate={playerStrategyRate}
-          enemyStrategyRate={enemyStrategyRate}
           onLaunch={() => {
             setShowConfirm(false);
             onLaunch(formation, targetNode, {
