@@ -270,21 +270,17 @@
       "factionId": "faction_red",
       "charIds": [
         "char_021",
-        "char_022"
+        "char_022",
+        "char_111"
       ],
       "mobSlots": [],
       "maxMobSlots": 0,
-      "attackPriority": [
-        "base_001",
-        "base_047"
-      ],
+      "attackPriority": [],
       "defendBases": [
-        "base_047",
-        "base_046"
+        "base_003",
+        "base_021"
       ],
-      "attackFrequency": {
-        "type": "every_turn"
-      },
+      "attackFrequency": null,
       "retreatRule": {
         "onAttack": "char_dead",
         "onDefend": "char_dead",
@@ -374,23 +370,16 @@
       "attackPriority": [
         "base_001",
         "base_003",
-        "base_014",
-        "base_071"
+        "base_021"
       ],
-      "defendBases": [
-        "base_003",
-        "base_014",
-        "base_071"
-      ],
+      "defendBases": [],
       "attackFrequency": {
         "type": "every_turn"
       },
       "retreatRule": {
         "onAttack": "char_dead",
         "onDefend": "char_dead",
-        "onDefendBase": {
-          "base_071": "never"
-        }
+        "onDefendBase": {}
       },
       "isDefenseReserve": false
     },
