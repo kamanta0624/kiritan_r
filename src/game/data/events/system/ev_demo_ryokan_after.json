@@ -1,0 +1,60 @@
+{
+  "id": "ev_demo_ryokan_after",
+  "name": "旅館防衛戦後",
+  "trigger": "battle_end",
+  "conditions": [
+    { "type": "flag", "flag": "flag_opening_done" },
+    { "type": "noFlag", "flag": "flag_ryokan_done" }
+  ],
+  "probability": 1,
+  "priority": 500,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        { "characterId": "char_004", "position": "center", "text": "きりたん砲全門斉射！" },
+        { "characterId": "char_005", "position": "right", "text": "ウナウナにしちゃうぞ！" }
+      ]
+    },
+    { "type": "narration", "text": "カップリングボーナスエフェクト" },
+    {
+      "type": "conversation",
+      "lines": [
+        { "characterId": "char_019", "position": "right", "text": "！" },
+        { "characterId": "char_111", "position": "center", "text": "効かないよ！…えっ、反射しきれない！？" },
+        { "characterId": "char_019", "position": "right", "text": "今！そらの人！" },
+        { "characterId": "char_018", "position": "left", "text": "うさぎさま！ぐぐ…ええーい！" },
+        { "characterId": "char_111", "position": "center", "text": "ぎゃー！" },
+        { "characterId": "char_021", "position": "right", "text": "総帥！" },
+        { "characterId": "char_022", "position": "left", "text": "ちゃんこ様！" },
+        { "characterId": "char_023", "position": "left", "text": "源氏丸がやられるなんて" },
+        { "characterId": "char_111", "position": "center", "text": "くっ、一度撤退するよ！" },
+        { "characterId": "char_004", "position": "center", "text": "ずんねえさまたちがいなくても勝てるなんて思いませんでした" },
+        { "characterId": "char_005", "position": "right", "text": "いつもより力が出せた気がするぞ！" },
+        { "characterId": "char_016", "position": "left", "text": "きりたん砲の威力がすごかったのだ" },
+        { "characterId": "char_019", "position": "right", "text": "絆の力…世界の理…仲良しパワーアップ…" },
+        { "characterId": "char_017", "position": "right", "text": "世界の理？秘められた力ね！" },
+        { "characterId": "char_107", "position": "right", "text": "なるほど、そーいうことだったもん" },
+        { "characterId": "char_005", "position": "right", "text": "とーほく！今度はウナたちからちゃんこたちに会いにいくぞ！" },
+        { "characterId": "char_004", "position": "center", "text": "えぇ…いやですよめんどくさい" },
+        { "characterId": "char_006", "position": "left", "text": "めろんさん、ずん子さんの太ももの写真たくさん持ってるみたいだよ" },
+        { "characterId": "char_004", "position": "center", "text": "…それは聞き捨てなりませんね。没収しに行きましょう" },
+        { "characterId": "char_017", "position": "right", "text": "そんなこと言ってなかったわよね" },
+        { "characterId": "char_006", "position": "left", "text": "ちゃんこちゃん、あの力のせいで学校とか行ってないと思う。私たちの学校に誘ってあげようよ" },
+        { "characterId": "char_018", "position": "left", "text": "しゅおさま…きっとご主ずんさまもそう言った思います" },
+        { "characterId": "char_019", "position": "right", "text": "ふるさと女学院…転入生も飛び級も歓迎…" },
+        { "characterId": "char_004", "position": "center", "text": "よーし、わたしとウナでまたやっつけますよ。先手必勝です" },
+        { "characterId": "char_019", "position": "right", "text": "大都会の本拠地は水戸にあるみたいだよ" },
+        { "characterId": "char_017", "position": "right", "text": "結構遠いわね。拠点を1つ1つ落とさないと" },
+        { "characterId": "char_006", "position": "left", "text": "攻め返してくるだろうから防衛も大事だね" }
+      ]
+    },
+    { "type": "end" }
+  ],
+  "effects": {
+    "default": [
+      { "type": "setFlag", "flag": "flag_ryokan_done" }
+    ]
+  }
+}

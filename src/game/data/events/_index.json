@@ -7,209 +7,99 @@
   },
   "events": [
     {
-      "id": "ev_000_opening",
-      "path": "system/ev_000_opening.json",
+      "id": "ev_demo_opening",
+      "path": "system/ev_demo_opening.json",
       "chapter": "system"
     },
     {
-      "id": "ev_turn1_status",
-      "path": "system/ev_turn1_status.json",
+      "id": "ev_demo_ryokan_after",
+      "path": "system/ev_demo_ryokan_after.json",
       "chapter": "system"
     },
     {
-      "id": "ev_turn2_join_kotohaxsisters",
-      "path": "system/ev_turn2_join_kotohaxsisters.json",
+      "id": "ev_demo_zunko_portal",
+      "path": "system/ev_demo_zunko_portal.json",
       "chapter": "system"
     },
     {
-      "id": "ev_daitoshi_turn1",
-      "path": "ch01_tohoku/ev_daitoshi_turn1.json",
+      "id": "ev_demo_fukushima_attack",
+      "path": "ch01_tohoku/ev_demo_fukushima_attack.json",
       "chapter": "ch01_tohoku"
     },
     {
-      "id": "ev_defense_sendai",
-      "path": "ch01_tohoku/ev_defense_sendai.json",
+      "id": "ev_demo_fukushima_conquered",
+      "path": "ch01_tohoku/ev_demo_fukushima_conquered.json",
       "chapter": "ch01_tohoku"
     },
     {
-      "id": "ev_defeated_meron",
-      "path": "ch01_tohoku/ev_defeated_meron.json",
+      "id": "ev_demo_daitoshi_turn1",
+      "path": "ch01_tohoku/ev_demo_daitoshi_turn1.json",
       "chapter": "ch01_tohoku"
     },
     {
-      "id": "ev_chanko_conquered_a",
-      "path": "ch01_tohoku/ev_chanko_conquered_a.json",
+      "id": "ev_demo_meron_awamo_attack",
+      "path": "ch01_tohoku/ev_demo_meron_awamo_attack.json",
       "chapter": "ch01_tohoku"
     },
     {
-      "id": "ev_chanko_conquered_b",
-      "path": "ch01_tohoku/ev_chanko_conquered_b.json",
+      "id": "ev_demo_turn2_open",
+      "path": "ch01_tohoku/ev_demo_turn2_open.json",
       "chapter": "ch01_tohoku"
     },
     {
-      "id": "ev_mito_conquest_a",
-      "path": "ch01_tohoku/ev_mito_conquest_a.json",
+      "id": "ev_demo_koriyama_conquered",
+      "path": "ch01_tohoku/ev_demo_koriyama_conquered.json",
       "chapter": "ch01_tohoku"
     },
     {
-      "id": "ev_mito_conquest_b",
-      "path": "ch01_tohoku/ev_mito_conquest_b.json",
+      "id": "ev_demo_mito_attack",
+      "path": "ch01_tohoku/ev_demo_mito_attack.json",
       "chapter": "ch01_tohoku"
     },
     {
-      "id": "ev_qa_fukushima_conquest",
-      "path": "ch01_tohoku/ev_qa_fukushima_conquest.json",
+      "id": "ev_demo_mito_conquered",
+      "path": "ch01_tohoku/ev_demo_mito_conquered.json",
       "chapter": "ch01_tohoku"
     },
     {
-      "id": "ev_saitama_chain_1",
-      "path": "ch02_saitama/ev_saitama_chain_1.json",
+      "id": "ev_demo_boibo_1",
+      "path": "ch02_saitama/ev_demo_boibo_1.json",
       "chapter": "ch02_saitama"
     },
     {
-      "id": "ev_saitama_chain_2",
-      "path": "ch02_saitama/ev_saitama_chain_2.json",
+      "id": "ev_demo_boibo_2",
+      "path": "ch02_saitama/ev_demo_boibo_2.json",
       "chapter": "ch02_saitama"
     },
     {
-      "id": "ev_saitama_chain_3",
-      "path": "ch02_saitama/ev_saitama_chain_3.json",
+      "id": "ev_demo_boibo_3",
+      "path": "ch02_saitama/ev_demo_boibo_3.json",
       "chapter": "ch02_saitama"
     },
     {
-      "id": "ev_saitama_chain_4",
-      "path": "ch02_saitama/ev_saitama_chain_4.json",
+      "id": "ev_demo_saitama_declare",
+      "path": "ch02_saitama/ev_demo_saitama_declare.json",
       "chapter": "ch02_saitama"
     },
     {
-      "id": "ev_otaru_phase1_start",
-      "path": "ch03_otaru/ev_otaru_phase1_start.json",
-      "chapter": "ch03_otaru"
-    },
-    {
-      "id": "ev_otaru_expand_1",
-      "path": "ch03_otaru/ev_otaru_expand_1.json",
-      "chapter": "ch03_otaru"
-    },
-    {
-      "id": "ev_otaru_expand_2",
-      "path": "ch03_otaru/ev_otaru_expand_2.json",
-      "chapter": "ch03_otaru"
-    },
-    {
-      "id": "ev_otaru_expand_3",
-      "path": "ch03_otaru/ev_otaru_expand_3.json",
-      "chapter": "ch03_otaru"
-    },
-    {
-      "id": "ev_otaru_declare_war",
-      "path": "ch03_otaru/ev_otaru_declare_war.json",
-      "chapter": "ch03_otaru"
-    },
-    {
-      "id": "ev_otaru_war_flag_sync",
-      "path": "ch03_otaru/ev_otaru_war_flag_sync.json",
-      "chapter": "ch03_otaru"
-    },
-    {
-      "id": "ev_otaru_conquered",
-      "path": "ch03_otaru/ev_otaru_conquered.json",
-      "chapter": "ch03_otaru"
-    },
-    {
-      "id": "ev_otaru_max_check",
-      "path": "ch03_otaru/ev_otaru_max_check.json",
-      "chapter": "ch03_otaru"
-    },
-    {
-      "id": "ev_defeated_awamo",
-      "path": "defeated/ev_defeated_awamo.json",
-      "chapter": "defeated"
-    },
-    {
-      "id": "ev_defeated_shinobi",
-      "path": "defeated/ev_defeated_shinobi.json",
-      "chapter": "defeated"
-    },
-    {
-      "id": "theater_sample_001",
-      "path": "theater/ev_theater_sample.json",
+      "id": "ev_demo_theater_ririse",
+      "path": "theater/ev_demo_theater_ririse.json",
       "chapter": "theater"
     },
     {
-      "id": "ev_theater_kotoha_sisters",
-      "path": "theater/ev_theater_kotoha_sisters.json",
+      "id": "ev_demo_theater_tsuina_meet",
+      "path": "theater/ev_demo_theater_tsuina_meet.json",
       "chapter": "theater"
     },
     {
-      "id": "ev_theater_chanko",
-      "path": "theater/ev_theater_chanko.json",
+      "id": "ev_demo_theater_tsuina_join",
+      "path": "theater/ev_demo_theater_tsuina_join.json",
       "chapter": "theater"
     },
     {
-      "id": "theater_voice_demo",
-      "path": "theater/ev_theater_voice_demo.json",
+      "id": "ev_demo_theater_teto",
+      "path": "theater/ev_demo_theater_teto.json",
       "chapter": "theater"
-    },
-    {
-      "id": "theater_psd_demo",
-      "path": "theater/ev_theater_psd_demo.json",
-      "chapter": "theater"
-    },
-    {
-      "id": "ev_679817",
-      "path": "system/ev_679817.json",
-      "chapter": "system"
-    },
-    {
-      "id": "ev_una_joined",
-      "path": "ch04_saitama_tl/ev_una_joined.json",
-      "chapter": "ch04_saitama_tl"
-    },
-    {
-      "id": "ev_una_fled",
-      "path": "ch04_saitama_tl/ev_una_fled.json",
-      "chapter": "ch04_saitama_tl"
-    },
-    {
-      "id": "ev_tokyo_open",
-      "path": "ch04_saitama_tl/ev_tokyo_open.json",
-      "chapter": "ch04_saitama_tl"
-    },
-    {
-      "id": "ev_saitama_absorbed",
-      "path": "ch04_saitama_tl/ev_saitama_absorbed.json",
-      "chapter": "ch04_saitama_tl"
-    },
-    {
-      "id": "ev_tokyo_conquered",
-      "path": "ch04_saitama_tl/ev_tokyo_conquered.json",
-      "chapter": "ch04_saitama_tl"
-    },
-    {
-      "id": "ev_ahs_conquered_flag",
-      "path": "ch05_vocalo/ev_ahs_conquered_flag.json",
-      "chapter": "ch05_vocalo"
-    },
-    {
-      "id": "ev_ahs_absorbed",
-      "path": "ch05_vocalo/ev_ahs_absorbed.json",
-      "chapter": "ch05_vocalo"
-    },
-    {
-      "id": "ev_vocalo_attacks",
-      "path": "ch05_vocalo/ev_vocalo_attacks.json",
-      "chapter": "ch05_vocalo"
-    },
-    {
-      "id": "ev_vocalo_conquered",
-      "path": "ch05_vocalo/ev_vocalo_conquered.json",
-      "chapter": "ch05_vocalo"
-    },
-    {
-      "id": "ev_247618",
-      "path": "system/ev_247618.json",
-      "chapter": "system"
     }
   ]
 }

@@ -1,0 +1,20 @@
+{
+  "id": "ev_demo_boibo_3",
+  "name": "ボイボ寮の気配3",
+  "trigger": "player_turn",
+  "conditions": [
+    { "type": "turn", "op": "eq", "value": 9 }
+  ],
+  "probability": 1,
+  "priority": 500,
+  "maxOccurrences": 1,
+  "script": [
+    { "type": "narration", "text": "ボイボ寮は何かを準備しているようです" },
+    { "type": "end" }
+  ],
+  "effects": {
+    "default": [
+      { "type": "setFlag", "flag": "flag_boibo_3" }
+    ]
+  }
+}

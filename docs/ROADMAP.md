@@ -16,8 +16,29 @@
     [C-2] ダンジョン基盤改修   → 完了（2026-08-14）
     [C-3] クラファン＋浅層探索 → 完了（2026-08-14）
     [C-4] 進捗ポイント制・UI改善 → 完了（2026-08-14）
-[3] シナリオ実装（ボイボ寮撃破・小樽潮風撃破まで）→ 次の着手対象。遊べる状態にする
+[3] シナリオ実装（ボイボ寮撃破・小樽潮風撃破まで）→ 製品版の目標
 ```
+
+### 1-b. 体験版の範囲（2026-08-26・暫定）
+
+**終端は「ボイボ寮（`faction_green`）が東北家へ宣戦布告し、交戦状態に入る」ところまで。**
+4対4の戦闘シーンの開始ではない。`ev_saitama_chain_4` の `warFlag(faction_green, atWar:true)` が
+発火した時点で `atWarWith` が成立し、MAP 上でボイボ寮が敵表示に変わる（`MapScene.jsx:380-381`）。
+
+上記 [3] より手前で切るため、**[3] の範囲をそのまま体験版の定義として使えない。**
+確定した時点で本節を正式版へ書き換えること。詳細の検討は別途進行中。
+
+体験版までに要るものと、外したもの:
+
+| 項目 | 扱い |
+|---|---|
+| ch01 東北 + ch02 埼玉チェーンの通し | 要る |
+| 自軍メイン1の編成（通常戦・防衛・クラファン） | 要る（2026-08-26 実装済み） |
+| イベント本文の執筆 | 要る。現在は全41件が機械生成の「ベタ張り」 |
+| 立ち絵の VIEW値 / `portraitDefaults.json` 確定 | 要る（人間の目視） |
+| 配布パッケージング（`PROMPT_asset_pack.md`） | 要るが**優先順位は最下位**（オーナー判断） |
+| MapScene の背景差し替え（`PROMPT_azgaar_map_bg.md`） | 体験版には不要 |
+| ギャラリー / 設定 / クレジット | 未実装。タイトルから空実装画面へ飛ぶ。扱い未定 |
 
 [3] の構成は `docs/SCENARIO_DRAMA_NOTES.md` に準拠しつつ、**システムに合わせて微調整する**。
 対象は同書の「ボイボ寮の黒幕」「小樽潮風・小春六花編」まで。初音ミク編・ボカコレ編は対象外。
@@ -172,8 +193,11 @@ PSD は PSDTool（https://oov.github.io/psdtool/）対応。北海道めろん�
 
 ### 3-1d. 変換パイプライン
 
-- `tools/psd_extract.cjs` でレイヤー分解 → `public/characters/parts/<charKey>/` に PNG + `parts.json`。表示構成は手書き `rig.json`（詳細は KNOWLEDGE §17）
-- `StandingChar` は `rig.json` fetch 成功時にパーツ合成、失敗時（404）は静止画ポートレートへフォールバック。**PNG 資産は移行完了までフォールバック先として残す**
+> **2026-08-20 追記: 本節の `rig.json` 方式は廃止済み。**現行は `tools/psd2ymm4.cjs` による
+> YMM4形式 + `portrait.json` 方式（詳細は KNOWLEDGE §17、状況は §3-3）。以下は経緯の記録。
+
+- ~~`tools/psd_extract.cjs` でレイヤー分解 → `public/characters/parts/<charKey>/` に PNG + `parts.json`。表示構成は手書き `rig.json`~~
+- ~~`StandingChar` は `rig.json` fetch 成功時にパーツ合成、失敗時（404）は静止画ポートレートへフォールバック~~
 
 ### 3-2. 素材カバー状況（2026-08-14 実測）
 
@@ -227,7 +251,10 @@ Moiky素材の実測ディレクトリ数は **55**（§3-2 執筆時の43は YM
 ### 3-2e. YMM4形式への変換状況（2026-08-19）
 
 `tools/psd2ymm4.cjs` により **15 PSD / 1460 PNG** を `public/characters/ymm4/` へ出力済み（2026-08-19 完了）。
-詳細は `docs/prompts/PROMPT_psd2ymm4.md`。
+詳細は `docs/archive/PROMPT_psd2ymm4.md`。
+
+> **2026-08-20 追記: Moiky氏素材43体の取り込みが完了し、現在 `public/characters/ymm4/` は 53体・PNG 4390枚（実測 510MB）。**
+> 下表は変換15体の内訳であり、現在の全体像ではない。詳細は `docs/archive/PROMPT_moiky_import.md`。
 
 出力仕様:
 
@@ -264,14 +291,16 @@ Moiky素材の実測ディレクトリ数は **55**（§3-2 執筆時の43は YM
 - 水德式 重音テト — KumaSun氏素材（`~/Desktop/sozai/KumaSun/KumaSun_Teto`）に差し替え済み
 - Moiky 43体 — 既にYMM4形式のため変換不要
 
-### 3-3. リグ済み
+### 3-3. 立ち絵の配置状況（2026-08-20 移行完了）
 
-`public/characters/parts/` に配置済のキャラ:
+`public/characters/ymm4/` に **53体**（PSD変換15体 + Moiky氏43体 − 重複5体）。全体に `portrait.json` を出力済み。
 
-- `char_006` 彩澄しゅお（4段階まばたき）— PSD は `docs/assets/psd/彩澄しゅお縮小_800pix.psd`
-- `char_017` 四国めたん（3段階まばたき）— PSD は `docs/assets/psd/四国めたん.psd`
+**旧 `rig.json` 方式（`public/characters/parts/`）は廃止**し、`char_006` / `char_017` ともに
+`_deprecated_parts_20260820/` へ退避済み。ぱるとねる版5体も同ディレクトリの `ymm4_partonelle/` に退避し、
+`public/characters/ymm4/` 側は Moiky版に置き換えてある。
 
-Moiky氏素材からの移行は未着手。
+残るのは人間の目視確定のみ（`?qa=portrait` / `?qa=adv`）。
+`VIEW_BOTTOM_CM` / `VIEW_TOP_CM` は既定の 60 / 180、`portraitDefaults.json` は `{}`（0件）のまま。
 
 ### 3-2c. 素材フォルダの所在
 

@@ -183,12 +183,12 @@ export class BattleEngineV3 {
     });
   }
 
-  static buildUnit(char, sideType, index) {
+  static buildUnit(char, sideType, index, mainCount = 2) {
     return {
       char,
       sideType,
       bonus:       resolveBonus(char, sideType),
-      position:    index < 2 ? 'front' : 'rear',
+      position:    index < mainCount ? 'front' : 'rear',
       soldiers:    char.soldiers,
       maxSoldiers: char.soldiers,
       charHp:      char.charHp    ?? 200,

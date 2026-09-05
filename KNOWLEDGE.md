@@ -375,6 +375,10 @@ docs/archive/   ← 破棄済み・完了済みプロンプト、旧ドキュメ
 - 立ち絵修正: PartyScene / FormationScene / BattleScene は `/characters/portraits/<id>.png` 規約パス + 404時プレースホルダへ統一済。
 - イベント/バグ修正: VS大都会 ch01 イベント7件追加、QAふくしま制圧イベント追加、battleEnd の stale ws.bases 修正、エディタ trigger options（`char_defeated`/`theater` + 未登録値防御）修正、水戸制圧時 `baseTransfer` + 防衛キャンセル復帰修正が完了済。
 - **v2 方針 P1（UI削除フェーズ）完了**: 研究/アイテムNavButton削除、TopBar通貨/収入表示削除（breadcrumb 側含む）、兵力UI削除（NodePopup/StatTile/MapScene troops生成）、PartyScene 強化コマンドUIレンダリング削除（UPGRADE_COMMANDS 定数は温存）、itemGain effect no-op化、characters.json battleCapacity削除、BaseMenuScene 訪問コマンド削除、NodePopup ホバー化＋ボタン全削除、BaseMenuScene 背景透過化（MapScene を背景レイヤ）、NodePopup 収入表示削除。詳細は `docs/archive/PROMPT_P1_ui_deletion.md` / `PROMPT_P1_addendum.md` / `PROMPT_P1_addendum_fix.md`。
+- **2026-08-26**:
+  - **さいたま（ボイボ寮）宣戦布告の連鎖修正** — `ev_saitama_chain_3` の trigger が未接続の `turn_start` だったため連鎖が停止していた。`before_faction_turn` へ変更（chain_1/2/4 と一致）。あわせて `ev_saitama_chain_4` の `legionForceAttack` を `warFlag(faction_green, atWar:true)` へ置換。**`legionForceAttack` は `attackPriority` 非空・`atWarWith` 成立の両方を要求するため単独では発火しない**（`LegionAI.buildAttackQueue` L56/L61）。既存の宣戦布告3件と同じ `warFlag` 単独の作法に揃えた
+  - **メインキャスト数の可変化** — `BattleEngineV3.buildUnit(char, sideType, index, mainCount = 2)`。敵側は `legions.json` の `mainCount`、自軍は編成画面／ダンジョン画面の `MainCountToggle`（`FormationScene.jsx` から export）で選ぶ。`formation` の4キー構造は不変で、`position` は配列の添字と `mainCount` だけで決まる。詳細は `docs/archive/PROMPT_maincast_variable.md` / `PROMPT_maincast_ui.md`
+  - **未コミット169件を解消** — `2f8ce50` / PR #5 で `origin/main`（`15c5bac`）へマージ済み
 - 参照: `docs/archive/ARCHIVED_QA_BUG_20260519.md`、`PROMPT_battle_*`、`PROMPT_domestic_*` 他。
 
 ---
@@ -418,10 +422,11 @@ docs/archive/   ← 破棄済み・完了済みプロンプト、旧ドキュメ
 - 戦闘アニメ演出の詳細詰め（Design v5相当）→ 上記安定後。
 
 ### シナリオ
-- 復元9件 + VS大都会 ch01 イベントのダミーテキスト差し替え。
+- **全41イベントの台詞は「ベタ張り」状態**（2026-08-26）。`【<id>】<name> ｜ EFFECTS: <効果一覧>` を
+  機械的に転記したもので、本文の執筆は未着手。発火したイベントと適用効果が画面でそのまま読める。
+- イベント内容そのものの改修（暗黒大将軍のカット等）は**別途シナリオ設計として扱う**。
+  カットはフラグ連鎖に波及する（例: `flag_ankokugun_active` を切ると `ev_mito_conquest_a` のルートAが消える）。
 - charJoin の実合流処理（ウナしゅお/ずん子いたこ解禁。現状フラグのみ）。
-- **要ディレクター判断**: `ev_turn1_status`（player_turn turn==1）と `ev_turn2_join_kotohaxsisters`（player_turn turn==2）が共に char_008・char_009 を `charJoin`。前者は flag 未設定のため後者の `noFlag` が通過し2ターン目で再 charJoin。どちらが正か・前者に `setFlag` を持たせるか要決定（ターン入場統一とは独立の既存重複）。
-- **要調査**: `ch02_saitama/ev_saitama_chain_3` の `trigger:"turn_start"` は未接続trigger疑い→chain停止で `ev_saitama_chain_4` の `legionForceAttack` 不発の可能性。
 
 ### バランス・デザイン（別途設計）
 - characters.json の kana 実値調整。（`strategyRate` は 2026-08-14 に戦闘システムから切り離したため調整不要）
@@ -441,14 +446,28 @@ docs/archive/   ← 破棄済み・完了済みプロンプト、旧ドキュメ
 ### 音声（事前生成方式）
 イベント JSON の `voice.speakerId` を元にローカル VOICEVOX ENGINE で wav を事前生成し、`public/audio/voice/<eventId>/` に配置する。ADVScene はステップごとに `new Audio(voice.file)` で再生。テキストや話者を変更した場合はエディタの「音声一括生成」ボタンで再生成が必要。ランタイムでの TTS 呼び出しは行わない。
 
-### 立ち絵（リグ定義方式）
-PSD を `tools/psd_extract.cjs` でレイヤー分解し `public/characters/parts/<charKey>/` に PNG + `parts.json` を配置。表示レイヤー構成は手書きの `rig.json`（base レイヤー ID 配列 + blink フレーム定義）で制御する。PSDToolKit の命名規約には依存しない。
+### 立ち絵（YMM4 portrait.json 方式）— 2026-08-20 移行完了
 
-StandingChar は `rig.json` fetch 成功時にパーツ合成＋自動まばたき表示、失敗時（404）は従来の静止画ポートレートにフォールバック。既存キャラへの影響なし。
+**旧 `rig.json` 方式は廃止。`public/characters/parts/` は `_deprecated_parts_20260820/` へ退避済み。**
 
-対応済みキャラ: `char_006`（彩澄しゅお・4段階まばたき）、`char_017`（四国めたん・3段階まばたき）。
+`public/characters/ymm4/<charKey>/` に YMM4形式（カテゴリフォルダ + `preset.ini`）と `portrait.json` を配置する。
+`ADVScene.jsx` の `usePortraitData` が `portrait.json` を fetch し、`drawOrder` 順に各カテゴリのPNGを
+`<img>` で重ねて合成する。全PNGがキャンバス全域のため座標計算は不要。
 
-`psd_extract.cjs` に同種のリスクあり（char_006/char_017 は現状動作）: RLEチャンネル解凍で内部計算がズレた場合、以降の全レイヤーの読み出し位置が破壊される（`tools/psd2ymm4.cjs` 作成時に mikoto.psd で実際に発生し修正済み）。
+- **53体**（PSD変換15体 + Moiky氏素材43体 − 重複5体）。`_index.json` は `vite.config.js` の
+  `ymm4IndexPlugin` が dev起動時・build開始時にディレクトリを走査して自動生成する
+- 表情の解決順: `portrait.json.default` → `portraitDefaults.json` で上書き → `face`（presets）→ `parts`（勝つ）
+- **まばたきは未実装**（`rig.json` の blink に対応物が無いため）
+- 生成ツール: `tools/psd2ymm4.cjs`（PSD → YMM4形式 + `portrait.json`）。Moiky素材は変換不要でコピーのみ
+
+**表示スケールはカメラ方式**（`src/shared/portraitScale.js`）。`PX_PER_CM` を直接持たず、
+`VIEW_BOTTOM_CM` / `VIEW_TOP_CM`（地面から何cm〜何cmを画面に映すか）から逆算する。
+身長は `src/game/data/characterHeight.json`（53件）。未設定は 155cm。
+**現在の値は既定の 60 / 180 のまま。`?qa=portrait` / `?qa=adv` での目視確定が未了。**
+`src/game/data/portraitDefaults.json` も現在 `{}`（0件）。
+
+`psd2ymm4.cjs` / `psd_extract.cjs` のリスク: RLEチャンネル解凍で内部計算がズレた場合、
+以降の全レイヤーの読み出し位置が破壊される（`mikoto.psd` で実際に発生し修正済み）。
 
 ### 発展形（進行中）
 

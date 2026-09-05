@@ -1,0 +1,36 @@
+{
+  "id": "ev_demo_turn2_open",
+  "name": "2ターン目開始",
+  "trigger": "player_turn",
+  "conditions": [
+    { "type": "turn", "op": "eq", "value": 2 }
+  ],
+  "probability": 1,
+  "priority": 500,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        { "characterId": "char_004", "position": "center", "text": "2人は帰らなくていいんですか？" },
+        { "characterId": "char_005", "position": "right", "text": "帰る？なんでだ？" },
+        { "characterId": "char_006", "position": "left", "text": "せっかくだしこのまま手伝うよ" },
+        { "characterId": "char_005", "position": "right", "text": "ゲームにも飽きてきてたしな！" },
+        { "characterId": "char_004", "position": "center", "text": "音街はよくてもしゅおはお姉さんとか地元の人とか" },
+        { "characterId": "char_006", "position": "left", "text": "お姉ちゃんなら大丈夫だよ。ほら" },
+        { "characterId": "char_013", "position": "right", "text": "お友達を助けるなんてしゅおちゃんえらい！困ったらいつでもお姉ちゃんを呼んでね！" },
+        { "characterId": "char_005", "position": "right", "text": "ノリが軽いな！" },
+        { "characterId": "char_004", "position": "center", "text": "音街に言われたくはないと思うよ" },
+        { "characterId": "char_006", "position": "left", "text": "私が自分から何かするって言うの珍しいからね、喜んでるんだと思う" },
+        { "characterId": "char_005", "position": "right", "text": "困ったらりりせさん呼んでみような！" },
+        { "characterId": "char_006", "position": "left", "text": "本当に来ちゃうよ…" }
+      ]
+    },
+    { "type": "end" }
+  ],
+  "effects": {
+    "default": [
+      { "type": "setFlag", "flag": "flag_turn2_done" }
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"import sys,json,subprocess; d=json.load(sys.stdin); p=d.get('file_path',''); r=subprocess.run(['npx','eslint','--fix',p],capture_output=True,text=True) if any(p.endswith(e) for e in ('.jsx','.js')) else None; print((r.stdout+r.stderr).strip()) if r and (r.stdout or r.stderr).strip() else None\""
+          }
+        ]
+      }
+    ]
+  }
+}

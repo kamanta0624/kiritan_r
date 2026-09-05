@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { PK, PK2, AC, AC2, TEAL } from '../shared/tokens.js';
 import { requiredMeme } from '../game/data/crowdfundingConfig.js';
+import { MainCountToggle } from './FormationScene.jsx';
 
 // ═══════════════════════════════════════════════════════════
 //   DungeonScene — クラファン挑戦・浅層探索
@@ -41,6 +42,7 @@ export default function DungeonScene({
   const [phase, setPhase]                     = useState(initialPhase);
   const [selectedCharIds, setSelectedCharIds] = useState([]);
   const [selectedGoalId, setSelectedGoalId]   = useState(null);
+  const [mainCount, setMainCount]             = useState(2);
 
   // wave_result: 結果を一定時間表示してから次へ進む
   useEffect(() => {
@@ -129,10 +131,14 @@ export default function DungeonScene({
             })}
           </div>
 
+          <div style={{ marginTop:14 }}>
+            <MainCountToggle mainCount={mainCount} onChange={setMainCount}/>
+          </div>
+
           <div style={{ display:'flex', gap:10, marginTop:8 }}>
             <DungeonBtn label={isCF ? '挑戦開始' : '探索開始'} color={TEAL} primary
               disabled={selectedCharIds.length === 0 || needsGoal || noChars}
-              onClick={() => onConfirm(selectedCharIds, isCF ? selectedGoalId : null)} />
+              onClick={() => onConfirm(selectedCharIds, isCF ? selectedGoalId : null, mainCount)} />
             <DungeonBtn label="戻る" color="rgba(255,255,255,.7)"
               onClick={() => onNavigate('map')} />
           </div>

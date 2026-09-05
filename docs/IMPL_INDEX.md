@@ -106,7 +106,7 @@ occurredEvents: { [eventId]: number }   // 発生回数
 flagTimestamps: { [flagKey]: number }   // セットされたターン番号
 conqueredThisTurn: boolean
 hireCooldownUntil: number
-gamePhase: 'playing' | 'victory' | 'defeat'
+gamePhase: 'playing' | 'victory' | 'defeat' | 'demo_complete'
 actionPoints: number
 maxActionPoints: number
 researchQueue: null | { id: string, turnsRemaining: number }
@@ -316,6 +316,7 @@ getEventById(id)                                     // named export → EventDe
 | type | 処理先 | 主なフィールド |
 |------|--------|-------------|
 | `affinityGain` | APPLY_EFFECTS | `pairs: [[charId, charId], ...]`, `amount` |
+| `demoEnd` | APPLY_EFFECTS | 体験版終了。`gamePhase='demo_complete'` |
 | `treasury` | APPLY_EFFECTS | `factionId?`, `delta` |
 | `charJoin` | APPLY_EFFECTS | `charId`, `factionId?` |
 | `charLeave` | APPLY_EFFECTS | `charId` |

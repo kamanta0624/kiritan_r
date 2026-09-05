@@ -1,0 +1,42 @@
+{
+  "id": "ev_demo_theater_ririse",
+  "name": "りりせ参戦",
+  "trigger": "theater",
+  "conditions": [
+    { "type": "turn", "op": "gte", "value": 5 },
+    { "type": "noFlag", "flag": "conquered_base_045" },
+    { "type": "noFlag", "flag": "flag_ririse_joined" }
+  ],
+  "probability": 1,
+  "priority": 500,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        { "characterId": "char_019", "position": "right", "text": "ちゃんこの人、しぶとい。粘り腰。さすが力士ロボ" },
+        { "characterId": "char_004", "position": "center", "text": "あと一歩なんですが、その一歩が遠いですね…" },
+        { "characterId": "char_017", "position": "right", "text": "めろんさんとあわもちゃんの遊撃も厄介よ。攻略に専念できないわ" },
+        { "characterId": "char_013", "position": "left", "text": "お困りのようだね" },
+        { "characterId": "char_006", "position": "left", "text": "その声は…" },
+        { "characterId": "char_013", "position": "left", "text": "やっほーしゅおちゃん。お姉ちゃんが助けに来たよ" },
+        { "characterId": "char_005", "position": "right", "text": "りりせさん、本当に来てくれたんだな！" },
+        { "characterId": "char_013", "position": "left", "text": "大事な妹とその友達のためだからね！" },
+        { "characterId": "char_004", "position": "center", "text": "りりせさん、ありがとうございます。よく私たちの状況がわかりましたね" },
+        { "characterId": "char_006", "position": "left", "text": "お姉ちゃん、こないだ連絡してからすぐこっち向かったでしょ…" },
+        { "characterId": "char_017", "position": "right", "text": "なんにしても助かるわ。もうひと押し頑張りましょう" },
+        { "characterId": "char_004", "position": "center", "text": "そうですね。りりせさん、よろしくお願いします" },
+        { "characterId": "char_013", "position": "left", "text": "お任せだよ！何でも大活躍だけど、しゅおちゃんと一緒なら超大活躍するから覚えといてね！" },
+        { "characterId": "char_006", "position": "left", "text": "私は別々でいいよ" },
+        { "characterId": "char_013", "position": "left", "text": "そんな！" }
+      ]
+    },
+    { "type": "end" }
+  ],
+  "effects": {
+    "default": [
+      { "type": "charJoin", "charId": "char_013", "factionId": "東北家" },
+      { "type": "setFlag", "flag": "flag_ririse_joined" }
+    ]
+  }
+}

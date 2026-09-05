@@ -1,0 +1,40 @@
+{
+  "id": "ev_demo_saitama_declare",
+  "name": "ボイボ寮宣戦布告",
+  "trigger": "player_turn",
+  "conditions": [
+    { "type": "turn", "op": "eq", "value": 10 }
+  ],
+  "probability": 1,
+  "priority": 900,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        { "characterId": "char_004", "position": "left", "text": "ん？スマホに何か届いている？" },
+        { "characterId": "char_005", "position": "right", "text": "つむぎさんからだ" },
+        { "characterId": "char_075", "position": "center", "text": "えー、この動画はこれと見込んだ東北のみんなに一斉送信されています" },
+        { "characterId": "char_075", "position": "center", "text": "皆さんこんにちは、春日部つむぎです。突然ですがボイボ寮は埼玉になりました。" },
+        { "characterId": "char_075", "position": "center", "text": "これからあーしたちボイボ寮、改め埼玉は東北を埼玉にします。" },
+        { "characterId": "char_075", "position": "center", "text": "これは無差別埼玉ではありません。厳正なる審査のもと、選別した結果東北は埼玉になります。" },
+        { "characterId": "char_075", "position": "center", "text": "東北は埼玉です。東北家はみんなボイボ寮に部屋があるからです。" },
+        { "characterId": "char_075", "position": "center", "text": "みんなみんな埼玉です。" },
+        { "characterId": "char_075", "position": "center", "text": "えー最後に。あーしたちはこれから東北のみんなに覇権争いを挑むことを宣言します。" },
+        { "characterId": "char_075", "position": "center", "text": "世界埼玉化計画のために、東日本を埼玉化します。きりたん！勝った方が埼玉だよ！" },
+        { "characterId": "char_075", "position": "center", "text": "それでは皆さんごきげんようさようなら" },
+        { "characterId": "char_004", "position": "left", "text": "…えぇ…" },
+        { "characterId": "char_006", "position": "left", "text": "えーと、つまり…" },
+        { "characterId": "char_005", "position": "right", "text": "ボイロ寮が東北家に宣戦布告してきたってことか！？" }
+      ]
+    },
+    { "type": "end" }
+  ],
+  "effects": {
+    "default": [
+      { "type": "warFlag", "factionId": "faction_green", "atWar": true },
+      { "type": "setFlag", "flag": "flag_demo_end" },
+      { "type": "demoEnd" }
+    ]
+  }
+}

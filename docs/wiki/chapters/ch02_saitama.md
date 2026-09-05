@@ -13,7 +13,7 @@ events:
     priority: 900
     maxOccurrences: 1
   - id: ev_saitama_chain_3
-    trigger: turn_start
+    trigger: before_faction_turn
     priority: 900
     maxOccurrences: 1
   - id: ev_saitama_chain_4

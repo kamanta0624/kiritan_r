@@ -1,0 +1,28 @@
+{
+  "id": "ev_demo_koriyama_conquered",
+  "name": "郡山制圧",
+  "trigger": "base_conquered",
+  "conditions": [
+    { "type": "baseId", "baseId": "base_021" }
+  ],
+  "probability": 1,
+  "priority": 500,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        { "characterId": "char_024", "position": "left", "text": "ずん子ちゃんたち抜きでここまでやるとはね" },
+        { "characterId": "char_023", "position": "right", "text": "次は手加減なしだよ！おりゃー！" },
+        { "characterId": "char_024", "position": "left", "text": "ひぇっ！危ないじゃないの！こっちもマスク持ってるんだから気をつけてよ！" },
+        { "characterId": "char_023", "position": "right", "text": "ひひ、ごめんごめん。でも次のターンはそのくらいがんばっちゃうよ！" }
+      ]
+    },
+    { "type": "end" }
+  ],
+  "effects": {
+    "default": [
+      { "type": "setFlag", "flag": "flag_koriyama_done" }
+    ]
+  }
+}

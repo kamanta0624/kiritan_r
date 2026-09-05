@@ -1,0 +1,37 @@
+{
+  "id": "ev_demo_fukushima_conquered",
+  "name": "福島制圧",
+  "trigger": "base_conquered",
+  "conditions": [
+    { "type": "baseId", "baseId": "base_003" }
+  ],
+  "probability": 1,
+  "priority": 500,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        { "characterId": "char_005", "position": "right", "text": "勝ったぞ！一歩前進だな！" },
+        { "characterId": "char_016", "position": "left", "text": "家からこんなに離れるのも久しぶりなのだ" },
+        { "characterId": "char_017", "position": "right", "text": "タグポータルが中立化しているわ。東北家とつなげてしまいましょう" },
+        { "characterId": "char_004", "position": "center", "text": "登録…っと" }
+      ]
+    },
+    { "type": "narration", "text": "画面が光るエフェクト、効果音" },
+    {
+      "type": "conversation",
+      "lines": [
+        { "characterId": "char_004", "position": "center", "text": "セーブしました。これで東北家と行き来できます" },
+        { "characterId": "char_006", "position": "left", "text": "東北家、全然ポータル繋げてないよね" },
+        { "characterId": "char_004", "position": "center", "text": "ボイロ地方が栄すぎなんですよ" }
+      ]
+    },
+    { "type": "end" }
+  ],
+  "effects": {
+    "default": [
+      { "type": "setFlag", "flag": "flag_fukushima_done" }
+    ]
+  }
+}
