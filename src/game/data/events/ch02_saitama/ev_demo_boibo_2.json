@@ -1,0 +1,20 @@
+{
+  "id": "ev_demo_boibo_2",
+  "name": "ボイボ寮の気配2",
+  "trigger": "player_turn",
+  "conditions": [
+    { "type": "turn", "op": "eq", "value": 6 }
+  ],
+  "probability": 1,
+  "priority": 500,
+  "maxOccurrences": 1,
+  "script": [
+    { "type": "narration", "text": "ボイボ寮が県内のタグポータルを繋げました" },
+    { "type": "end" }
+  ],
+  "effects": {
+    "default": [
+      { "type": "setFlag", "flag": "flag_boibo_2" }
+    ]
+  }
+}

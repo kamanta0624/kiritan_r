@@ -1,0 +1,43 @@
+{
+  "id": "ev_demo_theater_tsuina_meet",
+  "name": "ついなちゃん邂逅",
+  "trigger": "theater",
+  "conditions": [
+    { "type": "flag", "flag": "conquered_base_014" },
+    { "type": "flag", "flag": "flag_daitoshi_destroyed" },
+    { "type": "noFlag", "flag": "flag_tsuina_met" }
+  ],
+  "probability": 1,
+  "priority": 500,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        { "characterId": "char_024", "position": "left", "text": "ここからは歩きになるわね" },
+        { "characterId": "char_019", "position": "right", "text": "ありがとうめろんの人。向こうも私たちに気づいてこっちに向かっている" },
+        { "characterId": "char_024", "position": "left", "text": "私でもわかるくらいの霊力？妖力？とにかくすごい気配だわ" },
+        { "characterId": "char_037", "position": "center", "text": "よいしょっと。ふー。強い気配がしたから来てみたら、どうやら待たせちゃったみたいやね。行者ってわけでもなさそうやけどこんな山奥で何しとるんや" },
+        { "characterId": "char_019", "position": "right", "text": "私は中国うさぎ。修行中の巫女。今はふるさと女学院の生徒" },
+        { "characterId": "char_024", "position": "left", "text": "北海道めろんよ。今はふるさと女学院で保健室の先生をしているわ" },
+        { "characterId": "char_037", "position": "center", "text": "役ついな、方相氏や。ついなちゃんって呼んでな。修行と見回りを兼ねて地方を回ってる最中や。こっちは後鬼や" },
+        { "characterId": "char_094", "position": "right", "text": "ついなちゃんのお付きの1人、後鬼よ。よろしくね" },
+        { "characterId": "char_024", "position": "left", "text": "めちゃくちゃキャラ被りしてるわね…" },
+        { "characterId": "char_037", "position": "center", "text": "出雲の巫女さんか。ならその気配も納得や。めろん先生もそのヘルメットして平気でバイク乗り回すなんてただもんやないな" },
+        { "characterId": "char_024", "position": "left", "text": "まあね。ついなちゃんも知ってると思うけど、この辺もいろんなものが封印されててね。私たちも最近は手分けして見回りをするようになったの" },
+        { "characterId": "char_019", "position": "right", "text": "幸い鬼はまだ出ていないけど、天狗や悪霊が出て何度か大騒ぎになってる。パトロール、大事" },
+        { "characterId": "char_037", "position": "center", "text": "なるほどな。それでウチが山に入ったから様子を見に来たと" },
+        { "characterId": "char_094", "position": "right", "text": "ふるさと女学院とおっしゃいましたね。皆さんのような方は他にもいらっしゃるのですか" },
+        { "characterId": "char_024", "position": "left", "text": "いらっしゃるどころかバーゲンセールよ。2人とも、よかったら一度来てみない？" },
+        { "characterId": "char_037", "position": "center", "text": "ええんか？ウチ部外者やけど" },
+        { "characterId": "char_019", "position": "right", "text": "ふる女はその辺緩い。みんなも歓迎する" }
+      ]
+    },
+    { "type": "end" }
+  ],
+  "effects": {
+    "default": [
+      { "type": "setFlag", "flag": "flag_tsuina_met" }
+    ]
+  }
+}

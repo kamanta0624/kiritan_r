@@ -1,0 +1,36 @@
+{
+  "id": "ev_demo_daitoshi_turn1",
+  "name": "大都会作戦会議",
+  "trigger": "enemy_turn",
+  "conditions": [
+    { "type": "turn", "op": "eq", "value": 1 }
+  ],
+  "probability": 1,
+  "priority": 500,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        { "characterId": "char_020", "position": "center", "text": "きりたん、明らかに力が増してた。新たな力？" },
+        { "characterId": "char_024", "position": "left", "text": "きりたんちゃんたち、あんな混戦でも連携がとれてたわね" },
+        { "characterId": "char_020", "position": "center", "text": "それでも旅館を取り戻すのはずん子たちがいない今しかない" },
+        { "characterId": "char_022", "position": "right", "text": "伝令！きりたんたちが逆に攻め込んで来たで！あっちは防衛と攻撃でメンバー分けた模様" },
+        { "characterId": "char_020", "position": "center", "text": "あのひきこもりのきりたんが自分から外に！？そんなこと言ってる場合じゃない。あわもとめろんは遊撃！時間を稼ぎながら撤退して！しのびとつるぎはちゃんこといっしょに迎撃！" },
+        { "characterId": "char_023", "position": "left", "text": "ボクたちにお任せを！" },
+        { "characterId": "char_020", "position": "center", "text": "きりたんたちのあの力を発揮されたらちゃんこたちでは勝てない…なんとか秘密を暴かないと" },
+        { "characterId": "char_107", "position": "right", "text": "お困りのようだもん" },
+        { "characterId": "char_021", "position": "left", "text": "何奴！" },
+        { "characterId": "char_020", "position": "center", "text": "アンタ、ちゃんこに何の用" },
+        { "characterId": "char_107", "position": "right", "text": "きりたんたちの力の正体、知りたいなら教えてやるもん" },
+        { "characterId": "char_020", "position": "center", "text": "！" }
+      ]
+    },
+    { "type": "end" }
+  ],
+  "effects": {
+    "default": [
+      { "type": "setFlag", "flag": "flag_daitoshi_turn1_done" }
+    ]
+  }
+}

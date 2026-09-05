@@ -1,0 +1,56 @@
+{
+  "id": "ev_demo_mito_conquered",
+  "name": "水戸制圧",
+  "trigger": "base_conquered",
+  "conditions": [
+    { "type": "baseId", "baseId": "base_045" }
+  ],
+  "probability": 1,
+  "priority": 500,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        { "characterId": "char_020", "position": "center", "text": "ぐぬぬ" },
+        { "characterId": "char_021", "position": "right", "text": "くそ…" },
+        { "characterId": "char_022", "position": "left", "text": "これでも勝てへんとは…" },
+        { "characterId": "char_019", "position": "right", "text": "絆の力、平行世界から引き出した力。でもそれはこちらも同じ" },
+        { "characterId": "char_004", "position": "center", "text": "前回より段違いに強かったけど、勝ったのは私たちです！" },
+        { "characterId": "char_006", "position": "left", "text": "ちゃんこちゃん、あなた学校は行ってる？" },
+        { "characterId": "char_020", "position": "center", "text": "行ってないよ！ちゃんこは異能力者だから普通の学校行っても周りに迷惑かかるんだ" },
+        { "characterId": "char_006", "position": "left", "text": "私たちの学校ならそんなことないよ。通ってみない？" },
+        { "characterId": "char_020", "position": "center", "text": "でも…" },
+        { "characterId": "char_006", "position": "left", "text": "大丈夫だよ、旅館からならみんなで登校できるし" },
+        { "characterId": "char_020", "position": "center", "text": "！旅館を返してくれるのか？" },
+        { "characterId": "char_005", "position": "right", "text": "もともとちゃんこの旅館なんだろ！とーほくが勝手に住んでるだけだぞ！" },
+        { "characterId": "char_004", "position": "center", "text": "ちょっと！勝手に決めないでくださいよ！住み込みで働いてるだけなのはそうですけど" },
+        { "characterId": "char_021", "position": "right", "text": "総帥が学校に通うなら私もお供します" },
+        { "characterId": "char_022", "position": "left", "text": "ウチも通うで！" },
+        { "characterId": "char_023", "position": "left", "text": "ボクも編入しようかな" },
+        { "characterId": "char_024", "position": "right", "text": "じゃあ私は保健の先生でもしようかしら" },
+        { "characterId": "char_107", "position": "right", "text": "ちょ、ちょっと！なんで仲良くなってるもん！？泥試合のどさくさでずんだもんにタイマン仕掛ける計画がパーだもん！" },
+        { "characterId": "char_016", "position": "left", "text": "あんこもん。最近見かけないと思ったら大都会にいたのだ？" },
+        { "characterId": "char_107", "position": "right", "text": "あんこもんは孤高の存在だもん！徒党を組まずに暗躍するんだもん" },
+        { "characterId": "char_016", "position": "left", "text": "ちゃんこたちにカップリングボーナス教えたのだ？" },
+        { "characterId": "char_107", "position": "right", "text": "あんこもんのおかげで大都会は完全燃焼したもん！おしえなきゃよかったもん" },
+        { "characterId": "char_016", "position": "left", "text": "いつでも普通に遊びに来たらいいっていつも言ってるのだ…" },
+        { "characterId": "char_107", "position": "right", "text": "うるさいもん！次はこうは行かないもん！" },
+        { "characterId": "char_016", "position": "left", "text": "行っちゃったのだ…" }
+      ]
+    },
+    { "type": "end" }
+  ],
+  "effects": {
+    "default": [
+      { "type": "charJoin", "charId": "char_020", "factionId": "東北家" },
+      { "type": "charJoin", "charId": "char_021", "factionId": "東北家" },
+      { "type": "charJoin", "charId": "char_022", "factionId": "東北家" },
+      { "type": "charJoin", "charId": "char_023", "factionId": "東北家" },
+      { "type": "charJoin", "charId": "char_024", "factionId": "東北家" },
+      { "type": "warFlag", "factionId": "faction_red", "atWar": false },
+      { "type": "warFlag", "factionId": "faction_new02", "atWar": true },
+      { "type": "setFlagWithTurn", "flag": "flag_daitoshi_destroyed" }
+    ]
+  }
+}

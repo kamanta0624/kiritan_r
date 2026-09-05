@@ -1,0 +1,57 @@
+{
+  "id": "ev_demo_theater_teto",
+  "name": "重音テト邂逅",
+  "trigger": "theater",
+  "conditions": [
+    { "type": "noFlag", "flag": "flag_teto_met" }
+  ],
+  "probability": 1,
+  "priority": 500,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        { "characterId": "char_039", "position": "center", "text": "ふんふーん。やはり東北に来たらずん子ちゃんたちにも会って行かなきゃ。ここが引っ越し先のずんだ旅館だね" },
+        { "characterId": "char_004", "position": "left", "text": "あれ、テトさん。おひさしぶりです" },
+        { "characterId": "char_005", "position": "right", "text": "テト！こんな所で会えるなんて思わなかったぞ！" },
+        { "characterId": "char_039", "position": "center", "text": "やあきりたん、ウナ。実は今日本一周の最中でね。これから東北を抜けて北海道に向かうんだ" },
+        { "characterId": "char_004", "position": "left", "text": "そうなんですね。こんなところじゃ何ですので良ければ上がって休んでいってください" }
+      ]
+    },
+    { "type": "narration", "text": "（場面転換）" },
+    {
+      "type": "conversation",
+      "lines": [
+        { "characterId": "char_039", "position": "center", "text": "ありゃ、2人は秋葉原にいたのか。すれ違いになっちゃったな" },
+        { "characterId": "char_004", "position": "left", "text": "クラファンからほとんど休みなくずんだカフェを開きに行っちゃいました" },
+        { "characterId": "char_039", "position": "center", "text": "そうだったのか。いやー、実はしばらくネットデトックスをしててね" },
+        { "characterId": "char_005", "position": "right", "text": "テト、もしかして前回の“うたフェス”の後からか…？" },
+        { "characterId": "char_039", "position": "center", "text": "うーん、そうだね。ウナが思ってる通りだよ。日本一周もね" },
+        { "characterId": "char_004", "position": "left", "text": "…" },
+        { "characterId": "char_005", "position": "right", "text": "…そっか！ウナとおんなじだな！" },
+        { "characterId": "char_004", "position": "left", "text": "音街" },
+        { "characterId": "char_039", "position": "center", "text": "まあ、湿っぽいのは無しにしようじゃないか。ウナ、また一緒に歌おうな" },
+        { "characterId": "char_005", "position": "right", "text": "うん！" },
+        { "characterId": "char_004", "position": "left", "text": "何もない所ですが、良ければテトさんもゆっくりしていってください" },
+        { "characterId": "char_039", "position": "center", "text": "ありがとう、お言葉に甘えて一泊させてもらおうかな。でも明日にはまた旅に戻るよ。北海道は行ったことがないから楽しみなんだ" }
+      ]
+    },
+    { "type": "narration", "text": "（場面転換）" },
+    {
+      "type": "conversation",
+      "lines": [
+        { "characterId": "char_004", "position": "left", "text": "テトさん、行っちゃったね" },
+        { "characterId": "char_006", "position": "left", "text": "私ほとんど話せなかった" },
+        { "characterId": "char_004", "position": "left", "text": "きっとまたすぐ会えるよ" },
+        { "characterId": "char_005", "position": "right", "text": "テト…" }
+      ]
+    },
+    { "type": "end" }
+  ],
+  "effects": {
+    "default": [
+      { "type": "setFlag", "flag": "flag_teto_met" }
+    ]
+  }
+}

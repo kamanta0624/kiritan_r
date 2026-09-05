@@ -1166,7 +1166,7 @@ function getBgUrl(targetNode, isDefense) {
     : 'url(assets/bg_battle.jpg)';
 }
 
-export default function BattleFlow({ formation, targetNode, onComplete, onBattleStart, enemyChars = [], battleMode = 'normal', isDefense = false, enemyRetreatRule = 'char_dead', battleCapacity = null, affinity = {} }) {
+export default function BattleFlow({ formation, targetNode, onComplete, onBattleStart, enemyChars = [], battleMode = 'normal', isDefense = false, enemyRetreatRule = 'char_dead', battleCapacity = null, affinity = {}, playerMainCount = 2, enemyMainCount = 2 }) {
   const BATTLE_CAP  = battleCapacity ?? targetNode?.battleCapacity ?? 400;
   const slots       = ['front1','front2','rear1','rear2'];
   const rawAllies   = useRef(slots.map(k => formation?.[k]).filter(Boolean)).current;
@@ -1211,10 +1211,11 @@ export default function BattleFlow({ formation, targetNode, onComplete, onBattle
       const fronts = alive.filter(u => u.position === 'front');
       const rears  = alive.filter(u => u.position === 'rear');
       const reordered = fronts.length > 0 ? [...fronts, ...rears] : [...rears];
+      const displayFrontCount = fronts.length > 0 ? fronts.length : Math.min(rears.length, 2);
       return reordered.map((u, i) => ({
         id:          u.char.id,
         name:        u.char.name,
-        position:    i < 2 ? 'front' : 'rear',
+        position:    i < displayFrontCount ? 'front' : 'rear',
         soldiers:    u.soldiers,
         maxSoldiers: u.maxSoldiers,
         charHp:      u.charHp,
@@ -1299,7 +1300,7 @@ export default function BattleFlow({ formation, targetNode, onComplete, onBattle
   // ── エンジン初期化（一度だけ） ──
   useEffect(() => {
     // BUG-2: 防衛戦ではプレイヤーが守備側・敵が攻撃側
-    const playerUnits = rawAllies.map((c, i) => BattleEngineV3.buildUnit(c, isDefense ? 'defense' : 'attack', i));
+    const playerUnits = rawAllies.map((c, i) => BattleEngineV3.buildUnit(c, isDefense ? 'defense' : 'attack', i, playerMainCount));
     const initEnemies = enemyChars.length > 0
       ? enemyChars.map((c, i) => normalizeChar(c, i))
       : buildDefaultEnemies(targetNode);
@@ -1316,7 +1317,7 @@ export default function BattleFlow({ formation, targetNode, onComplete, onBattle
         },
         sideType: isDefense ? 'attack' : 'defense',
         bonus:{ soldierAtk:0, soldierDef:0, charAttack:0, charSong:0 },
-        position: i < 2 ? 'front' : 'rear',
+        position: i < enemyMainCount ? 'front' : 'rear',
         soldiers: e.meme, maxSoldiers: e.max, charHp: eHp, charMaxHp: eHpMax,
         action: null, retreated: false, charged: false, skillUsed: false,
         attackCount: eAtkCnt, charDefense: e.def, level: 0, targetId: null, _actedThisRound: false,

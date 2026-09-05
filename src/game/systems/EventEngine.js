@@ -147,6 +147,8 @@ export class EventEngine {
         const pf = ws.factions?.find(f => f.isPlayer);
         return pf?.atWarWith?.includes(cond.factionId) ?? false;
       }
+      case 'baseId':
+        return ctx.baseId === cond.baseId;
       case 'attackerFaction':
         return ctx.attackerFactionId === cond.factionId;
       case 'defenderFaction': {

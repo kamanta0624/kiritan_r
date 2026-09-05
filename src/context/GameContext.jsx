@@ -22,6 +22,7 @@ import { LegionAI }       from '../game/systems/LegionAI.js';
 import { EventEngine }    from '../game/systems/EventEngine.js';
 import { BattleEngineV3 } from '../game/systems/BattleEngineV3.js';
 import { allPairs, gainAffinity } from '../game/utils/Affinity.js';
+import { applyDemoEnd } from '../game/utils/GamePhase.js';
 
 import factionsData   from '../game/data/factions.json';
 import basesData      from '../game/data/bases.json';
@@ -77,7 +78,7 @@ function createInitialState() {
     flagTimestamps:    {},
     conqueredThisTurn: false,
     hireCooldownUntil: 0,
-    gamePhase:         'playing',   // 'playing' | 'victory' | 'defeat'
+    gamePhase:         'playing',   // 'playing' | 'victory' | 'defeat' | 'demo_complete'
     actionPoints:      5,
     maxActionPoints:   5,
     researchQueue:     null,        // null | { id: string, turnsRemaining: number }
@@ -438,7 +439,7 @@ const PURE_EFFECT_TYPES = new Set([
   'treasury', 'charJoin', 'charLeave', 'charParam', 'baseIncome', 'battleCap',
   'baseTransfer', 'warFlag', 'attackUnlock', 'setFlag', 'setFlagWithTurn', 'clearFlag',
   'actionPointsBonus', 'dungeonUnlock', 'charUsedThisTurn', 'baseTransferSingle', 'itemLose',
-  'affinityGain',
+  'affinityGain', 'demoEnd',
 ]);
 
 function applyEffectToState(state, eff) {
@@ -543,6 +544,8 @@ function applyEffectToState(state, eff) {
       delete flags[eff.flag];
       return { ...state, eventFlags: flags };
     }
+    case 'demoEnd':
+      return applyDemoEnd(state);
     case 'actionPointsBonus': {
       return {
         ...state,
@@ -835,6 +838,9 @@ export function GameProvider({ children }) {
   // startDialogRef と同じref経由で配線し、useEffectで .current を同期する。
   const applyEffectsRef = useRef(null);
 
+  // game_start 直後に1回だけ差し込む強制防衛戦。1件保持で足り、配列にはしない。
+  const pendingForcedBattleRef = useRef(null);
+
   // LegionAIの参照データを常に最新stateで同期
   // （LegionAIはcharacters配列への参照を内部で保持するため更新が必要）
   const syncLegionAI = useCallback(() => {
@@ -946,7 +952,7 @@ export function GameProvider({ children }) {
   // ゲーム開始時イベント
   // ─────────────────────────────────────
 
-  const startNewGame = useCallback(async () => {
+  const startNewGame = useCallback(async (onForcedBattle) => {
     // flushSync で START_NEW_GAME を同期反映し、game_start 発火前に stateRef を確定させる。
     // startPlayerTurn と同型の欠陥（dispatch 直後の buildWsAdapter が反映前 state を読む）を
     // game_start 側にも残さない（条件付き game_start を追加した際の遅延を未然に防ぐ）。
@@ -969,6 +975,12 @@ export function GameProvider({ children }) {
     // 層A: ゲーム生涯1回のターン非依存イベントのみ（ev_000_opening）
     const ws = buildWsAdapter();
     await EventEngine.processTrigger(ws, 'game_start', {});
+    // game_start の effects で forceDefenseBattle が積まれていれば、ターン1入場前に処理する。
+    const forced = pendingForcedBattleRef.current;
+    if (forced) {
+      pendingForcedBattleRef.current = null;
+      if (onForcedBattle) await onForcedBattle(forced);
+    }
     // 層B: ターン1入場。currentTurn 0→1 で player_turn を発火（ev_turn1_status）。
     // ターン1も他ターンと同じ唯一の入場経路（startPlayerTurn）を通す。
     await startPlayerTurn();
@@ -1234,6 +1246,19 @@ export function GameProvider({ children }) {
         if (!legion) return;
         if (eff.factionId       !== undefined) legion.factionId       = eff.factionId;
         if (eff.attackFrequency !== undefined) legion.attackFrequency = eff.attackFrequency;
+      } else if (eff.type === 'forceDefenseBattle') {
+        const defenderBase = stateRef.current.bases.find(b => b.id === eff.baseId);
+        if (!defenderBase) {
+          console.warn('[GameContext] forceDefenseBattle: base not found:', eff.baseId);
+          return;
+        }
+        pendingForcedBattleRef.current = {
+          attackerFactionId: eff.attackerFactionId,
+          defenderBase,
+          attackerCharIds:   eff.attackerCharIds,
+          legionId:          null,
+          retreatRule:       eff.retreatRule,
+        };
       }
     });
   }, []);

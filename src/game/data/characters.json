@@ -57,6 +57,60 @@
       "skillId": null
     },
     {
+      "id": "char_111",
+      "name": "大江戸ちゃんこ（源氏丸）",
+      "factionId": "faction_red",
+      "isLeader": false,
+      "isTemplate": false,
+      "role": "attacker",
+      "attackType": "melee",
+      "charHp": 30,
+      "charMaxHp": 30,
+      "charAttack": 10,
+      "charDefense": 5,
+      "charSong": 0,
+      "attack": 10,
+      "defense": 70,
+      "attackCount": 8,
+      "soldiers": 10,
+      "maxSoldiers": 10,
+      "soldierAtk": 7,
+      "soldierDef": 10,
+      "strategyRate": 20,
+      "kana": null,
+      "hireCost": 0,
+      "joinCondition": null,
+      "description": "秘密結社大都会の総帥。力士型ロボット源氏丸に搭乗した姿",
+      "battleBonus": {
+        "attack": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "defense": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        },
+        "dungeon": {
+          "soldierAtk": 0,
+          "soldierDef": 0,
+          "charAttack": 0,
+          "charSong": 0
+        }
+      },
+      "usedThisTurn": false,
+      "recoveryRate": null,
+      "equipment": {
+        "item": null
+      },
+      "specialType": null,
+      "talkEventId": null,
+      "skillId": null
+    },
+    {
       "id": "mob_001",
       "isTemplate": true,
       "displayName": "歩兵部隊",
@@ -3971,7 +4025,7 @@
     {
       "id": "char_101",
       "name": "ROSA",
-      "factionId": "東北家",
+      "factionId": null,
       "isLeader": false,
       "isTemplate": false,
       "role": "attacker",
@@ -4025,7 +4079,7 @@
     {
       "id": "char_107",
       "name": "あんこもん",
-      "factionId": "東北家",
+      "factionId": null,
       "isLeader": false,
       "isTemplate": false,
       "role": "attacker",
@@ -4403,7 +4457,7 @@
     {
       "id": "char_014",
       "name": "東北ずんこ",
-      "factionId": "東北家",
+      "factionId": null,
       "isLeader": false,
       "isTemplate": false,
       "role": "attacker",
@@ -4457,7 +4511,7 @@
     {
       "id": "char_015",
       "name": "東北イタコ",
-      "factionId": "東北家",
+      "factionId": null,
       "isLeader": false,
       "isTemplate": false,
       "role": "attacker",
@@ -4511,7 +4565,7 @@
     {
       "id": "char_084",
       "name": "猫使アル",
-      "factionId": "東北家",
+      "factionId": null,
       "isLeader": false,
       "isTemplate": false,
       "role": "attacker",
@@ -4565,7 +4619,7 @@
     {
       "id": "char_085",
       "name": "猫使ビィ",
-      "factionId": "東北家",
+      "factionId": null,
       "isLeader": false,
       "isTemplate": false,
       "role": "attacker",
@@ -4619,7 +4673,7 @@
     {
       "id": "char_100",
       "name": "藍田ノエル",
-      "factionId": "東北家",
+      "factionId": null,
       "isLeader": false,
       "isTemplate": false,
       "role": "attacker",
@@ -4673,7 +4727,7 @@
     {
       "id": "char_109",
       "name": "里石ユカ",
-      "factionId": "東北家",
+      "factionId": null,
       "isLeader": false,
       "isTemplate": false,
       "role": "attacker",
@@ -4727,7 +4781,7 @@
     {
       "id": "char_039",
       "name": "重音テト",
-      "factionId": "東北家",
+      "factionId": null,
       "isLeader": false,
       "isTemplate": false,
       "role": "attacker",

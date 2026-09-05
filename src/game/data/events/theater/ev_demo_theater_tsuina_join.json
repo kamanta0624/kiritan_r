@@ -1,0 +1,39 @@
+{
+  "id": "ev_demo_theater_tsuina_join",
+  "name": "ついなちゃん加入",
+  "trigger": "theater",
+  "conditions": [
+    { "type": "flag", "flag": "flag_tsuina_met" },
+    { "type": "noFlag", "flag": "flag_tsuina_joined" }
+  ],
+  "probability": 1,
+  "priority": 500,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        { "characterId": "char_021", "position": "left", "text": "メエェェェェン！" },
+        { "characterId": "char_037", "position": "center", "text": "なんの！コテェェェェェ！" },
+        { "characterId": "char_022", "position": "right", "text": "大将と真正面から打ち合っている…すごい転校生だ" },
+        { "characterId": "char_094", "position": "right", "text": "転校はしてないですけどね。それに私からすればついなちゃんとやり合える子がウヨウヨしてるこの学院のほうがびっくりよ" },
+        { "characterId": "char_024", "position": "left", "text": "誘っといてなんだけど、あんたたち普通に馴染んでるわね…" },
+        { "characterId": "char_037", "position": "center", "text": "ふうふう、この学院強い人が多すぎるで…" },
+        { "characterId": "char_094", "position": "right", "text": "お休み中の2人はもっとやばいらしいわよ" },
+        { "characterId": "char_037", "position": "center", "text": "えぇ…もう鬼ヶ島やんここ…" },
+        { "characterId": "char_094", "position": "right", "text": "それで、どうします？私はしばらくここを拠点にしてもいいと思いますが" },
+        { "characterId": "char_037", "position": "center", "text": "せやな、授業も部活も実戦的だし霊場巡りも出来るし、ついでに巫女さんのネットワークから情報も分けてもらえるし言うことなしや" },
+        { "characterId": "char_094", "position": "right", "text": "というわけで私も臨時で教師になりました" },
+        { "characterId": "char_037", "position": "center", "text": "変わり身がはやい…" }
+      ]
+    },
+    { "type": "end" }
+  ],
+  "effects": {
+    "default": [
+      { "type": "charJoin", "charId": "char_037", "factionId": "東北家" },
+      { "type": "charJoin", "charId": "char_094", "factionId": "東北家" },
+      { "type": "setFlag", "flag": "flag_tsuina_joined" }
+    ]
+  }
+}

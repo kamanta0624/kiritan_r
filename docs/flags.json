@@ -17,6 +17,7 @@
     "flag_ankokugun_active": "ルートA: 郡山制圧で暗黒大将軍フェーズ移行済み（ev_chanko_conquered_a）",
     "flag_chanko_conquered": "郡山（base_021）制圧イベント発生済み（ルートA/B共通）",
     "flag_mito_conquest_done": "水戸（base_045）制圧イベント発生済み（ev_mito_conquest_a/b、setFlagWithTurn）",
-    "flag_awamo_joined": "沖縄あわも（char_023）撃破→加入済み（ev_defeated_awamo、ルートB分岐の起点）"
+    "flag_awamo_joined": "沖縄あわも（char_023）撃破→加入済み（ev_defeated_awamo、ルートB分岐の起点）",
+    "flag_demo_end": "体験版終端（ev_demo_saitama_declare）到達済み"
   }
 }

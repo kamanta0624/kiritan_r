@@ -1,0 +1,42 @@
+{
+  "id": "ev_demo_zunko_portal",
+  "name": "ずん子とタグポータル",
+  "trigger": "player_turn",
+  "conditions": [
+    { "type": "turn", "op": "eq", "value": 1 }
+  ],
+  "probability": 1,
+  "priority": 500,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        { "characterId": "char_015", "position": "right", "text": "きりちゃんが東北家を背負ってちゃんこちゃんと戦うなんて、立派になってあたし感動でちゅわ〜" },
+        { "characterId": "char_014", "position": "left", "text": "すごいわきりたん！" },
+        { "characterId": "char_004", "position": "center", "text": "（ずん姉様の盗撮を横取りする計画は黙っておきましょう…）" },
+        { "characterId": "char_014", "position": "left", "text": "ところできりたん、タグポータルの使い方はわかる？" },
+        { "characterId": "char_004", "position": "center", "text": "授業でやりました…が、実習はサボったので知りません！" },
+        { "characterId": "char_015", "position": "right", "text": "やっぱりでちゅわ…。ちゃんと実習もやらなきゃだめよ" },
+        { "characterId": "char_014", "position": "left", "text": "もうきりたん。使い方教えるからちゃんと覚えてね。ちゃんこちゃんたちのアジトまで行くにはポータル繋げないと無理よ" },
+        { "characterId": "char_004", "position": "center", "text": "はい…" },
+        { "characterId": "char_015", "position": "right", "text": "大都会はずんだ旅館の手前までタグをつなげていまちゅわ。戦って一つ一つポータルを中立化させた上で、きりたんが東北家の鍵で上書きして行くのよ" },
+        { "characterId": "char_014", "position": "left", "text": "そうすれば拠点間は一瞬で移動できるわ。秋葉原までつなげたらずんだカフェに来るのも一瞬ね！" },
+        { "characterId": "char_004", "position": "center", "text": "さすがに秋葉原まではつなげませんよ。維持も大変ですし" },
+        { "characterId": "char_015", "position": "right", "text": "きりちゃんなら出来まちゅわ！ガンバ！でちゅわ！" },
+        { "characterId": "char_004", "position": "center", "text": "私たちのことより、姉様たちはずんだカフェは順調なんですか？" },
+        { "characterId": "char_014", "position": "left", "text": "もちろん！日に日に行列増えてるよ！" },
+        { "characterId": "char_015", "position": "right", "text": "大変ですけど頑張ってまちゅわ！大きいお店に移転してきりたんも呼べるように頑張りますわ！" },
+        { "characterId": "char_004", "position": "center", "text": "無理はしないでくださいね。私も適当にやりますから" },
+        { "characterId": "char_014", "position": "left", "text": "きりたんはきりたんのやりたいことをやれば良いんだよ。みんなと私たちがついてるからね" },
+        { "characterId": "char_004", "position": "center", "text": "はい！" }
+      ]
+    },
+    { "type": "end" }
+  ],
+  "effects": {
+    "default": [
+      { "type": "setFlag", "flag": "flag_portal_taught" }
+    ]
+  }
+}

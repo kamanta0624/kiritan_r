@@ -1,0 +1,27 @@
+{
+  "id": "ev_demo_mito_attack",
+  "name": "水戸攻撃戦",
+  "trigger": "base_attack",
+  "conditions": [
+    { "type": "baseId", "baseId": "base_045" }
+  ],
+  "probability": 1,
+  "priority": 500,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        { "characterId": "char_004", "position": "center", "text": "追い詰めましたよちゃんこ。さあ、ずん姉さまの隠し撮り写真を出してもらいましょうか" },
+        { "characterId": "char_020", "position": "right", "text": "何の話？そんなことよりアンタたちの謎の力の正体、わかったんだから！" },
+        { "characterId": "char_020", "position": "right", "text": "いくよ、つるぎ！しのび！納豆ファクトリーの陣！" }
+      ]
+    },
+    { "type": "end" }
+  ],
+  "effects": {
+    "default": [
+      { "type": "setFlag", "flag": "flag_mito_attacked" }
+    ]
+  }
+}

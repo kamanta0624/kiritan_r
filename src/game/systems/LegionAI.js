@@ -169,7 +169,7 @@ export class LegionAI {
     if (legion) {
       const chars = this._getLegionCombatChars(legion);
       if (chars.length > 0) {
-        return { chars, retreatRule: this.getRetreatRule(legion.id, defenderBase.id, mode) };
+        return { chars, retreatRule: this.getRetreatRule(legion.id, defenderBase.id, mode), mainCount: legion.mainCount ?? 2 };
       }
     }
 
@@ -180,12 +180,12 @@ export class LegionAI {
     if (reserve) {
       const chars = this._getLegionCombatChars(reserve);
       if (chars.length > 0) {
-        return { chars, retreatRule: this.getRetreatRule(reserve.id, defenderBase.id, mode) };
+        return { chars, retreatRule: this.getRetreatRule(reserve.id, defenderBase.id, mode), mainCount: reserve.mainCount ?? 2 };
       }
     }
 
     // 3. 最終手段: 汎用敵 → char_dead fallback
-    return { chars: [], retreatRule: 'char_dead' };
+    return { chars: [], retreatRule: 'char_dead', mainCount: 2 };
   }
 
   // ----------------------------------------------------------------

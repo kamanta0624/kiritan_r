@@ -1,0 +1,34 @@
+{
+  "id": "ev_demo_meron_awamo_attack",
+  "name": "めろんとあわもの雑談",
+  "trigger": "base_defense",
+  "conditions": [
+    { "type": "attackerFaction", "factionId": "faction_red" }
+  ],
+  "probability": 1,
+  "priority": 500,
+  "maxOccurrences": 1,
+  "script": [
+    {
+      "type": "conversation",
+      "lines": [
+        { "characterId": "char_024", "position": "left", "text": "きのこたけのこなら" },
+        { "characterId": "char_023", "position": "right", "text": "たけのこだよ！" },
+        { "characterId": "char_024", "position": "left", "text": "目玉焼きには" },
+        { "characterId": "char_023", "position": "right", "text": "しょうゆ！" },
+        { "characterId": "char_024", "position": "left", "text": "あんこといえば" },
+        { "characterId": "char_023", "position": "right", "text": "つぶあん！" },
+        { "characterId": "char_024", "position": "left", "text": "こしあんでしょ！私たちどうしてあんこだけは合わないのかしらね" },
+        { "characterId": "char_023", "position": "right", "text": "きび砂糖か甜菜糖かで違うのかなあ" },
+        { "characterId": "char_024", "position": "left", "text": "そんなこと言っている間にもうすぐ東北家の拠点よ" },
+        { "characterId": "char_023", "position": "right", "text": "ばっちり戦っちゃうよ！" }
+      ]
+    },
+    { "type": "end" }
+  ],
+  "effects": {
+    "default": [
+      { "type": "setFlag", "flag": "flag_meron_awamo_talked" }
+    ]
+  }
+}

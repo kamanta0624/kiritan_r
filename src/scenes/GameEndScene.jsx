@@ -8,6 +8,7 @@ import { TopBar } from '../shared/SharedUI.jsx';
 
 export default function GameEndScene({
   isVictory = true,
+  isDemoComplete = false,
   clearedCount = 3,
   onNavigate,
   hasNewGamePlus = true,
@@ -15,7 +16,11 @@ export default function GameEndScene({
   playerBaseCount = 0,
   totalBaseCount = 92,
 }) {
-  const tone = isVictory
+  const tone = isDemoComplete
+    ? { c1:TEAL, c2:AC, label:'DEMO COMPLETE', jp:'体験版終了', emb:'TO BE · CONTINUED',
+        text1:'ボイボ寮は東北家へ宣戦を布告した。',
+        text2:'物語は、ここから新たな戦いへ続く。', bg1:'#071719', bg2:'#0c2b2d' }
+    : isVictory
     ? { c1:'#d4a044', c2:AC, label:'VICTORY', jp:'制圧完了', emb:'CONQUEST · COMPLETE',
         text1:'全ての旗印を、東北の名のもとに集めた。',
         text2:'長き戦いの果てに、ミームは束となり、旗は天下に翻った。\n仲間たちの労を、語り継ぐべし。', bg1:'#1f1408', bg2:'#3a2410' }
@@ -32,7 +37,7 @@ export default function GameEndScene({
       {/* radial light */}
       <div style={{position:'absolute', inset:0, background:`radial-gradient(ellipse 60% 40% at 50% 35%, ${tone.c1}22 0%, transparent 70%)`}}/>
       {/* diagonal rays */}
-      {isVictory && [...Array(8)].map((_,i)=>(
+      {(isVictory || isDemoComplete) && [...Array(8)].map((_,i)=>(
         <div key={i} style={{
           position:'absolute', top:'50%', left:'50%',
           width:2, height:'180vh', transformOrigin:'top center',
@@ -90,7 +95,7 @@ export default function GameEndScene({
           animation:'fadeUp .5s .8s both'}}>
           <EndStat label="到達ターン" value={currentTurn}     unit="T"                    color={tone.c1}/>
           <EndStat label="制圧拠点"   value={playerBaseCount} unit={`/${totalBaseCount}`} color={TEAL}/>
-          {isVictory && <EndStat label="キャラクリ" value={clearedCount} unit="人" color={tone.c1}/>}
+          {isVictory && !isDemoComplete && <EndStat label="キャラクリ" value={clearedCount} unit="人" color={tone.c1}/>}
         </div>
 
         {/* buttons */}
@@ -102,7 +107,7 @@ export default function GameEndScene({
             color:'#fff', cursor:'pointer',
             fontFamily:"'Noto Sans JP'", fontSize:13, fontWeight:700, letterSpacing:'.16em',
           }}>タイトルへ</button>
-          {isVictory && hasNewGamePlus && (
+          {isVictory && !isDemoComplete && hasNewGamePlus && (
             <button onClick={()=>onNavigate('new_game_plus')} style={{
               padding:'14px 28px', borderRadius:8,
               background:`linear-gradient(135deg, ${tone.c1}, ${tone.c2})`,

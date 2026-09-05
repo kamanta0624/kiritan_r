@@ -9,6 +9,7 @@ const FIELD_BATTLE_CAPACITY = 5000;
 
 const ATK_LABEL = { melee:'近接', ranged:'遠距離', song:'歌' };
 const ATK_COLOR = { melee:PK, ranged:TEAL, song:AC2 };
+const MARU = ['①', '②', '③', '④'];
 
 /* ── atoms ── */
 function Bar({ val, max, color, h=6, label }) {
@@ -363,6 +364,38 @@ function BattleModeToggle({ mode, onChange, siegeCapacity, fieldCapacity }) {
   );
 }
 
+export function MainCountToggle({ mainCount, onChange }) {
+  const opts = [
+    { key:1, label:'メイン 1名' },
+    { key:2, label:'メイン 2名' },
+  ];
+  return (
+    <div>
+      <div style={{ fontFamily:FONT_DISPLAY, fontSize:11, color:TXD,
+        letterSpacing:'.16em', marginBottom:6 }}>メインキャスト数</div>
+      <div style={{ display:'flex', gap:8 }}>
+        {opts.map(o => {
+          const sel = mainCount === o.key;
+          return (
+            <button key={o.key} onClick={() => onChange(o.key)} style={{
+              flex:1, padding:'8px 12px', borderRadius:6,
+              border: sel ? `1.5px solid ${PK}` : `1px solid ${BR}`,
+              background: sel ? PK : 'rgba(255,253,251,.8)',
+              color: sel ? '#fff' : TXF,
+              cursor:'pointer', textAlign:'left',
+              boxShadow: sel ? `0 2px 12px ${PK}55` : 'none',
+              transition:'all .15s',
+            }}>
+              <div style={{ fontFamily:FONT_DISPLAY, fontWeight:900, fontSize:13,
+                letterSpacing:'.14em' }}>{o.label}</div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 /* ── UnitMiniRow (LaunchConfirmOverlay helper) ── */
 function UnitMiniRow({ char, color, ally, battleCapacity }) {
   const sp = char.soldiers ?? char.troops ?? 0;
@@ -604,6 +637,7 @@ export default function AttackFormationScene({
 }) {
   const [picks, setPicks] = useState([]);
   const [battleMode, setBattleMode] = useState('siege');
+  const [mainCount, setMainCount] = useState(2);
   const [showConfirm, setShowConfirm] = useState(false);
 
   const chars = availableChars ?? [];
@@ -698,11 +732,15 @@ export default function AttackFormationScene({
             <div style={{ fontFamily:FONT_DISPLAY, fontSize:13, color:TXD,
               letterSpacing:'.22em', marginBottom:14 }}>EDITING — 編成スロット</div>
 
+            <div style={{ marginBottom:14 }}>
+              <MainCountToggle mainCount={mainCount} onChange={setMainCount}/>
+            </div>
+
             <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-              <SlotRow slotLabel="① メイン" color={PK}   char={formation.front1} onRemove={() => removeAt(0)}/>
-              <SlotRow slotLabel="② メイン" color={PK}   char={formation.front2} onRemove={() => removeAt(1)}/>
-              <SlotRow slotLabel="③ サブ"   color={TEAL} char={formation.rear1}  onRemove={() => removeAt(2)}/>
-              <SlotRow slotLabel="④ サブ"   color={TEAL} char={formation.rear2}  onRemove={() => removeAt(3)}/>
+              <SlotRow slotLabel={`${MARU[0]} ${0 < mainCount ? 'メイン' : 'サブ'}`} color={0 < mainCount ? PK : TEAL} char={formation.front1} onRemove={() => removeAt(0)}/>
+              <SlotRow slotLabel={`${MARU[1]} ${1 < mainCount ? 'メイン' : 'サブ'}`} color={1 < mainCount ? PK : TEAL} char={formation.front2} onRemove={() => removeAt(1)}/>
+              <SlotRow slotLabel={`${MARU[2]} ${2 < mainCount ? 'メイン' : 'サブ'}`} color={2 < mainCount ? PK : TEAL} char={formation.rear1}  onRemove={() => removeAt(2)}/>
+              <SlotRow slotLabel={`${MARU[3]} ${3 < mainCount ? 'メイン' : 'サブ'}`} color={3 < mainCount ? PK : TEAL} char={formation.rear2}  onRemove={() => removeAt(3)}/>
             </div>
 
             <div style={{ marginTop:'auto', display:'flex', flexDirection:'column', gap:10, paddingTop:14 }}>
@@ -825,6 +863,7 @@ export default function AttackFormationScene({
               isDefense,
               battleMode,
               battleCapacity: effectiveBattleCapacity,
+              mainCount,
             });
           }}
           onCancel={() => setShowConfirm(false)}

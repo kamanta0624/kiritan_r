@@ -167,6 +167,15 @@ export default function App() {
         playerBaseCount: playerBases.length,
         totalBaseCount:  bases.length,
       });
+    } else if (gamePhase === 'demo_complete') {
+      navigate('game_end', {
+        isVictory:       false,
+        isDemoComplete:  true,
+        clearedCount:    0,
+        currentTurn,
+        playerBaseCount: playerBases.length,
+        totalBaseCount:  bases.length,
+      });
     }
   }, [gamePhase, navigate]);
 
@@ -405,6 +414,7 @@ export default function App() {
       targetNode:     { name: dungeonKind === 'crowdfunding' ? 'クラファン挑戦' : '浅層探索', battleCapacity: 99999 },
       _dungeonEnemies: builtEnemies,
       battleCapacity: 99999,
+      playerMainCount: session.mainCount ?? 2,
     });
   }
 
@@ -450,7 +460,7 @@ export default function App() {
         enemyChars={fEnemyChars}
         battleMode={item.retreatRule ?? null}
         onLaunch={(formation, _tNode, opts) => {
-          setDefenseFlow(prev => prev ? { ...prev, phase: 'battle', formation, battleCapacity: opts?.battleCapacity } : null);
+          setDefenseFlow(prev => prev ? { ...prev, phase: 'battle', formation, battleCapacity: opts?.battleCapacity, playerMainCount: opts?.mainCount ?? 2 } : null);
         }}
         onCancel={() => {
           setDefenseFlow(prev => prev ? { ...prev, phase: 'defense_prompt' } : null);
@@ -478,6 +488,7 @@ export default function App() {
             enemyChars={enemyChars}
             affinity={affinity}
             enemyRetreatRule={item.retreatRule ?? 'char_dead'}
+            playerMainCount={defenseFlow.playerMainCount ?? 2}
             onBattleStart={() => game.actions.fireTrigger('battle_start', {
               playerCharIds: ['front1','front2','rear1','rear2']
                 .map(k => defenseFlow.formation?.[k]?.id).filter(Boolean),
@@ -510,7 +521,7 @@ export default function App() {
         return <TitleScene
           onNavigate={async (dest, params) => {
             if (dest === 'map') {
-              await game.actions.startNewGame();
+              await game.actions.startNewGame((item) => startDefenseQueue([item]));
               navigate('map');
               return;
             }
@@ -568,10 +579,11 @@ export default function App() {
             game.actions.setActionPoints(game.actionPoints - 1);
             await game.actions.beforeAttack(fNode?.baseId, playerFaction?.id);
             navigate('battle', {
-              mode:           'attack',
+              mode:            'attack',
               formation,
-              targetNode:     fNode,
-              battleCapacity: opts?.battleCapacity ?? fNode?.battleCapacity ?? 3500,
+              targetNode:      fNode,
+              battleCapacity:  opts?.battleCapacity ?? fNode?.battleCapacity ?? 3500,
+              playerMainCount: opts?.mainCount ?? 2,
             });
           }}
           onCancel={() => navigate('map')}
@@ -584,12 +596,13 @@ export default function App() {
         const enemyFactionId = targetBase?.factionId;
         // P2: 攻撃戦では AI が守備側 → mode='defense'（onDefend ルール）。撤退ルールも併せて取得。
         const _def = sceneParams._dungeonEnemies
-          ? { chars: sceneParams._dungeonEnemies, retreatRule: 'never' }
+          ? { chars: sceneParams._dungeonEnemies, retreatRule: 'never', mainCount: 2 }
           : (enemyFactionId && legionAI
               ? legionAI.getDefendersWithRule(enemyFactionId, targetBase, characters, 'defense')
-              : { chars: [], retreatRule: 'char_dead' });
+              : { chars: [], retreatRule: 'char_dead', mainCount: 2 });
         const enemyChars       = _def.chars.slice(0, 4);
         const enemyRetreatRule = _def.retreatRule;
+        const enemyMainCount   = _def.mainCount ?? 2;
 
         return (
           <div style={{ width:'100vw', height:'100vh', background:'#000' }}>
@@ -601,6 +614,8 @@ export default function App() {
               enemyChars={enemyChars}
               affinity={affinity}
               enemyRetreatRule={enemyRetreatRule}
+              enemyMainCount={enemyMainCount}
+              playerMainCount={sceneParams.playerMainCount ?? 2}
               onBattleStart={() => game.actions.fireTrigger('battle_start', {
                 playerCharIds: ['front1','front2','rear1','rear2']
                   .map(k => sceneParams.formation?.[k]?.id).filter(Boolean),
@@ -841,6 +856,7 @@ export default function App() {
       case 'game_end':
         return <GameEndScene
           isVictory={sceneParams.isVictory ?? true}
+          isDemoComplete={sceneParams.isDemoComplete ?? false}
           clearedCount={sceneParams.clearedCount ?? 0}
           currentTurn={sceneParams.currentTurn ?? 1}
           playerBaseCount={sceneParams.playerBaseCount ?? 0}
@@ -907,7 +923,7 @@ export default function App() {
             sessionEnded={sceneParams._sessionEnded ?? false}
             rewardInfo={sceneParams._rewardInfo ?? null}
             milestoneHit={sceneParams._milestoneHit ?? false}
-            onConfirm={(charIds, goalId) => {
+            onConfirm={(charIds, goalId, mainCount) => {
               const requiredMemeByChar = {};
               let progressRequired = 0;
               if (dungeonSession.dungeonKind === 'crowdfunding') {
@@ -922,7 +938,7 @@ export default function App() {
               }
               const next = {
                 ...dungeonSession, charIds, goalId, requiredMemeByChar, waveIndex: 1,
-                progressPoints: 0, progressRequired,
+                progressPoints: 0, progressRequired, mainCount,
               };
               setDungeonSession(next);
               startDungeonWave(next);

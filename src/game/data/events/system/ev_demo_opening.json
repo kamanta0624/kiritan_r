@@ -1,0 +1,50 @@
+{
+  "id": "ev_demo_opening",
+  "name": "オープニング",
+  "trigger": "game_start",
+  "conditions": [],
+  "probability": 1,
+  "priority": 999,
+  "maxOccurrences": 1,
+  "script": [
+    { "type": "narration", "text": "場所：ずんだ旅館" },
+    {
+      "type": "conversation",
+      "lines": [
+        { "characterId": "char_004", "position": "center", "text": "きらりとかがやく翡翠色" },
+        { "characterId": "char_016", "position": "left", "text": "人の涙を笑顔に変えよう" },
+        { "characterId": "char_004", "position": "center", "text": "それが不思議なずんだのパワー" },
+        { "characterId": "char_016", "position": "left", "text": "それが不思議なずんだのパワー" },
+        { "characterId": "char_005", "position": "right", "text": "包む！世界をずんだで包もう" },
+        { "characterId": "char_006", "position": "left", "text": "包もう！ずんだで世界を包もう" },
+        { "characterId": "char_004", "position": "center", "text": "ずんだうんとうんめぃ、うんとうんめぃずんだ" },
+        { "characterId": "char_005", "position": "right", "text": "うまい！うまいぞ！" },
+        { "characterId": "char_006", "position": "left", "text": "きりたんもずんだもち作るのうまいんだね" },
+        { "characterId": "char_004", "position": "center", "text": "いつも手伝ってますからね。ずんねえさまには遠く及びませんが" },
+        { "characterId": "char_017", "position": "right", "text": "そんなことないわよ。かなりおいしいわ" },
+        { "characterId": "char_018", "position": "left", "text": "ご主ずんさまのずんだもち、秋葉原のみなさまにも召し上がってもらえているんでしょうか" },
+        { "characterId": "char_019", "position": "right", "text": "秋葉原のずんだカフェ。盛況。整理券配布" },
+        { "characterId": "char_005", "position": "right", "text": "リピーターがふえてるといいな！" },
+        { "characterId": "char_022", "position": "left", "text": "本当にずん子とイタコは留守みたいやな" },
+        { "characterId": "char_021", "position": "right", "text": "総帥、ここは我々にお任せを" },
+        { "characterId": "char_111", "position": "center", "text": "ちゃんこの旅館を返してもらうよ！" },
+        { "characterId": "char_004", "position": "center", "text": "ちゃんこ！私たちの家は奪わせませんよ！" },
+        { "characterId": "char_111", "position": "center", "text": "その旅館もともとちゃんこたち大都会のものだからね！？" },
+        { "characterId": "char_016", "position": "left", "text": "その通りすぎて何も言えないのだ" },
+        { "characterId": "char_006", "position": "left", "text": "えっ、東北家何してるの…" },
+        { "characterId": "char_005", "position": "right", "text": "ひとの旅館をとったらだめなんだぞ！" },
+        { "characterId": "char_004", "position": "center", "text": "ええい問答無用！旅館の次は大都会のアジトもきりたん砲の味噌にしてやります！" }
+      ]
+    },
+    { "type": "end" }
+  ],
+  "effects": {
+    "default": [
+      { "type": "setFlag", "flag": "flag_opening_done" },
+      { "type": "forceDefenseBattle", "baseId": "base_001",
+        "attackerFactionId": "faction_red",
+        "attackerCharIds": ["char_111", "char_021", "char_022", "char_024"],
+        "retreatRule": "char_dead" }
+    ]
+  }
+}
